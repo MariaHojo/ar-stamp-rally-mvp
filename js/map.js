@@ -81,7 +81,7 @@ async function tryRequestDeviceMotion() {
 // ---- 5) 遷移先URLの生成（必要に応じて編集）----
 function buildArUrl({ spotId, userId }) {
   // あなたの8th Wall公開URLに置き換え
-  const base = 'https://your-project.8thwall.app/';
+  const base = 'https://maria261081.8thwall.app/test-3/';
   const q = new URLSearchParams({ spotId, uid: userId });
   return `${base}?${q.toString()}`;
 }
@@ -99,3 +99,4 @@ function getSelectedSpotId() {
   // 将来：マーカー選択や地図の選択状態から取得
   return null; // いまは固定で 'spot1'
 }
+
