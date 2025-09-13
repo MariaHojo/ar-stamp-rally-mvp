@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>初回アンケート</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Firebase SDK（あなたの構成に合わせて。CDN利用なら下2行をそのまま） -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <!-- あなたの初期化 -->
+  <script src="js/firebase.js"></script>
+
+  <script src="js/survey.js" defer></script>
+</head>
+<body class="survey-body">
+  <header class="survey-header">
+    <h1 class="survey-title">初回アンケート</h1>
+    <p class="survey-lead">イベント改善のためご協力ください（任意回答の項目もあります）</p>
+  </header>
+
+  <main class="survey-main">
+    <form id="surveyForm" novalidate class="survey-form">
+      <!-- 年齢（必須） -->
+      <div class="row">
+        <label for="age" class="label">
+          年齢 <span class="badge-required">必須</span>
+        </label>
+        <div class="field">
+          <select id="age" name="age" required>
+            <option value="">選択してください</option>
+            <!-- 15以下 / 16〜59 / 60以上 は JS で動的に追加します -->
+          </select>
+          <div class="error" id="err-age"></div>
+        </div>
+      </div>
+
+      <!-- 所属（必須） -->
+      <div class="row">
+        <label for="affiliation" class="label">
+          所属 <span class="badge-required">必須</span>
+        </label>
+        <div class="field">
+          <select id="affiliation" name="affiliation" required>
+            <option value="">選択してください</option>
+            <option value="会社員">会社員</option>
+            <option value="教職員">教職員</option>
+            <option value="学生">学生</option>
+            <option value="その他">その他</option>
+          </select>
+          <div class="error" id="err-affiliation"></div>
+        </div>
+      </div>
+
+      <!-- 学校区分（任意） -->
+      <div class="row">
+        <label for="schoolDivision" class="label">学校区分</label>
+        <div class="field">
+          <select id="schoolDivision" name="schoolDivision">
+            <option value="">未選択</option>
+            <option value="大学生">大学生</option>
+            <option value="大学院生">大学院生</option>
+            <option value="専門学校生">専門学校生</option>
+            <option value="短大生">短大生</option>
+            <option value="高校生">高校生</option>
+            <option value="その他">その他</option>
+          </select>
+          <div class="error" id="err-schoolDivision"></div>
+        </div>
+      </div>
+
+      <!-- 専門（任意） -->
+      <div class="row">
+        <label for="major" class="label">専門</label>
+        <div class="field">
+          <input id="major" name="major" type="text" inputmode="text" placeholder="例：歴史" />
+          <div class="error" id="err-major"></div>
+        </div>
+      </div>
+
+      <!-- 歴史への興味（必須） -->
+      <div class="row">
+        <label for="interest" class="label">
+          大学の歴史への興味 <span class="badge-required">必須</span>
+        </label>
+        <div class="field">
+          <select id="interest" name="interest" required>
+            <option value="">選択してください</option>
+            <option value="低い">低い</option>
+            <option value="やや低い">やや低い</option>
+            <option value="やや高い">やや高い</option>
+            <option value="高い">高い</option>
+          </select>
+          <div class="error" id="err-interest"></div>
+        </div>
+      </div>
+
+      <!-- 同意チェック（必須） -->
+      <div class="row">
+        <label class="label" for="consent">
+          同意 <span class="badge-required">必須</span>
+        </label>
+        <div class="field consent-field">
+          <div class="consent-line">
+            <input id="consent" name="consent" type="checkbox" />
+            <label for="consent" class="consent-text">入力情報が論文に使用されることに同意します</label>
+          </div>
+          <div class="consent-note"><strong>回答は卒業論文のみに使用し、個人を特定しません</strong></div>
+          <div class="error" id="err-consent"></div>
+          <div class="terms-link"><a href="terms.html" target="_blank" rel="noopener">利用規約</a> を確認する</div>
+        </div>
+      </div>
+
+      <!-- 注意書き（下部） -->
+      <p class="disclaimer">※ 回答は統計的に集計し、個人を特定しません</p>
+
+      <!-- 送信固定ボタン -->
+      <div class="submit-bar">
+        <button id="submitBtn" type="submit" class="btn-primary">登録完了</button>
+      </div>
+    </form>
+  </main>
+</body>
+</html>

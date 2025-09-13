@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>チュートリアル</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="js/tutorial.js" defer></script>
+</head>
+<body class="tutorial-body">
+  <div class="tutorial-container">
+    <!-- 1ページ目 -->
+    <section class="slide" aria-label="チュートリアル1">
+      <img src="assets/tutorial1.png" alt="チュートリアル1" class="tutorial-img" />
+      <p class="tutorial-text">マップからスポットを探しましょう。</p>
+    </section>
+
+    <!-- 2ページ目 -->
+    <section class="slide" aria-label="チュートリアル2">
+      <img src="assets/tutorial2.png" alt="チュートリアル2" class="tutorial-img" />
+      <p class="tutorial-text">スポットでカメラをかざしてスタンプを集めましょう。</p>
+    </section>
+
+    <!-- 3ページ目 -->
+    <section class="slide" aria-label="チュートリアル3">
+      <img src="assets/tutorial3.png" alt="チュートリアル3" class="tutorial-img" />
+      <p class="tutorial-text">3つ集めたら解説ページで歴史を学べます。</p>
+    </section>
+  </div>
+
+  <!-- 下部ナビ（ページに応じて表示を切替） -->
+  <div class="tutorial-nav">
+    <!-- 左下：←（テキスト） -->
+    <button id="navPrev" class="nav-text-btn left" aria-label="前のページ">←</button>
+
+    <!-- 右下：→（テキスト） or 完了ボタン -->
+    <button id="navNext" class="nav-text-btn right" aria-label="次のページ">→</button>
+    <button id="tutorialDoneBtn" class="btn-primary right done" aria-label="チュートリアル完了">スタート</button>
+  </div>
+</body>
+</html>

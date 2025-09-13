@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>マップ</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/map.js" defer></script>
+</head>
+<body>
+  <!-- メニューバー -->
+<div id="menuBar">
+  <!-- チュートリアルへのリンク -->
+  <a href="tutorial.html">チュートリアル</a> |
+
+  <!-- 利用規約リンク（リンク先は未定なので空） -->
+  <a href="terms.html" target="_blank" rel="noopener">利用規約</a> |
+
+  <!-- スタンプ帳の折り畳み -->
+  <button id="stampToggle" class="stamp-toggle">▼スタンプ帳</button>
+  <div id="stampBook" class="stamp-book">
+    <table>
+      <tr>
+        <td><img src="assets/images/stamp1.png" alt="スタンプ1" class="stamp-img" /></td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+  <div id="mapContainer"></div>
+  <button id="cameraBtn">カメラ起動</button>
+</body>
+</html>
