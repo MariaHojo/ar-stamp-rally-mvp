@@ -100,3 +100,38 @@ function getSelectedSpotId() {
   return null; // いまは固定で 'spot1'
 }
 
+// js/map.js の追記（重複しないようにファイル末尾などに入れてください）
+(function () {
+  function buildGmapsUrl(lat, lng) {
+    // どの端末でも無難に動く検索リンク
+    return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+    // 経路案内を強制したいときは下（挙動差あり）
+    // return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`;
+  }
+
+  function onPinClick(ev) {
+    const btn = ev.currentTarget;
+    const lat = btn.getAttribute('data-lat');
+    const lng = btn.getAttribute('data-lng');
+    const spotId = btn.getAttribute('data-spot-id');
+    if (!lat || !lng) return;
+
+    const url = buildGmapsUrl(lat, lng);
+
+    // 解析やログ送信をしたい場合はここで（任意）
+    // sendNavigateLog({ spotId, lat, lng });
+
+    // 新しいタブで開く（iOS/Safariのポップアップ制限を避けるため同期で実行）
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
+  function initPins() {
+    document.querySelectorAll('.pin').forEach(pin => {
+      // click だけでOK。端末によっては touchend を追加してもよいです。
+      pin.addEventListener('click', onPinClick, { passive: true });
+    });
+  }
+
+  // 他の初期化がある場合は干渉しないよう DOMContentLoaded で後からフック
+  window.addEventListener('DOMContentLoaded', initPins);
+})();
