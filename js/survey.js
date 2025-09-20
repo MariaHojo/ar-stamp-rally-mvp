@@ -7,9 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const ageSelect = document.getElementById('age');
   if (ageSelect && !ageSelect.dataset.ready) {
     const opt15 = document.createElement('option');
-    opt15.value = '15以下'; opt15.textContent = '15歳以下';
-    ageSelect.appendChild(opt15);
-    for (let y = 16; y <= 59; y++) {
+    opt15.value = '18以下'; opt15.textContent = '18歳以下';
+    ageSelect.appendChild(opt18);
+    for (let y = 18; y <= 59; y++) {
       const opt = document.createElement('option');
       opt.value = String(y); opt.textContent = `${y}歳`;
       ageSelect.appendChild(opt);
