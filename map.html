@@ -7,45 +7,110 @@
   <link rel="stylesheet" href="css/style.css" />
   <style>
     .map-wrap { position: relative; max-width: 900px; margin: 12px auto; }
-    .map-image { width: 100%; height: auto; display: block; border-radius: 12px; }
-    .pin { position: absolute; width: 44px; height: 44px; transform: translate(-50%, -100%); display: block; }
+    .map-image { width: 100%; height: auto; display: block; border-radius: 12px; box-shadow: 0 6px 24px rgba(0,0,0,.08); }
+    .pin { position: absolute; width: 44px; height: 44px; transform: translate(-50%, -100%); display: block; border: none; background: transparent; padding: 0; cursor: pointer; }
     .pin img { width: 100%; height: 100%; display: block; }
+    .legend { max-width: 900px; margin: 8px auto 0; padding: 8px 12px; font-size: 14px; background: #f6f7fb; border-radius: 10px; color: #333; }
+    .legend strong { color: #0a58ca; }
     #mapContainer { max-width: 900px; margin: 0 auto; }
   </style>
 </head>
 <body>
+  <!-- メニューバー（必要に応じて調整） -->
   <div id="menuBar">
     <a href="tutorial.html">チュートリアル</a> |
-    <a href="terms.html" target="_blank" rel="noopener">利用規約</a>
-  </div>
-
-  <div id="mapContainer">
-    <div class="map-wrap">
-      <img src="assets/images/campus-map.png" alt="学内マップ" class="map-image" />
-
-      <!-- spot1: 35°41'12.9"N, 139°31'45.1"E -->
-      <a class="pin" style="left:32%; top:58%;"
-         href="https://www.google.com/maps/dir/?api=1&destination=35.686917,139.529194&travelmode=walking"
-         target="_blank" rel="noopener">
-        <img src="assets/images/map_pin.png" alt="スポット1">
-      </a>
-
-      <!-- spot2: 35°41'10.1"N, 139°31'59.0"E -->
-      <a class="pin" style="left:61%; top:41%;"
-         href="https://www.google.com/maps/dir/?api=1&destination=35.686139,139.533056&travelmode=walking"
-         target="_blank" rel="noopener">
-        <img src="assets/images/map_pin.png" alt="スポット2">
-      </a>
-
-      <!-- spot3: 35°41'08.4"N, 139°31'51.2"E -->
-      <a class="pin" style="left:78%; top:72%;"
-         href="https://www.google.com/maps/dir/?api=1&destination=35.685667,139.530889&travelmode=walking"
-         target="_blank" rel="noopener">
-        <img src="assets/images/map_pin.png" alt="スポット3">
-      </a>
+    <a href="terms.html" target="_blank" rel="noopener">利用規約</a> |
+    <button id="stampToggle" class="stamp-toggle">▼スタンプ帳</button>
+    <div id="stampBook" class="stamp-book">
+      <table>
+        <tr>
+          <td><img src="assets/images/stamp1.png" alt="スタンプ1" class="stamp-img" /></td>
+        </tr>
+      </table>
     </div>
   </div>
 
+  <!-- 地図画像＋ピン -->
+  <div id="mapContainer">
+    <div class="map-wrap">
+      <img src="assets/images/campus-map.png" alt="学内マップ" class="map-image" id="mapImage" />
+
+      <!-- ピン1（Spot1） -->
+      <button class="pin" style="left:32%; top:58%;" type="button"
+              onclick="openDirections(35.686917, 139.529194, 'Spot1')"
+              aria-label="スポット1へ（徒歩案内）">
+        <img src="assets/images/map_pin.png" alt="スポット1">
+      </button>
+
+      <!-- ピン2（Spot2） -->
+      <button class="pin" style="left:61%; top:41%;" type="button"
+              onclick="openDirections(35.686139, 139.533056, 'Spot2')"
+              aria-label="スポット2へ（徒歩案内）">
+        <img src="assets/images/map_pin.png" alt="スポット2">
+      </button>
+
+      <!-- ピン3（Spot3） -->
+      <button class="pin" style="left:78%; top:72%;" type="button"
+              onclick="openDirections(35.685667, 139.530889, 'Spot3')"
+              aria-label="スポット3へ（徒歩案内）">
+        <img src="assets/images/map_pin.png" alt="スポット3">
+      </button>
+    </div>
+
+    <div class="legend">
+      <p>
+        ピンをタップすると端末に最適な地図アプリが開きます（AndroidはGoogleマップ、iOSはAppleマップ優先）。<br>
+        案内に従ってスポットへ移動 → 着いたら <strong>カメラを起動してマーカーを読み取り</strong> → AR を体験したあと解説ページへ進みます。
+      </p>
+    </div>
+  </div>
+
+  <!-- カメラ起動（既存のmap.jsの機能を使う場合） -->
   <button id="cameraBtn">カメラ起動</button>
+
+  <!-- 端末別ディープリンク＋フォールバック -->
+  <script>
+    (function(){
+      function isiOS(){ return /iPad|iPhone|iPod/.test(navigator.userAgent); }
+      function isAndroid(){ return /Android/.test(navigator.userAgent); }
+
+      // 端末に最適なURLを選んで遷移。開けない場合は時間差で次候補にフォールバック。
+      window.openDirections = function(lat, lng, label){
+        var ll = lat + ',' + lng;
+        var name = encodeURIComponent(label || 'Destination');
+        var urls = [];
+
+        if (isAndroid()) {
+          // Googleマップアプリ（地点精度が出やすい）
+          urls.push('geo:' + ll + '?q=' + ll + '(' + name + ')');
+          // Web代替
+          urls.push('https://maps.google.com/?daddr=' + ll);
+        } else if (isiOS()) {
+          // Appleマップ優先（徒歩案内）
+          urls.push('http://maps.apple.com/?daddr=' + ll + '&dirflg=w');
+          // Googleマップアプリがあればこちらも
+          urls.push('comgooglemaps://?daddr=' + ll + '&directionsmode=walking');
+          // 最後にWeb版Googleマップ
+          urls.push('https://www.google.com/maps/dir/?api=1&destination=' + ll + '&travelmode=walking');
+        } else {
+          // PCなど
+          urls.push('https://www.google.com/maps/dir/?api=1&destination=' + ll + '&travelmode=walking');
+        }
+
+        // 1案目へ同期遷移（ユーザー操作直後）
+        location.href = urls[0];
+
+        // 800ms後、まだページが可視状態なら2案目へ（1案目が失敗したと判断）
+        setTimeout(function(){
+          if (document.visibilityState === 'visible' && urls[1]) {
+            location.href = urls[1];
+          }
+        }, 800);
+      };
+    })();
+  </script>
+
+  <!-- カメラ起動フロー等（ピン処理は本HTMLが担当するため、map.jsに .pin のクリック処理が残っていれば削除してください） -->
+  <script src="js/map.js" defer></script>
 </body>
 </html>
