@@ -6,12 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="css/style.css" />
 
-  <!-- Firebase SDK（あなたの構成に合わせて。CDN利用なら下2行をそのまま） -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <!-- あなたの初期化 -->
+  <!-- Firebase 初期化 -->
   <script src="js/firebase.js"></script>
 
+  <!-- アンケートスクリプト -->
   <script src="js/survey.js" defer></script>
 </head>
 <body class="survey-body">
@@ -30,7 +31,7 @@
         <div class="field">
           <select id="age" name="age" required>
             <option value="">選択してください</option>
-            <!-- 18以下 / 16〜59 / 60以上 は JS で動的に追加します -->
+            <!-- 18歳以下 / 18〜29歳（各年齢）/ 30代 / 40代 / 50代 / 60歳以上 は JS で動的追加 -->
           </select>
           <div class="error" id="err-age"></div>
         </div>
@@ -106,13 +107,17 @@
             <input id="consent" name="consent" type="checkbox" />
             <label for="consent" class="consent-text">入力情報が論文に使用されることに同意します</label>
           </div>
-          <div class="consent-note"><strong>回答は卒業論文のみに使用し、個人を特定しません</strong></div>
+          <div class="consent-note">
+            <strong>回答は卒業論文のみに使用し、個人を特定しません</strong>
+          </div>
           <div class="error" id="err-consent"></div>
-          <div class="terms-link"><a href="terms.html" target="_blank" rel="noopener">利用規約</a> を確認する</div>
+          <div class="terms-link">
+            <a href="terms.html" target="_blank" rel="noopener">利用規約</a> を確認する
+          </div>
         </div>
       </div>
 
-      <!-- 注意書き（下部） -->
+      <!-- 注意書き -->
       <p class="disclaimer">※ 回答は統計的に集計し、個人を特定しません</p>
 
       <!-- 送信固定ボタン -->
