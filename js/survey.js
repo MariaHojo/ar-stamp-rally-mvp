@@ -1,35 +1,22 @@
-// js/survey.js（ES5互換版・17歳以下対応）
+// js/survey.js — 初回アンケート送信。書き込み拒否でもローカル退避して先へ進む
 document.addEventListener('DOMContentLoaded', function () {
   var form = document.getElementById('surveyForm');
   var btn  = document.getElementById('submitBtn');
 
-  // --- 年齢プルダウンの生成 ---
+  // --- 年齢プルダウン（既存のロジックそのまま） ---
   var ageSelect = document.getElementById('age');
   if (ageSelect && !ageSelect.getAttribute('data-ready')) {
-    // クリアしてプレースホルダーを先頭に
     ageSelect.innerHTML = '<option value="">選択してください</option>';
-
     function makeOpt(value, label) {
       var opt = document.createElement('option');
-      opt.value = value;
-      opt.textContent = label;
-      return opt;
+      opt.value = value; opt.textContent = label; return opt;
     }
-
-    // ★ 17歳以下（修正）
     ageSelect.appendChild(makeOpt('17以下', '17歳以下'));
-
-    // 18〜29歳（各年齢）
-    for (var y = 18; y <= 29; y++) {
-      ageSelect.appendChild(makeOpt(String(y), y + '歳'));
-    }
-
-    // 30代 / 40代 / 50代 / 60歳以上
+    for (var y = 18; y <= 29; y++) ageSelect.appendChild(makeOpt(String(y), y + '歳'));
     ageSelect.appendChild(makeOpt('30代', '30代'));
     ageSelect.appendChild(makeOpt('40代', '40代'));
     ageSelect.appendChild(makeOpt('50代', '50代'));
     ageSelect.appendChild(makeOpt('60以上', '60歳以上'));
-
     ageSelect.setAttribute('data-ready', '1');
   }
 
@@ -39,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (el) el.textContent = msg || '';
   }
 
-  // --- バリデーション ---
+  // --- 値取得 & バリデーション ---
   function getVal(id) {
     var el = document.getElementById(id);
     return el ? String(el.value).trim() : '';
@@ -48,24 +35,16 @@ document.addEventListener('DOMContentLoaded', function () {
     var el = document.getElementById(id);
     return !!(el && el.checked);
   }
-
   function validate() {
     var ok = true;
-    var age = getVal('age');
-    var affiliation = getVal('affiliation');
-    var interest = getVal('interest');
-    var consent = isChecked('consent');
-
-    if (!age) { setError('age', '選択してください'); ok = false; } else setError('age', '');
-    if (!affiliation) { setError('affiliation', '選択してください'); ok = false; } else setError('affiliation', '');
-    if (!interest) { setError('interest', '選択してください'); ok = false; } else setError('interest', '');
-    if (!consent) { setError('consent', '同意にチェックしてください'); ok = false; } else setError('consent', '');
+    if (!getVal('age'))         { setError('age', '選択してください'); ok = false; } else setError('age','');
+    if (!getVal('affiliation')) { setError('affiliation', '選択してください'); ok = false; } else setError('affiliation','');
+    if (!getVal('interest'))    { setError('interest', '選択してください'); ok = false; } else setError('interest','');
+    if (!isChecked('consent'))  { setError('consent', '同意にチェックしてください'); ok = false; } else setError('consent','');
     return ok;
   }
 
   if (!form || !btn) return;
-
-  // フォーム自動遷移の抑止
   form.setAttribute('action', '');
 
   form.addEventListener('submit', function (e) {
@@ -85,9 +64,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     var name = null;
-    try {
-      name = localStorage.getItem('loginName');
-    } catch (e2) { /* ignore */ }
+    try { name = localStorage.getItem('loginName'); } catch(_) {}
     if (!name) { alert('ログイン情報がありません。最初からやり直してください。'); return; }
 
     var payload = {
@@ -101,23 +78,23 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     btn.disabled = true;
-    try {
-      if (window.firebase && firebase.apps && firebase.apps.length) {
-        firebase.database().ref('users/' + name + '/info').set(payload)
-          .then(function () { window.location.href = 'tutorial.html'; })
-          .catch(function (err) {
-            console.error(err);
-            alert('保存に失敗しました。通信状況とFirebase設定をご確認ください。');
-            btn.disabled = false;
-          });
-      } else {
-        console.warn('[survey] firebase not ready, skip write and continue');
-        window.location.href = 'tutorial.html';
+
+    // 書ければDBへ。拒否されてもローカル退避して続行。
+    (async function submit() {
+      try {
+        if (window.firebase && firebase.apps && firebase.apps.length) {
+          await firebase.database().ref('users/' + name + '/info').set(payload);
+          window.location.href = 'tutorial.html';
+          return;
+        } else {
+          console.warn('[survey] firebase not ready, skip write');
+        }
+      } catch (err) {
+        console.warn('[survey] write failed, keep locally and continue:', err && err.message ? err.message : err);
+        try { localStorage.setItem('survey_info_' + name, JSON.stringify(payload)); } catch(_){}
       }
-    } catch (err) {
-      console.error(err);
-      alert('保存に失敗しました。通信状況とFirebase設定をご確認ください。');
-      btn.disabled = false;
-    }
+      // いずれの場合も体験を止めない
+      window.location.href = 'tutorial.html';
+    })();
   });
 });

@@ -1,22 +1,40 @@
-// login.js (permission-deniedに強い版)
-document.getElementById('startBtn').addEventListener('click', async () => {
-  const name = document.getElementById('loginName').value.trim();
-  if (!name) return alert('ログイン名を入力してください');
+// js/login.js — ルールでread不可でも先へ進む／ローカルに保存
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('loginName');
+  const btn   = document.getElementById('startBtn');
+  if (!input || !btn) return;
 
-  // ★ まずはローカルに保存してから進める（重複チェックは行わない／行けない環境でも動く）
-  try { localStorage.setItem('loginName', name); } catch {}
-
-  // 任意：書ける環境なら作成時刻を書いておく（失敗しても無視）
-  try {
-    if (window.firebase && firebase.apps && firebase.apps.length) {
-      await firebase.database().ref('users/' + name + '/meta/createdAt')
-        .set(firebase.database.ServerValue.TIMESTAMP);
+  btn.addEventListener('click', async () => {
+    const name = String(input.value || '').trim();
+    if (!name) {
+      alert('ログイン名を入力してください');
+      return;
     }
-  } catch (e) {
-    console.warn('[login] skip write meta due to rules:', e?.message || e);
-    // ここで止めない。surveyで本保存に再挑戦します。
-  }
 
-  // 次の画面へ
-  window.location.href = 'initial-survey.html';
+    // まずローカル保存（map.js では userId or loginName を参照）
+    try {
+      localStorage.setItem('loginName', name);
+      // 可能なら userId も同じ値で保持（8th Wall 側に uid として渡す用途）
+      localStorage.setItem('userId', name);
+    } catch (_) {}
+
+    // 既存実装はここで users/<name> を .get() して重複チェックしていたが、
+    // ルールで read 禁止だと Permission denied になる可能性がある。
+    // 読めない場合は警告ログだけ出して続行する。
+    try {
+      if (window.firebase && firebase.apps && firebase.apps.length) {
+        const snap = await firebase.database().ref('users/' + name).get();
+        if (snap.exists()) {
+          alert('その名前は既に使用されています');
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('[login] duplicate check skipped due to rules:', e && e.message ? e.message : e);
+      // 読み取り不可でも体験は続行
+    }
+
+    // 初回アンケートへ
+    window.location.href = 'initial-survey.html';
+  });
 });
