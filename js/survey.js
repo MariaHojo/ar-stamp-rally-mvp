@@ -1,4 +1,4 @@
-// js/survey.js（ES5互換版）
+// js/survey.js（ES5互換版・17歳以下対応）
 document.addEventListener('DOMContentLoaded', function () {
   var form = document.getElementById('surveyForm');
   var btn  = document.getElementById('submitBtn');
@@ -16,8 +16,8 @@ document.addEventListener('DOMContentLoaded', function () {
       return opt;
     }
 
-    // 18歳以下
-    ageSelect.appendChild(makeOpt('18以下', '18歳以下'));
+    // ★ 17歳以下（修正）
+    ageSelect.appendChild(makeOpt('17以下', '17歳以下'));
 
     // 18〜29歳（各年齢）
     for (var y = 18; y <= 29; y++) {
@@ -101,7 +101,6 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     btn.disabled = true;
-    // Firebase が読み込めていない端末でも画面が止まらないようにガード
     try {
       if (window.firebase && firebase.apps && firebase.apps.length) {
         firebase.database().ref('users/' + name + '/info').set(payload)
@@ -112,7 +111,6 @@ document.addEventListener('DOMContentLoaded', function () {
             btn.disabled = false;
           });
       } else {
-        // 一時的に保存をスキップして先へ（現地動作優先）
         console.warn('[survey] firebase not ready, skip write and continue');
         window.location.href = 'tutorial.html';
       }
