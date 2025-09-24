@@ -2,40 +2,48 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>チュートリアル</title>
+  <title>チュートリアル | ARスタンプラリー</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="css/style.css" />
-  <script src="js/tutorial.js" defer></script>
+  <style>
+    .wrap { max-width: 860px; margin: 24px auto; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(0,0,0,.06); padding: 20px; }
+    h1 { margin: 0 0 8px; font-size: 22px; }
+    p { color:#555; }
+    ol { margin: 10px 0 16px; padding-left: 18px; }
+    li { margin: 8px 0; }
+    .btns { display:flex; gap:10px; flex-wrap:wrap; margin-top: 14px; }
+    .btn { padding:10px 16px; border-radius:10px; border:0; background:#0a58ca; color:#fff; font-size:16px; cursor:pointer; }
+    .btn.secondary { background:#6c757d; }
+    .btn:disabled { opacity:.6; cursor:not-allowed; }
+    .status { font-size: 14px; margin-top: 10px; min-height: 1.2em; }
+    .ok { color:#1a7f37; font-weight:600; }
+    .ng { color:#b02a37; font-weight:600; }
+    .note { font-size:12px; color:#666; margin-top:8px; }
+  </style>
 </head>
-<body class="tutorial-body">
-  <div class="tutorial-container">
-    <!-- 1ページ目 -->
-    <section class="slide" aria-label="チュートリアル1">
-      <img src="assets/tutorial1.png" alt="チュートリアル1" class="tutorial-img" />
-      <p class="tutorial-text">マップからスポットを探しましょう。</p>
-    </section>
+<body>
+  <main class="wrap">
+    <h1>チュートリアル</h1>
+    <p>当日の流れを確認しましょう。必要に応じてカメラの事前許可テストもできます。</p>
 
-    <!-- 2ページ目 -->
-    <section class="slide" aria-label="チュートリアル2">
-      <img src="assets/tutorial2.png" alt="チュートリアル2" class="tutorial-img" />
-      <p class="tutorial-text">スポットでカメラをかざしてスタンプを集めましょう。</p>
-    </section>
+    <ol>
+      <li>マップでスポットを確認し、現地に移動します。</li>
+      <li><strong>カメラ起動</strong>からARを開始します（カメラ許可を求められます）。</li>
+      <li>現地でVPSが位置合わせされると、<strong>スタンプ</strong>が保存されます。</li>
+      <li>解説ページを読み、マップへ戻ってスタンプ帳を確認します。</li>
+    </ol>
 
-    <!-- 3ページ目 -->
-    <section class="slide" aria-label="チュートリアル3">
-      <img src="assets/tutorial3.png" alt="チュートリアル3" class="tutorial-img" />
-      <p class="tutorial-text">3つ集めたら解説ページで歴史を学べます。</p>
-    </section>
-  </div>
+    <div class="btns">
+      <button id="testCameraBtn" class="btn secondary" type="button">カメラをテスト</button>
+      <button id="goMapBtn" class="btn" type="button">マップへ進む</button>
+    </div>
 
-  <!-- 下部ナビ（ページに応じて表示を切替） -->
-  <div class="tutorial-nav">
-    <!-- 左下：←（テキスト） -->
-    <button id="navPrev" class="nav-text-btn left" aria-label="前のページ">←</button>
+    <div id="camStatus" class="status"></div>
+    <p class="note">※ カメラテストは事前の許可確認用です。実際のAR起動時にも再度許可が必要な場合があります。</p>
+  </main>
 
-    <!-- 右下：→（テキスト） or 完了ボタン -->
-    <button id="navNext" class="nav-text-btn right" aria-label="次のページ">→</button>
-    <button id="tutorialDoneBtn" class="btn-primary right done" aria-label="チュートリアル完了">スタート</button>
-  </div>
+  <!-- スクリプト：必ずこの順（firebase → ページ固有） -->
+  <script src="js/firebase.js?v=2" defer></script>
+  <script src="js/tutorial.js?v=2" defer></script>
 </body>
 </html>

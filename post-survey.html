@@ -1,19 +1,89 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>アンケート</title>
-  <link rel="stylesheet" href="css/style.css">
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="js/firebase.js"></script>
-  <script src="js/post-survey.js" defer></script>
+  <meta charset="UTF-8" />
+  <title>事後アンケート | ARスタンプラリー</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .wrap { max-width: 860px; margin: 24px auto; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(0,0,0,.06); padding: 20px; }
+    h1 { margin: 0 0 10px; font-size: 22px; }
+    p { color:#555; }
+    fieldset { border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px 14px; margin: 14px 0; }
+    legend { padding: 0 6px; font-weight: 600; color:#333; }
+    .grid { display: grid; gap: 8px; margin-top: 8px; }
+    .row { display:flex; align-items:center; gap:8px; }
+    .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top: 14px; }
+    .btn { padding:10px 16px; border-radius:10px; border:0; background:#0a58ca; color:#fff; font-size:16px; cursor:pointer; }
+    .btn.secondary { background:#6c757d; }
+    .btn:disabled { opacity:.6; cursor:not-allowed; }
+    textarea { width:100%; min-height:120px; padding:10px 12px; border-radius:10px; border:1px solid #d0d7de; font-size:14px; }
+    select, input[type="radio"] { font-size: 14px; }
+    .msg { font-size:14px; min-height:1.2em; margin-top: 8px; }
+    .ok { color:#1a7f37; font-weight:600; }
+    .ng { color:#b02a37; font-weight:600; }
+    .note { font-size:12px; color:#666; margin-top:8px; }
+  </style>
 </head>
 <body>
-  <h1>アンケート（任意）</h1>
-  <form id="postSurveyForm">
-    <textarea name="feedback" rows="5" cols="30" placeholder="ご意見・感想をどうぞ"></textarea>
-    <button type="submit">送信</button>
-  </form>
+  <main class="wrap">
+    <h1>事後アンケート</h1>
+    <p>体験のご感想をお聞かせください（1分程度）。</p>
+
+    <form id="postSurveyForm">
+      <fieldset>
+        <legend>総合満足度</legend>
+        <div class="grid" role="group" aria-label="総合満足度">
+          <label class="row"><input type="radio" name="satisfaction" value="5" required> とても満足</label>
+          <label class="row"><input type="radio" name="satisfaction" value="4"> 満足</label>
+          <label class="row"><input type="radio" name="satisfaction" value="3"> ふつう</label>
+          <label class="row"><input type="radio" name="satisfaction" value="2"> やや不満</label>
+          <label class="row"><input type="radio" name="satisfaction" value="1"> 不満</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>操作のわかりやすさ</legend>
+        <div class="grid" role="group" aria-label="操作のわかりやすさ">
+          <label class="row"><input type="radio" name="usability" value="5" required> とてもわかりやすい</label>
+          <label class="row"><input type="radio" name="usability" value="4"> わかりやすい</label>
+          <label class="row"><input type="radio" name="usability" value="3"> ふつう</label>
+          <label class="row"><input type="radio" name="usability" value="2"> やや難しい</label>
+          <label class="row"><input type="radio" name="usability" value="1"> 難しい</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>一番良かったスポット</legend>
+        <div class="grid">
+          <select id="favoriteSpot" name="favoriteSpot" required>
+            <option value="" disabled selected>選択してください</option>
+            <option value="spot1">スポット1</option>
+            <option value="spot2">スポット2</option>
+            <option value="spot3">スポット3</option>
+            <option value="none">特になし</option>
+          </select>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>自由記述（任意）</legend>
+        <div class="grid">
+          <textarea id="comment" name="comment" placeholder="改善点や良かった点など、ご自由にお書きください（任意）"></textarea>
+        </div>
+      </fieldset>
+
+      <div class="actions">
+        <button id="submitBtn" type="submit" class="btn">送信する</button>
+        <button id="skipBtn" type="button" class="btn secondary">スキップ</button>
+      </div>
+      <div id="msg" class="msg"></div>
+      <p class="note">※ 匿名認証で保存されます。個人を特定できる情報は含まれません。</p>
+    </form>
+  </main>
+
+  <!-- スクリプト（必ずこの順） -->
+  <script src="js/firebase.js?v=2" defer></script>
+  <script src="js/post-survey.js?v=2" defer></script>
 </body>
 </html>

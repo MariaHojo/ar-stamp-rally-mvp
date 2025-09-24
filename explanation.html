@@ -1,15 +1,58 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>解説</title>
-  <link rel="stylesheet" href="css/style.css">
-  <script src="js/explanation.js" defer></script>
+  <meta charset="UTF-8" />
+  <title>解説 | ARスタンプラリー</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .wrap { max-width: 900px; margin: 24px auto; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(0,0,0,.06); padding: 20px; }
+    .title-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    h1 { margin: 0; font-size: 22px; }
+    .badge { padding:4px 8px; border-radius:999px; font-size:12px; background:#eef2ff; color:#1d4ed8; }
+    .status { margin-left:auto; font-size:12px; padding:4px 8px; border-radius:999px; }
+    .ok { background:#e8f5ed; color:#1a7f37; }
+    .ng { background:#fdecea; color:#b02a37; }
+    .hero { margin: 14px 0 10px; border-radius:12px; overflow:hidden; box-shadow:0 6px 20px rgba(0,0,0,.06); }
+    .hero img { width:100%; display:block; }
+    .content { color:#444; line-height:1.7; }
+    .btns { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+    .btn { padding:10px 16px; border-radius:10px; border:0; background:#0a58ca; color:#fff; font-size:16px; cursor:pointer; }
+    .btn.secondary { background:#6c757d; }
+    .btn.ghost { background:#eef2ff; color:#1d4ed8; }
+    .btn:disabled { opacity:.6; cursor:not-allowed; }
+    .note { font-size:12px; color:#666; margin-top:8px; }
+  </style>
 </head>
 <body>
-  <div class="spotName">スポット名</div>
-  <img id="spotImage" src="">
-  <p id="spotDescription"></p>
-  <button id="mapBtn">マップへ戻る</button>
+  <main class="wrap">
+    <div class="title-row">
+      <h1 id="spotTitle">スポット</h1>
+      <span id="spotBadge" class="badge">spot1</span>
+      <span id="stampStatus" class="status ng">未取得</span>
+    </div>
+
+    <div class="hero">
+      <!-- スポットごとに差し替えたい画像があれば assets に置いて切り替え -->
+      <img id="spotImage" src="assets/images/stamp01.png" alt="スポット画像">
+    </div>
+
+    <div id="spotContent" class="content">
+      <!-- スポット解説テキスト（spotIdで差し替え） -->
+      <p>このスポットの解説は準備中です。</p>
+    </div>
+
+    <div class="btns">
+      <button id="backMapBtn" type="button" class="btn">マップへ戻る</button>
+      <button id="nextSpotBtn" type="button" class="btn ghost">次のスポットへ</button>
+      <button id="completeBtn" type="button" class="btn secondary" style="display:none;">コンプリート画面へ</button>
+    </div>
+
+    <p class="note">※ スタンプが反映されない場合はマップに戻って数秒後に更新されます。</p>
+  </main>
+
+  <!-- スクリプトはこの順（先に firebase、次にページ固有） -->
+  <script src="js/firebase.js?v=2" defer></script>
+  <script src="js/explanation.js?v=2" defer></script>
 </body>
 </html>

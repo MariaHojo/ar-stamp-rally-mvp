@@ -1,100 +1,119 @@
-// js/survey.js — 初回アンケート送信。書き込み拒否でもローカル退避して先へ進む
-document.addEventListener('DOMContentLoaded', function () {
-  var form = document.getElementById('surveyForm');
-  var btn  = document.getElementById('submitBtn');
+/* survey.js（整理版）
+   - 匿名認証の準備を待機
+   - 年齢層を /users/<uid>/info に保存（上書きOK）
+   - 互換：/users/<loginName>/info にもミラー保存（任意・失敗しても続行）
+   - 保存成功後に tutorial.html へ遷移（スキップも可）
+*/
 
-  // --- 年齢プルダウン（既存のロジックそのまま） ---
-  var ageSelect = document.getElementById('age');
-  if (ageSelect && !ageSelect.getAttribute('data-ready')) {
-    ageSelect.innerHTML = '<option value="">選択してください</option>';
-    function makeOpt(value, label) {
-      var opt = document.createElement('option');
-      opt.value = value; opt.textContent = label; return opt;
+(function () {
+  const $ = (s) => document.querySelector(s);
+  const form = $('#surveyForm');
+  const submitBtn = $('#submitBtn');
+  const skipBtn = $('#skipBtn');
+  const msg = $('#msg');
+
+  function setOK(text){ msg.innerHTML = `<span class="ok">✔ ${text}</span>`; }
+  function setNG(text){ msg.innerHTML = `<span class="ng">✖ ${text}</span>`; }
+  function clearMsg(){ msg.textContent = ''; }
+
+  async function ensureFirebaseReady() {
+    if (window.firebaseReadyPromise) {
+      try { await window.firebaseReadyPromise; } catch (e) { /* no-op */ }
     }
-    ageSelect.appendChild(makeOpt('17以下', '17歳以下'));
-    for (var y = 18; y <= 29; y++) ageSelect.appendChild(makeOpt(String(y), y + '歳'));
-    ageSelect.appendChild(makeOpt('30代', '30代'));
-    ageSelect.appendChild(makeOpt('40代', '40代'));
-    ageSelect.appendChild(makeOpt('50代', '50代'));
-    ageSelect.appendChild(makeOpt('60以上', '60歳以上'));
-    ageSelect.setAttribute('data-ready', '1');
+    if (!(window.firebase && firebase.apps && firebase.apps.length)) {
+      throw new Error('Firebaseが初期化されていません');
+    }
   }
 
-  // --- エラー表示 ---
-  function setError(id, msg) {
-    var el = document.getElementById('err-' + id);
-    if (el) el.textContent = msg || '';
+  function getSelectedAge() {
+    const el = form.querySelector('input[name="age"]:checked');
+    return el ? el.value : null;
   }
 
-  // --- 値取得 & バリデーション ---
-  function getVal(id) {
-    var el = document.getElementById(id);
-    return el ? String(el.value).trim() : '';
-  }
-  function isChecked(id) {
-    var el = document.getElementById(id);
-    return !!(el && el.checked);
-  }
-  function validate() {
-    var ok = true;
-    if (!getVal('age'))         { setError('age', '選択してください'); ok = false; } else setError('age','');
-    if (!getVal('affiliation')) { setError('affiliation', '選択してください'); ok = false; } else setError('affiliation','');
-    if (!getVal('interest'))    { setError('interest', '選択してください'); ok = false; } else setError('interest','');
-    if (!isChecked('consent'))  { setError('consent', '同意にチェックしてください'); ok = false; } else setError('consent','');
-    return ok;
+  async function logEvent(type, meta = {}) {
+    try {
+      await ensureFirebaseReady();
+      const uid = (firebase.auth().currentUser && firebase.auth().currentUser.uid) || localStorage.getItem('uid') || 'guest';
+      const ref = firebase.database().ref('events').push();
+      await ref.set({
+        uid, type, ...meta,
+        ts: (typeof firebase.database.ServerValue !== 'undefined' && firebase.database.ServerValue.TIMESTAMP) || Date.now(),
+        ua: navigator.userAgent
+      });
+    } catch (_) {}
   }
 
-  if (!form || !btn) return;
-  form.setAttribute('action', '');
+  async function saveSurvey() {
+    await ensureFirebaseReady();
 
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    if (!validate()) {
-      // 最初のエラー位置へスクロール
-      var firstErr = null;
-      var ids = ['age','affiliation','interest','consent','schoolDivision','major'];
-      for (var i = 0; i < ids.length; i++) {
-        var el = document.getElementById('err-' + ids[i]);
-        if (el && el.textContent) { firstErr = el; break; }
+    const uid =
+      (firebase.auth().currentUser && firebase.auth().currentUser.uid) ||
+      localStorage.getItem('uid') || null;
+    if (!uid) throw new Error('匿名認証のUIDが取得できませんでした');
+
+    const age = getSelectedAge();
+    if (!age) throw new Error('年齢層を選択してください');
+
+    // 端末保存（互換）
+    try { localStorage.setItem('ageGroup', age); } catch {}
+
+    // DB 保存（uid 側が本線）
+    const now = (typeof firebase.database.ServerValue !== 'undefined' && firebase.database.ServerValue.TIMESTAMP) || Date.now();
+    const infoRef = firebase.database().ref(`users/${uid}/info`);
+    await infoRef.update({ ageGroup: age, updatedAt: now });
+
+    // 互換：loginName 側にミラー（任意）
+    try {
+      const ln = localStorage.getItem('loginName');
+      if (ln && ln !== uid) {
+        await firebase.database().ref(`users/${ln}/info`).update({ ageGroup: age, updatedAt: now });
       }
-      if (firstErr && firstErr.scrollIntoView) {
-        firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      return;
+    } catch (e) {
+      console.warn('[survey] mirror failed:', e && e.message ? e.message : e);
     }
 
-    var name = null;
-    try { name = localStorage.getItem('loginName'); } catch(_) {}
-    if (!name) { alert('ログイン情報がありません。最初からやり直してください。'); return; }
+    // ログ
+    logEvent('initial_survey_saved', { ageGroup: age }).catch(()=>{});
+  }
 
-    var payload = {
-      age: getVal('age'),
-      affiliation: getVal('affiliation'),
-      schoolDivision: (function(){ var v = getVal('schoolDivision'); return v || null; })(),
-      major: (function(){ var v = getVal('major'); return v || null; })(),
-      interest: getVal('interest'),
-      consent: true,
-      submittedAt: Date.now()
-    };
+  async function onSubmit(ev) {
+    ev.preventDefault();
+    clearMsg();
+    submitBtn.disabled = true;
 
-    btn.disabled = true;
+    try {
+      await saveSurvey();
+      setOK('保存しました。次の画面へ進みます…');
+      // 少し待ってから遷移（画面読みやすく）
+      setTimeout(() => { location.href = 'tutorial.html'; }, 300);
+    } catch (e) {
+      console.warn('[survey] submit failed:', e);
+      const t = (e && e.message) ? e.message : '保存に失敗しました。通信環境をご確認ください。';
+      setNG(t);
+      submitBtn.disabled = false;
+    }
+  }
 
-    // 書ければDBへ。拒否されてもローカル退避して続行。
-    (async function submit() {
-      try {
-        if (window.firebase && firebase.apps && firebase.apps.length) {
-          await firebase.database().ref('users/' + name + '/info').set(payload);
-          window.location.href = 'tutorial.html';
-          return;
-        } else {
-          console.warn('[survey] firebase not ready, skip write');
-        }
-      } catch (err) {
-        console.warn('[survey] write failed, keep locally and continue:', err && err.message ? err.message : err);
-        try { localStorage.setItem('survey_info_' + name, JSON.stringify(payload)); } catch(_){}
+  function onSkip() {
+    clearMsg();
+    logEvent('initial_survey_skipped').catch(()=>{});
+    location.href = 'tutorial.html';
+  }
+
+  function init() {
+    form.addEventListener('submit', onSubmit);
+    if (skipBtn) skipBtn.addEventListener('click', onSkip);
+    // 既に選択済みの年齢があればプリセット（任意）
+    try {
+      const prev = localStorage.getItem('ageGroup');
+      if (prev) {
+        const el = form.querySelector(`input[name="age"][value="${prev}"]`);
+        if (el) el.checked = true;
       }
-      // いずれの場合も体験を止めない
-      window.location.href = 'tutorial.html';
-    })();
-  });
-});
+    } catch {}
+    // ページ表示ログ（任意）
+    logEvent('initial_survey_open').catch(()=>{});
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+})();
