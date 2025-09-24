@@ -26,11 +26,6 @@
     .obtained { color: #1a7f37; }
     .not-obtained { color: #b02a37; }
   </style>
-
-  <!-- Firebase 読み込み -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="js/firebase.js"></script>
 </head>
 <body>
   <!-- メニューバー -->
@@ -69,224 +64,41 @@
     <div class="map-wrap">
       <img src="assets/images/campus-map.png" alt="学内マップ" class="map-image" id="mapImage" />
 
-      <button class="pin" style="left:32%; top:58%;" onclick="openDirections(35.686917, 139.529194, 'Spot1')">
+      <!-- ピン（クリックで経路案内＆lastSpotId保存） -->
+      <button class="pin" style="left:32%; top:58%;" aria-label="スポット1"
+              data-spot="spot1" data-lat="35.686917" data-lng="139.529194" data-label="Spot1">
         <img src="assets/images/map_pin.png" alt="スポット1">
       </button>
 
-      <button class="pin" style="left:61%; top:41%;" onclick="openDirections(35.686139, 139.533056, 'Spot2')">
+      <button class="pin" style="left:61%; top:41%;" aria-label="スポット2"
+              data-spot="spot2" data-lat="35.686139" data-lng="139.533056" data-label="Spot2">
         <img src="assets/images/map_pin.png" alt="スポット2">
       </button>
 
-      <button class="pin" style="left:78%; top:72%;" onclick="openDirections(35.685667, 139.530889, 'Spot3')">
+      <button class="pin" style="left:78%; top:72%;" aria-label="スポット3"
+              data-spot="spot3" data-lat="35.685667" data-lng="139.530889" data-label="Spot3">
         <img src="assets/images/map_pin.png" alt="スポット3">
       </button>
     </div>
 
     <div class="legend">
-      <p>ピンをタップすると地図アプリが開きます。案内に従いスポットへ移動し、着いたらカメラ起動→マーカー読取→AR体験へ進みます。</p>
+      <p>ピンをタップすると地図アプリが開きます。スポット到着後に「カメラ起動」からARに進み、スタンプを取得してください。</p>
     </div>
   </div>
 
-  <!-- カメラ起動ボタン -->
-  <button id="cameraBtn">カメラ起動</button>
+  <!-- カメラ起動ボタン（lastSpotId を使って 8th Wall を開く） -->
+  <div style="max-width:900px;margin:16px auto 40px;">
+    <button id="cameraBtn" type="button">カメラ起動</button>
+  </div>
 
-  <script>
-    // ▼▲切り替え
-    (function(){
-      var toggleBtn = document.getElementById('stampToggle');
-      var book = document.getElementById('stampBook');
-      if (!toggleBtn || !book) return;
-      function setClosed(){
-        book.style.display = 'none';
-        toggleBtn.textContent = '▼スタンプ帳';
-      }
-      function setOpen(){
-        book.style.display = 'block';
-        toggleBtn.textContent = '▲スタンプ帳';
-      }
-      setClosed();
-      toggleBtn.addEventListener('click', function(){
-        var isOpen = (book.style.display === 'block');
-        if (isOpen) setClosed(); else setOpen();
-      });
-    })();
+  <!-- スクリプト：必ずこの順（firebase → ページ固有） -->
+  <script src="js/firebase.js?v=2" defer></script>
+  <script src="js/map.js?v=2" defer></script>
 
-  // スタンプ表示更新
-  function setStampUI(index, obtained) {
-    var img = document.getElementById('stamp' + index + 'Img');
-    var ph  = document.getElementById('stamp' + index + 'Placeholder');
-    var st  = document.getElementById('stamp' + index + 'Status');
-    if (obtained) {
-      img.style.display = 'block';
-      ph.style.display = 'none';
-      st.textContent = '取得済み';
-      st.classList.remove('not-obtained'); st.classList.add('obtained');
-    } else {
-      img.style.display = 'none';
-      ph.style.display = 'block';
-      ph.textContent = '未取得';
-      st.textContent = '未取得';
-      st.classList.remove('obtained'); st.classList.add('not-obtained');
-    }
-  }
-
-  // ★ localStorage フォールバックをマージ
-  function getLocalStampFallback() {
-    try {
-      return {
-        spot1: localStorage.getItem('stamp_spot1') === 'true',
-        spot2: localStorage.getItem('stamp_spot2') === 'true',
-        spot3: localStorage.getItem('stamp_spot3') === 'true',
-      };
-    } catch { return { spot1:false, spot2:false, spot3:false }; }
-  }
-
-  // ★ ユーザーIDの取得を強化（loginName優先、無ければuserId）
-  function getUserName() {
-    try {
-      return localStorage.getItem('loginName') || localStorage.getItem('userId') || null;
-    } catch { return null; }
-  }
-
-  (function loadStamps(){
-    var name = getUserName();
-    // まず localStorage で UI を初期反映
-    var ls = getLocalStampFallback();
-    setStampUI(1, !!ls.spot1);
-    setStampUI(2, !!ls.spot2);
-    setStampUI(3, !!ls.spot3);
-
-    // ユーザー名 or Firebase が無いなら、ここで終了
-    if (!name) return;
-    if (!(window.firebase && firebase.apps && firebase.apps.length)) return;
-
-    // Firebaseの値で上書き（取得できたものを優先）
-    firebase.database().ref('users/' + name + '/stamps').once('value')
-      .then(function(snap){
-        var v = snap.val() || {};
-        // true が一つでもあれば優先、無ければlocalStorageの値を維持
-        setStampUI(1, v.spot1 === true ? true : !!ls.spot1);
-        setStampUI(2, v.spot2 === true ? true : !!ls.spot2);
-        setStampUI(3, v.spot3 === true ? true : !!ls.spot3);
-      })
-      .catch(function(){
-        // 読み出し失敗時は localStorage 表示のまま
-      });
-  })();
-
-    // 地図アプリを開く
-    function openDirections(lat, lng, label){
-      var ll = lat + ',' + lng;
-      if (/Android/.test(navigator.userAgent)) {
-        location.href = 'geo:' + ll + '?q=' + ll + '(' + label + ')';
-      } else if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-        location.href = 'http://maps.apple.com/?daddr=' + ll + '&dirflg=w';
-      } else {
-        location.href = 'https://www.google.com/maps/dir/?api=1&destination=' + ll + '&travelmode=walking';
-      }
-    }
+  <!-- firebase 準備完了/画面復帰でスタンプ再読込 -->
+  <script defer>
+    document.addEventListener('firebase-ready', () => window.loadAndRenderStamps && window.loadAndRenderStamps());
+    window.addEventListener('pageshow', () => window.loadAndRenderStamps && window.loadAndRenderStamps());
   </script>
-
-  <script src="js/map.js" defer></script>
-  <script>
-/* ======== Stamps Loader: 多キー統合 + localStorage フォールバック ======== */
-
-// UI反映
-function setStampUI(index, obtained) {
-  var img = document.getElementById('stamp' + index + 'Img');
-  var ph  = document.getElementById('stamp' + index + 'Placeholder');
-  var st  = document.getElementById('stamp' + index + 'Status');
-  if (!img || !ph || !st) return;
-
-  if (obtained) {
-    img.style.display = 'block';
-    ph.style.display  = 'none';
-    st.textContent    = '取得済み';
-    st.classList.remove('not-obtained'); st.classList.add('obtained');
-  } else {
-    img.style.display = 'none';
-    ph.style.display  = 'block';
-    ph.textContent    = '未取得';
-    st.textContent    = '未取得';
-    st.classList.remove('obtained'); st.classList.add('not-obtained');
-  }
-}
-
-// localStorage フォールバック（8th Wall 側がローカル保存だけだった場合でも表示）
-function getLocalStampFallback() {
-  try {
-    return {
-      spot1: localStorage.getItem('stamp_spot1') === 'true',
-      spot2: localStorage.getItem('stamp_spot2') === 'true',
-      spot3: localStorage.getItem('stamp_spot3') === 'true',
-    };
-  } catch (_) { return { spot1:false, spot2:false, spot3:false }; }
-}
-
-// Firebase の読み取りに使うキー候補（順に試して OR マージ）
-function getUserKeyCandidates() {
-  var list = [];
-  try {
-    var ln  = localStorage.getItem('loginName');
-    var uid = localStorage.getItem('userId');
-    if (ln)  list.push(ln);
-    if (uid && uid !== ln) list.push(uid);
-  } catch (_) {}
-  try {
-    var qp = new URLSearchParams(location.search).get('uid');
-    if (qp && list.indexOf(qp) === -1) list.push(qp);
-  } catch (_) {}
-  if (list.indexOf('guest') === -1) list.push('guest');
-  return list;
-}
-
-async function fetchStampsOnce(key) {
-  try {
-    if (!(window.firebase && firebase.apps && firebase.apps.length)) return {};
-    var snap = await firebase.database().ref('users/' + key + '/stamps').once('value');
-    var v = snap.val() || {};
-    console.log('[map] fetched', key, v);
-    return v;
-  } catch (e) {
-    console.warn('[map] read failed for', key, e && e.message ? e.message : e);
-    return {};
-  }
-}
-
-async function loadAndRenderStamps() {
-  // まずローカルだけで即時反映（体感を早く）
-  var merged = getLocalStampFallback();
-  setStampUI(1, !!merged.spot1);
-  setStampUI(2, !!merged.spot2);
-  setStampUI(3, !!merged.spot3);
-
-  // Firebase 未初期化ならここで終わり（コンソールだけ通知）
-  if (!(window.firebase && firebase.apps && firebase.apps.length)) {
-    console.log('[map] firebase not ready. local fallback only');
-    return;
-  }
-
-  // loginName / userId / URL uid / guest を順に読んで OR マージ
-  var keys = getUserKeyCandidates();
-  for (var i = 0; i < keys.length; i++) {
-    var v = await fetchStampsOnce(keys[i]);
-    merged.spot1 = merged.spot1 || !!v.spot1;
-    merged.spot2 = merged.spot2 || !!v.spot2;
-    merged.spot3 = merged.spot3 || !!v.spot3;
-    if (merged.spot1 && merged.spot2 && merged.spot3) break; // 3つ揃ったら早期終了
-  }
-
-  setStampUI(1, !!merged.spot1);
-  setStampUI(2, !!merged.spot2);
-  setStampUI(3, !!merged.spot3);
-}
-
-// 初回ロード & 画面復帰で再取得（explanation → map 戻り対策）
-document.addEventListener('DOMContentLoaded', loadAndRenderStamps);
-document.addEventListener('visibilitychange', function () {
-  if (!document.hidden) loadAndRenderStamps();
-});
-/* ===================================================================== */
-</script>
 </body>
 </html>
