@@ -9,8 +9,8 @@
 // ======= 設定：各スポットの 8th Wall 起動URL（必ず置き換え） =======
 const EIGHTHWALL_URLS = {
   spot1: 'https://maria261081.8thwall.app/test-3/', // ←置換
-  spot2: 'https://YOUR-8THWALL-URL-2', // ←置換
-  spot3: 'https://YOUR-8THWALL-URL-3', // ←置換
+  spot2: 'https://maria261081.8thwall.app/spot2/', // ←置換
+  spot3: 'https://maria261081.8thwall.app/spot3/', // ←置換
 };
 // ================================================================
 
