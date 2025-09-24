@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <title>アンケート</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="js/firebase.js"></script>
   <script src="js/post-survey.js" defer></script>
 </head>
@@ -13,9 +15,5 @@
     <textarea name="feedback" rows="5" cols="30" placeholder="ご意見・感想をどうぞ"></textarea>
     <button type="submit">送信</button>
   </form>
-<!-- Firebase（匿名認証つき） -->
-<script src="js/firebase.js" defer></script>
-<!-- ページ固有 -->
-<script src="js/post-survey.js" defer></script>
 </body>
 </html>
