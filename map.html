@@ -188,5 +188,106 @@
   </script>
 
   <script src="js/map.js" defer></script>
+  <script>
+/* ======== Stamps Loader: 多キー統合 + localStorage フォールバック ======== */
+
+// UI反映
+function setStampUI(index, obtained) {
+  var img = document.getElementById('stamp' + index + 'Img');
+  var ph  = document.getElementById('stamp' + index + 'Placeholder');
+  var st  = document.getElementById('stamp' + index + 'Status');
+  if (!img || !ph || !st) return;
+
+  if (obtained) {
+    img.style.display = 'block';
+    ph.style.display  = 'none';
+    st.textContent    = '取得済み';
+    st.classList.remove('not-obtained'); st.classList.add('obtained');
+  } else {
+    img.style.display = 'none';
+    ph.style.display  = 'block';
+    ph.textContent    = '未取得';
+    st.textContent    = '未取得';
+    st.classList.remove('obtained'); st.classList.add('not-obtained');
+  }
+}
+
+// localStorage フォールバック（8th Wall 側がローカル保存だけだった場合でも表示）
+function getLocalStampFallback() {
+  try {
+    return {
+      spot1: localStorage.getItem('stamp_spot1') === 'true',
+      spot2: localStorage.getItem('stamp_spot2') === 'true',
+      spot3: localStorage.getItem('stamp_spot3') === 'true',
+    };
+  } catch (_) { return { spot1:false, spot2:false, spot3:false }; }
+}
+
+// Firebase の読み取りに使うキー候補（順に試して OR マージ）
+function getUserKeyCandidates() {
+  var list = [];
+  try {
+    var ln  = localStorage.getItem('loginName');
+    var uid = localStorage.getItem('userId');
+    if (ln)  list.push(ln);
+    if (uid && uid !== ln) list.push(uid);
+  } catch (_) {}
+  try {
+    var qp = new URLSearchParams(location.search).get('uid');
+    if (qp && list.indexOf(qp) === -1) list.push(qp);
+  } catch (_) {}
+  if (list.indexOf('guest') === -1) list.push('guest');
+  return list;
+}
+
+async function fetchStampsOnce(key) {
+  try {
+    if (!(window.firebase && firebase.apps && firebase.apps.length)) return {};
+    var snap = await firebase.database().ref('users/' + key + '/stamps').once('value');
+    var v = snap.val() || {};
+    console.log('[map] fetched', key, v);
+    return v;
+  } catch (e) {
+    console.warn('[map] read failed for', key, e && e.message ? e.message : e);
+    return {};
+  }
+}
+
+async function loadAndRenderStamps() {
+  // まずローカルだけで即時反映（体感を早く）
+  var merged = getLocalStampFallback();
+  setStampUI(1, !!merged.spot1);
+  setStampUI(2, !!merged.spot2);
+  setStampUI(3, !!merged.spot3);
+
+  // Firebase 未初期化ならここで終わり（コンソールだけ通知）
+  if (!(window.firebase && firebase.apps && firebase.apps.length)) {
+    console.log('[map] firebase not ready. local fallback only');
+    return;
+  }
+
+  // loginName / userId / URL uid / guest を順に読んで OR マージ
+  var keys = getUserKeyCandidates();
+  for (var i = 0; i < keys.length; i++) {
+    var v = await fetchStampsOnce(keys[i]);
+    merged.spot1 = merged.spot1 || !!v.spot1;
+    merged.spot2 = merged.spot2 || !!v.spot2;
+    merged.spot3 = merged.spot3 || !!v.spot3;
+    if (merged.spot1 && merged.spot2 && merged.spot3) break; // 3つ揃ったら早期終了
+  }
+
+  setStampUI(1, !!merged.spot1);
+  setStampUI(2, !!merged.spot2);
+  setStampUI(3, !!merged.spot3);
+}
+
+// 初回ロード & 画面復帰で再取得（explanation → map 戻り対策）
+document.addEventListener('DOMContentLoaded', loadAndRenderStamps);
+document.addEventListener('visibilitychange', function () {
+  if (!document.hidden) loadAndRenderStamps();
+});
+/* ===================================================================== */
+</script>
+
 </body>
 </html>
