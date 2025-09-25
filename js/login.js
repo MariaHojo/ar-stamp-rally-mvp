@@ -1,91 +1,96 @@
-/* login.js（整理版）
-   - 匿名認証の準備完了を待って uid を取得
-   - 表示名(loginName)を localStorage に保存
-   - ユーザープロファイルを /users/<uid>/profile に保存（上書きOK）
-   - 互換のため /users/<loginName>/aliasUid に uid をミラー（任意）
-   - initial-survey.html へ遷移
-*/
+// js/login.js
+// フォーム要件：
+// <form id="loginForm">
+//   <input id="loginName" ...>
+//   <input id="loginPin"  ...>  // 4桁数字
+//   <button type="submit">はじめる</button>
+// </form>
 
-(function () {
-  const $ = (s) => document.querySelector(s);
-  const form = $('#loginForm');
-  const input = $('#loginName');
-  const startBtn = $('#startBtn');
-  const msg = $('#msg');
+(async function(){
+  function $(s){ return document.querySelector(s); }
+  const PEPPER = 'arstamprally_pepper_v1';
 
-  // 既存の表示名があればプレフィル
-  try {
-    const saved = localStorage.getItem('loginName');
-    if (saved) input.value = saved;
-  } catch {}
+  async function sha256Hex(str){
+    const buf = new TextEncoder().encode(str);
+    const digest = await crypto.subtle.digest('SHA-256', buf);
+    return Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+  function normName(name){ return (name||'').trim().toLowerCase().replace(/\s+/g,''); }
 
-  async function ensureFirebaseReady() {
-    if (window.firebaseReadyPromise) {
-      try { await window.firebaseReadyPromise; } catch (e) {
-        console.warn('[login] firebaseReadyPromise error:', e);
-      }
-    }
-    if (!(window.firebase && firebase.apps && firebase.apps.length)) {
-      throw new Error('Firebaseが初期化されていません');
-    }
-    if (!(firebase.auth && firebase.auth().currentUser)) {
-      // 念のため再試行（匿名認証）
-      try { await firebase.auth().signInAnonymously(); } catch {}
+  async function computeAccountKey(name, pin){
+    const nameKey = normName(name);
+    return await sha256Hex(`${nameKey}|${pin}|${PEPPER}`);
+  }
+
+  async function ensureFirebaseReady(){
+    try{ await window.firebaseReadyPromise; }catch{}
+    if(!(window.firebase && firebase.apps && firebase.apps.length)){
+      throw new Error('Firebase not initialized');
     }
   }
 
-  async function onSubmit(ev) {
-    ev.preventDefault();
-    msg.textContent = '';
-    startBtn.disabled = true;
-
-    const name = (input.value || '').trim();
-    if (!name) {
-      msg.textContent = '表示名を入力してください';
-      startBtn.disabled = false;
-      return;
-    }
-
-    try {
-      await ensureFirebaseReady();
-      const uid =
-        (firebase.auth().currentUser && firebase.auth().currentUser.uid) ||
-        localStorage.getItem('uid') ||
-        null;
-
-      if (!uid) throw new Error('匿名認証のUIDが取得できませんでした');
-
-      // 端末へ保存（既存コード互換）
-      try {
-        localStorage.setItem('loginName', name);
-        localStorage.setItem('userId', uid); // 互換キー
-      } catch {}
-
-      // DBにプロフィール保存（安全：auth != null ルール前提）
-      const profRef = firebase.database().ref(`users/${uid}/profile`);
-      const now = (typeof firebase.database.ServerValue !== 'undefined' && firebase.database.ServerValue.TIMESTAMP) || Date.now();
-      // 既存データを壊さず更新
-      await profRef.update({
-        loginName: name,
-        lastLoginAt: now
-      }).catch(console.warn);
-
-      // 任意：表示名→uid のミラー（互換運用用）
-      try {
-        await firebase.database().ref(`users/${name}/aliasUid`).set(uid);
-      } catch (e) {
-        console.warn('[login] aliasUid set failed:', e && e.message ? e.message : e);
-      }
-
-      // 画面遷移（初回アンケートへ）
-      location.href = 'initial-survey.html';
-    } catch (e) {
-      console.warn('[login] start failed:', e);
-      msg.textContent = 'ログインに失敗しました。通信環境を確認して再度お試しください。';
-      startBtn.disabled = false;
-    }
+  async function getNameIndex(nameKey){
+    await ensureFirebaseReady();
+    const snap = await firebase.database().ref('nameIndex/'+nameKey).once('value');
+    return snap.val();
   }
 
-  // Enter でも送信できるよう form submit を使う
-  form.addEventListener('submit', onSubmit);
+  async function setNameIndex(nameKey, accountKey, displayName){
+    await ensureFirebaseReady();
+    const now = Date.now();
+    await firebase.database().ref('nameIndex/'+nameKey).set({
+      accountKey, displayName, createdAt: now
+    });
+    // プロフィールも作成（既存でも上書き安全）
+    await firebase.database().ref('users/'+accountKey+'/profile').update({
+      displayName, updatedAt: now
+    });
+  }
+
+  // 旧ローカルキー掃除
+  function cleanupLegacyLocal(){
+    try{
+      ['spot1','spot2','spot3'].forEach(s => localStorage.removeItem('stamp_'+s));
+      localStorage.removeItem('uid'); // 以前の一時保存があれば
+    }catch{}
+  }
+
+  async function onSubmit(e){
+    e.preventDefault();
+    const name = $('#loginName')?.value || '';
+    const pin  = $('#loginPin')?.value || '';
+    if(!name){ alert('ニックネームを入力してください'); return; }
+    if(!/^\d{4}$/.test(pin)){ alert('PINは4桁の数字で入力してください'); return; }
+
+    const nameKey = normName(name);
+    const accountKey = await computeAccountKey(name, pin);
+
+    // 区別：既存か新規か
+    const idx = await getNameIndex(nameKey);
+    if(idx && idx.accountKey){
+      if(idx.accountKey !== accountKey){
+        alert('このニックネームは既に登録済みですが、PINが一致しません。PINを確認してください。');
+        return;
+      }
+      // 既存アカウントでOK（再ログイン）
+    }else{
+      // 新規登録
+      await setNameIndex(nameKey, accountKey, name);
+    }
+
+    // ここで「誰であるか」をローカルに保持（全ページ共通で使う）
+    try{
+      localStorage.setItem('accountKey', accountKey);
+      localStorage.setItem('loginName', name);
+      // 旧フォーマットのスタンプ残骸掃除
+      cleanupLegacyLocal();
+    }catch{}
+
+    // マップへ
+    location.href = 'map.html';
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    $('#loginForm')?.addEventListener('submit', onSubmit);
+  });
 })();
