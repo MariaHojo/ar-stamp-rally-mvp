@@ -19,55 +19,29 @@
     .stamp-status{font-size:13px;font-weight:600;margin-top:2px}
     .obtained{color:#1a7f37}.not-obtained{color:#b02a37}
 
-    /* カメラ起動のスポット選択UI（吹き出し） */
-    .camera-chooser-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.3); z-index: 9998; }
-    .camera-chooser {
-      position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
-      width: min(92vw, 520px); background: #fff; border-radius: 16px;
-      box-shadow: 0 18px 50px rgba(0,0,0,.2); padding: 14px; z-index: 9999;
-    }
-    .camera-chooser h3 { margin: 6px 8px 10px; font-size: 16px; }
-    .camera-chooser .list { display: grid; gap: 8px; margin: 0 8px 10px; }
-    .camera-chooser .item-btn {
-      appearance: none; border: 1px solid #e2e6ef; background: #f7f9ff;
-      border-radius: 12px; padding: 10px 12px; font-size: 15px; text-align: left; cursor: pointer;
-    }
-    .camera-chooser .item-btn strong { color: #0a58ca; }
-    .camera-chooser .row { display:flex; gap:8px; justify-content: flex-end; }
-    .camera-chooser .close-btn { appearance: none; border: 0; background: #e9ecef; color: #333; border-radius: 10px; padding: 8px 12px; cursor: pointer; }
-    [hidden] { display: none !important; }
+    /* カメラ起動のスポット選択UI */
+    .camera-chooser-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:9998}
+    .camera-chooser{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);width:min(92vw,520px);background:#fff;border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.2);padding:14px;z-index:9999}
+    .camera-chooser h3{margin:6px 8px 10px;font-size:16px}
+    .camera-chooser .list{display:grid;gap:8px;margin:0 8px 10px}
+    .camera-chooser .item-btn{appearance:none;border:1px solid #e2e6ef;background:#f7f9ff;border-radius:12px;padding:10px 12px;font-size:15px;text-align:left;cursor:pointer}
+    .camera-chooser .item-btn strong{color:#0a58ca}
+    .camera-chooser .row{display:flex;gap:8px;justify-content:flex-end}
+    .camera-chooser .close-btn{appearance:none;border:0;background:#e9ecef;color:#333;border-radius:10px;padding:8px 12px;cursor:pointer}
+    [hidden]{display:none!important}
 
-    /* === コンプリート用モーダル === */
-    .complete-overlay{position:fixed;inset:0;background:rgba(255,255,255,.9);z-index:10000;display:none}
-    .complete-modal{
-      position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
-      width:min(92vw,520px);background:#fff;border-radius:16px;
-      box-shadow:0 24px 60px rgba(0,0,0,.25);padding:20px;z-index:10001
-    }
-    .complete-modal h2{margin:0 0 8px;font-size:20px}
-    .complete-modal p{margin:8px 0 12px;line-height:1.6}
-    .complete-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
-    .btn{padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:600}
-    .btn-primary{background:#0a58ca;color:#fff}
-    .btn-ghost{background:#e9ecef;color:#333}
-    /* 完了リンク（上部に常時表示） */
+    /* 完了リンク（自動遷移後の再訪用） */
     #completeLinkArea{max-width:900px;margin:10px auto 0;display:none}
     #completeLinkArea a{display:inline-block;padding:8px 12px;border-radius:10px;background:#fff3cd;color:#664d03;text-decoration:none;font-weight:700}
   </style>
-
-  <!-- Firebase & page script -->
   <script src="js/firebase.js" defer></script>
   <script src="js/map.js" defer></script>
 </head>
 <body>
   <div style="max-width:900px;margin:0 auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
     <a href="tutorial.html">チュートリアル</a> |
+    <a href="terms.html">利用規約</a> |
     <button id="stampToggle" type="button">▼スタンプ帳</button>
-  </div>
-
-  <!-- ▼ コンプリート常時リンク（上部に配置） -->
-  <div id="completeLinkArea">
-    <a href="complete.html">🎉 コンプリートを確認する</a>
   </div>
 
   <div id="stampBook" class="stamp-book">
@@ -95,14 +69,14 @@
 
   <div class="map-wrap">
     <img src="assets/images/campus-map.png" alt="マップ" class="map-image" id="mapImage" />
-    <!-- ピン（例） -->
-    <button class="pin" data-spot="spot1" data-label="spot1" data-lat="35.686917" data-lng="139.529194" style="left:32%;top:58%;">
+    <!-- ピンの例。緯度経度は任意で。 -->
+    <button class="pin" data-spot="spot1" data-label="Spot1" data-lat="35.686917" data-lng="139.529194" style="left:32%;top:58%;">
       <img src="assets/images/map_pin.png" alt="1">
     </button>
-    <button class="pin" data-spot="spot2" data-label="spot2" data-lat="35.686139" data-lng="139.533056" style="left:61%;top:41%;">
+    <button class="pin" data-spot="spot2" data-label="Spot2" data-lat="35.686139" data-lng="139.533056" style="left:61%;top:41%;">
       <img src="assets/images/map_pin.png" alt="2">
     </button>
-    <button class="pin" data-spot="spot3" data-label="spot3" data-lat="35.685667" data-lng="139.530889" style="left:78%;top:72%;">
+    <button class="pin" data-spot="spot3" data-label="Spot3" data-lat="35.685667" data-lng="139.530889" style="left:78%;top:72%;">
       <img src="assets/images/map_pin.png" alt="3">
     </button>
   </div>
@@ -110,32 +84,18 @@
   <div class="legend"><p>ピンをタップすると地図アプリが開きます。現地で<strong>カメラ起動</strong>からARへ進んでください。</p></div>
 
   <div style="max-width:900px;margin:12px auto;text-align:center">
-    <!-- ※ 重複禁止：cameraBtnは1つだけ -->
     <button id="cameraBtn" type="button">カメラ起動</button>
   </div>
 
-  <!-- ▼ スポット選択の吹き出し -->
+  <!-- スポット選択の吹き出し -->
   <div id="cameraChooserOverlay" class="camera-chooser-overlay" hidden></div>
   <div id="cameraChooser" class="camera-chooser" hidden role="dialog" aria-modal="true" aria-labelledby="cameraChooserTitle">
     <h3 id="cameraChooserTitle">スポットを選んでください</h3>
-    <div id="cameraChooserList" class="list"><!-- JSで生成 --></div>
+    <div id="cameraChooserList" class="list"></div>
     <div class="row"><button id="cameraChooserClose" class="close-btn" type="button">キャンセル</button></div>
   </div>
 
-  <!-- ▼ コンプリートモーダル（×で閉じられる） -->
-  <div id="completeOverlay" class="complete-overlay" role="dialog" aria-modal="true" aria-labelledby="completeTitle">
-    <div class="complete-modal">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-        <h2 id="completeTitle">おめでとうございます！</h2>
-        <button id="completeClose" class="btn btn-ghost" type="button" aria-label="閉じる">×</button>
-      </div>
-      <p>3つのスタンプをコンプリートしました。<br>「コンプリートを確認する」ページから、いつでも結果を見返せます。</p>
-      <div class="complete-actions">
-        <a class="btn btn-primary" href="complete.html">コンプリートを確認</a>
-        <button id="completeLater" class="btn btn-ghost" type="button">あとで見る</button>
-      </div>
-    </div>
-  </div>
-
+  <!-- 完了リンク（自動遷移後、再訪用に表示） -->
+  <div id="completeLinkArea"><a href="complete.html">🎉 コンプリートを確認する</a></div>
 </body>
 </html>

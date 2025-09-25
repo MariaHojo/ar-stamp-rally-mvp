@@ -2,38 +2,65 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>コンプリート結果</title>
+  <title>コンプリート！ | ARスタンプラリー</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    .wrap{max-width:900px;margin:16px auto;padding:0 8px}
-    .notice{background:#fff3cd;color:#664d03;border-radius:10px;padding:12px}
-    /* map と同じ見た目のモーダル */
-    .complete-modal{
-      margin:16px auto; max-width:520px; background:#fff; border-radius:16px;
-      box-shadow:0 24px 60px rgba(0,0,0,.12); padding:20px
-    }
-    .complete-modal h2{margin:0 0 8px;font-size:20px}
-    .complete-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
-    .btn{padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:600}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#f6f7fb}
+    .wrap{max-width:900px;margin:0 auto;padding:20px}
+    .card{background:#fff;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.08);padding:24px;text-align:center}
+    h1{margin:0 0 8px;font-size:24px}
+    p{margin:8px 0 0}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+    .stamp{background:#fff;border-radius:12px;padding:12px;box-shadow:0 4px 16px rgba(0,0,0,.06)}
+    .stamp img{width:100%;max-width:140px;height:auto;display:block;margin:0 auto}
+    .row{display:flex;gap:10px;margin-top:16px;justify-content:center}
+    .btn{appearance:none;border:0;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:700}
     .btn-primary{background:#0a58ca;color:#fff}
     .btn-ghost{background:#e9ecef;color:#333}
+    .muted{color:#666;font-size:13px;margin-top:8px}
   </style>
   <script src="js/firebase.js" defer></script>
-  <script src="js/complete.js" defer></script>
 </head>
 <body>
   <div class="wrap">
-    <h1>コンプリート</h1>
-    <div id="notComplete" class="notice" style="display:none">まだ3つすべてのスタンプが揃っていません。<a href="map.html">マップへ戻る</a></div>
+    <div id="card" class="card" aria-live="polite">
+      <h1 id="title">コンプリート！🎉</h1>
+      <p id="desc">3つのスタンプを集めました。おめでとうございます！</p>
 
-    <div id="completeCard" class="complete-modal" style="display:none">
-      <h2>おめでとうございます！</h2>
-      <p>3つのスタンプをコンプリートしました。<br>体験へのご参加、ありがとうございました。</p>
-      <div class="complete-actions">
-        <a class="btn btn-primary" href="map.html">マップへ戻る</a>
+      <div class="grid" style="margin-top:8px">
+        <div class="stamp"><img src="assets/images/stamp01.png" alt="スタンプ1"></div>
+        <div class="stamp"><img src="assets/images/stamp02.png" alt="スタンプ2"></div>
+        <div class="stamp"><img src="assets/images/stamp03.png" alt="スタンプ3"></div>
       </div>
+
+      <div class="row">
+        <a class="btn btn-primary" href="map.html">マップに戻る</a>
+        <a class="btn btn-ghost" href="tutorial.html">チュートリアルを見る</a>
+      </div>
+
+      <p id="note" class="muted"></p>
     </div>
   </div>
+
+  <script>
+    (async function(){
+      const uid = await window.ensureAnon();
+      const db = firebase.database();
+      try{
+        const snap = await db.ref('users/'+uid+'/stamps').once('value');
+        const v = snap.val() || {};
+        const complete = !!v.spot1 && !!v.spot2 && !!v.spot3;
+        if(!complete){
+          document.getElementById('title').textContent = 'まだコンプリートしていません';
+          document.getElementById('desc').textContent = 'マップから各スポットのARを起動して、3つ集めましょう。';
+        } else {
+          document.getElementById('note').textContent = '※ このページはいつでも再訪できます。';
+        }
+      }catch(e){
+        console.warn('[complete] read failed', e?.message||e);
+      }
+    })();
+  </script>
 </body>
 </html>

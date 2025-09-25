@@ -1,9 +1,8 @@
-/* map.js（匿名UID専用・簡潔版）
-   - スタンプUI更新
-   - Firebase: users/{uid}/stamps だけ読む（ORマージ廃止）
+/* map.js（匿名UID専用）
+   - スタンプUI更新（users/{uid}/stamps を読む）
    - ローカルフォールバックは uid 名前空間付き
    - カメラ起動：スポット選択 → 8th Wall へ uid を付与
-   - コンプリートUI：uid単位でフラグ管理
+   - 完了検知：初回は complete.html へ自動遷移。その後はリンク常時表示
 */
 
 // ← 3スポットの 8th Wall URL を実URLに置換
@@ -44,14 +43,10 @@ function setStampUI(i, ok){
 }
 
 async function loadAndRenderStamps(){
-  // 画面を速く：ローカル先行
   const merged = getLocalStampFallback();
   setStampUI(1, !!merged.spot1); setStampUI(2, !!merged.spot2); setStampUI(3, !!merged.spot3);
 
-  // 匿名サインイン保証
   const uid = await window.ensureAnon();
-
-  // Firebase から最新を1回読む
   const db = firebase.database();
   try {
     const snap = await db.ref(`users/${uid}/stamps`).once('value');
@@ -71,15 +66,6 @@ async function loadAndRenderStamps(){
 
 function saveLastSpotId(s){ try{ localStorage.setItem('lastSpotId', s); }catch{} }
 function getLastSpotId(){ try{ return localStorage.getItem('lastSpotId') || 'spot1'; }catch{ return 'spot1'; } }
-
-async function openXRForSpot(spotId){
-  spotId = spotId || getLastSpotId() || 'spot1';
-  const base = EIGHTHWALL_URLS[spotId];
-  if (!base) { alert('このスポットのAR URLが未設定です'); return; }
-  const uid = await window.ensureAnon();
-  const url = `${base}?spotId=${encodeURIComponent(spotId)}&uid=${encodeURIComponent(uid)}`;
-  location.href = url;
-}
 
 /* ===== カメラ起動：スポット選択 ===== */
 function getAvailableSpots(){
@@ -110,39 +96,44 @@ function showCameraChooser(){
 }
 function hideCameraChooser(){ $('#cameraChooserOverlay')?.setAttribute('hidden',''); $('#cameraChooser')?.setAttribute('hidden',''); }
 
-/* ===== コンプリートUI（uid別に管理） ===== */
+async function openXRForSpot(spotId){
+  spotId = spotId || getLastSpotId() || 'spot1';
+  const base = EIGHTHWALL_URLS[spotId];
+  if (!base) { alert('このスポットのAR URLが未設定です'); return; }
+  const uid = await window.ensureAnon();
+  const url = `${base}?spotId=${encodeURIComponent(spotId)}&uid=${encodeURIComponent(uid)}`;
+  location.href = url;
+}
+
+/* ===== 完了UI（初回は自動遷移、以後はリンク表示） ===== */
 function completeFlagKeys(){
   const uid = getUidSync() || 'nouid';
   return {
-    seenKey: `complete_seen_${uid}`,
-    linkKey: `complete_link_enabled_${uid}`,
+    redirectedKey: `complete_redirected_${uid}`, // 初回遷移したか
+    linkKey:       `complete_link_enabled_${uid}`, // 常時リンク表示
   };
 }
 function setLocalFlag(k,val){ try{ localStorage.setItem(k, String(!!val)); }catch{} }
 function getLocalFlag(k){ try{ return localStorage.getItem(k)==='true'; }catch{ return false; } }
 function setCompleteLinkVisible(v){ const area=$('#completeLinkArea'); if(area) area.style.display = v ? 'block':'none'; }
-function showCompleteOverlay(){ $('#completeOverlay') && ($('#completeOverlay').style.display='block'); }
-function hideCompleteOverlay(){ $('#completeOverlay') && ($('#completeOverlay').style.display='none'); }
 
-async function handleCompletionUI(state){
+async function handleCompletionFlow(state){
+  const { redirectedKey, linkKey } = completeFlagKeys();
   if(!state?.complete){
-    const { linkKey } = completeFlagKeys();
     if(!getLocalFlag(linkKey)) setCompleteLinkVisible(false);
     return;
   }
-  const { seenKey, linkKey } = completeFlagKeys();
-  if(getLocalFlag(seenKey)){ setCompleteLinkVisible(true); return; }
-  showCompleteOverlay();
-  const closeOnce = ()=>{
-    hideCompleteOverlay();
-    setLocalFlag(seenKey,true);
-    setLocalFlag(linkKey,true);
+  // すでに遷移済み → リンクだけ表示
+  if(getLocalFlag(redirectedKey)){
+    setLocalFlag(linkKey, true);
     setCompleteLinkVisible(true);
-    $('#completeClose')?.removeEventListener('click', closeOnce);
-    $('#completeLater')?.removeEventListener('click', closeOnce);
-  };
-  $('#completeClose')?.addEventListener('click', closeOnce);
-  $('#completeLater')?.addEventListener('click', closeOnce);
+    return;
+  }
+  // 初達成：complete.html へ遷移（戻ってきたらリンク常時表示）
+  setLocalFlag(redirectedKey, true);
+  setLocalFlag(linkKey, true);
+  setCompleteLinkVisible(true);
+  location.href = 'complete.html';
 }
 
 /* ===== ページ初期化 ===== */
@@ -154,13 +145,9 @@ function openDirections(lat,lng,label){
   else location.href=`https://www.google.com/maps/dir/?api=1&destination=${ll}&travelmode=walking`;
 }
 
-async function bootCompletionFlow(){
-  const state = await loadAndRenderStamps();
-  await handleCompletionUI(state);
-}
-
-function initMapPage(){
-  // スタンプ帳開閉
+async function boot(){
+  await window.ensureAnon();
+  // スタンプ帳の開閉
   const toggleBtn=$('#stampToggle'), book=$('#stampBook');
   if(toggleBtn && book){
     const closed=()=>{ book.style.display='none'; toggleBtn.textContent='▼スタンプ帳'; };
@@ -177,28 +164,10 @@ function initMapPage(){
   // カメラ起動 → 吹き出し
   $('#cameraBtn')?.addEventListener('click', ()=> showCameraChooser());
 
-  // 初回＆復帰
-  bootCompletionFlow();
-  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) bootCompletionFlow(); });
-  window.addEventListener('pageshow', ()=> bootCompletionFlow());
+  const state = await loadAndRenderStamps();
+  await handleCompletionFlow(state);
+
+  document.addEventListener('visibilitychange', async ()=>{ if(!document.hidden){ const s = await loadAndRenderStamps(); await handleCompletionFlow(s); } });
+  window.addEventListener('pageshow', async ()=>{ const s = await loadAndRenderStamps(); await handleCompletionFlow(s); });
 }
-
-document.addEventListener('DOMContentLoaded', async ()=>{
-  await window.ensureAnon();
-  initMapPage();
-});
-
-/* ===== 参加者の入れ替え（任意でUIにボタンを作る） ===== */
-window.resetParticipant = async function(){
-  try{
-    // 現uidのローカルキャッシュをざっくり削除（必要十分な範囲で）
-    const uid = getUidSync();
-    ['spot1','spot2','spot3'].forEach(s => localStorage.removeItem(`stamp_${uid}_${s}`));
-    localStorage.removeItem(`complete_seen_${uid}`);
-    localStorage.removeItem(`complete_link_enabled_${uid}`);
-    localStorage.removeItem('uid');
-    await firebase.auth().signOut();
-    await window.ensureAnon(); // 新しい匿名UIDが発行される
-  }catch(e){ console.warn('reset failed', e); }
-  location.href = 'initial-survey.html';
-};
+document.addEventListener('DOMContentLoaded', boot);

@@ -6,52 +6,64 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    .wrap { max-width: 860px; margin: 24px auto; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(0,0,0,.06); padding: 20px; }
-    h1 { margin: 0 0 10px; font-size: 22px; }
-    p { color:#555; }
-    fieldset { border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px 14px; margin: 14px 0; }
-    legend { padding: 0 6px; font-weight: 600; color:#333; }
-    .radios { display: grid; gap: 8px; margin-top: 8px; }
-    .row { display:flex; align-items:center; gap:8px; }
-    .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top: 14px; }
-    .btn { padding:10px 16px; border-radius:10px; border:0; background:#0a58ca; color:#fff; font-size:16px; cursor:pointer; }
-    .btn.secondary { background:#6c757d; }
-    .btn:disabled { opacity:.6; cursor:not-allowed; }
-    .msg { font-size:14px; min-height:1.2em; margin-top: 8px; }
-    .ok { color:#1a7f37; font-weight:600; }
-    .ng { color:#b02a37; font-weight:600; }
-    .note { font-size:12px; color:#666; margin-top:8px; }
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#f6f7fb}
+    .wrap{max-width:720px;margin:0 auto;padding:20px}
+    .card{background:#fff;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.08);padding:20px}
+    h1{font-size:20px;margin:0 0 12px}
+    label{display:block;margin:12px 0 6px;font-weight:700}
+    input,textarea,select{width:100%;padding:12px;border:1px solid #e2e6ef;border-radius:10px;font-size:16px}
+    .row{display:flex;gap:10px;margin-top:16px;justify-content:flex-end}
+    .btn{appearance:none;border:0;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:700}
+    .btn-primary{background:#0a58ca;color:#fff}
+    .btn-ghost{background:#e9ecef;color:#333}
   </style>
+  <script src="js/firebase.js" defer></script>
 </head>
 <body>
-  <main class="wrap">
-    <h1>初回アンケート</h1>
-    <p>体験前に年齢層をお知らせください（所要10秒）。</p>
+  <div class="wrap">
+    <div class="card">
+      <h1>初回アンケート</h1>
+      <form id="surveyForm">
+        <label for="q1">本企画をどこで知りましたか？</label>
+        <select id="q1" name="q1" required>
+          <option value="">選択してください</option>
+          <option>学内ポスター</option>
+          <option>QRコード（現地）</option>
+          <option>SNS</option>
+          <option>友人・教員</option>
+          <option>その他</option>
+        </select>
 
-    <form id="surveyForm">
-      <fieldset>
-        <legend>年齢</legend>
-        <div class="radios" role="group" aria-labelledby="ageGroupLabel">
-          <label class="row"><input type="radio" name="age" value="17以下" required> 17以下</label>
-          <label class="row"><input type="radio" name="age" value="18-29"> 18-29</label>
-          <label class="row"><input type="radio" name="age" value="30代"> 30代</label>
-          <label class="row"><input type="radio" name="age" value="40代"> 40代</label>
-          <label class="row"><input type="radio" name="age" value="50代"> 50代</label>
-          <label class="row"><input type="radio" name="age" value="60以上"> 60以上</label>
+        <label for="q2">本企画への期待・ご意見</label>
+        <textarea id="q2" name="q2" rows="4" placeholder="自由記述（任意）"></textarea>
+
+        <div class="row">
+          <button type="submit" class="btn btn-primary">回答を送信してチュートリアルへ</button>
         </div>
-      </fieldset>
+      </form>
+    </div>
+  </div>
 
-      <div class="actions">
-        <button id="submitBtn" type="submit" class="btn">登録完了</button>
-        <button id="skipBtn" type="button" class="btn secondary">スキップ</button>
-      </div>
-      <div id="msg" class="msg"></div>
-      <p class="note">※ 匿名認証で保存されます。個人を特定できる情報は含まれません。</p>
-    </form>
-  </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('surveyForm');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const q1 = form.q1.value;
+        const q2 = form.q2.value;
+        if (!q1) { alert('Q1を選択してください'); return; }
 
-  <!-- スクリプトはこの順（先に firebase、次にページ固有） -->
-  <script src="js/firebase.js?v=2" defer></script>
-  <script src="js/survey.js?v=2" defer></script>
+        const uid = await window.ensureAnon();
+        const db = firebase.database();
+        const now = Date.now();
+        try{
+          await db.ref('surveys/' + uid).set({ q1, q2, ts: now });
+        }catch(e){
+          console.warn('[survey] save failed:', e?.message||e);
+        }
+        location.href = 'tutorial.html';
+      });
+    });
+  </script>
 </body>
 </html>
