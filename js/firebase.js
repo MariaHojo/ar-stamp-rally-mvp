@@ -1,6 +1,7 @@
-// firebase.js - v8 app/db/auth を順にロード→匿名サインイン→uid保存
-(() => {
-  const CFG = {
+// js/firebase.js - 動的ロード + 匿名サインイン + 準備完了Promise
+(function(){
+  const CDN = 'https://www.gstatic.com/firebasejs/8.10.1/';
+  const CONFIG = {
     apiKey: 'AIzaSyBtXZ6tiQWp0qBGOr7-TQ6OirwqL0PMBwo',
     authDomain: 'test-9faac.firebaseapp.com',
     databaseURL: 'https://test-9faac-default-rtdb.firebaseio.com',
@@ -9,27 +10,24 @@
     messagingSenderId: '781249745593',
     appId: '1:781249745593:web:b10cea040da53b5e670168',
   };
-  const CDN = 'https://www.gstatic.com/firebasejs/8.10.1/';
 
-  function load(src){return new Promise((res,rej)=>{if([...document.scripts].some(s=>s.src===src))return res();const s=document.createElement('script');s.src=src;s.async=true;s.onload=res;s.onerror=()=>rej(new Error('load fail:'+src));(document.head||document.documentElement).appendChild(s);});}
-  function saveUid(uid){try{localStorage.setItem('uid',uid);if(!localStorage.getItem('userId'))localStorage.setItem('userId',uid);}catch(_){}}
+  function load(src){ return new Promise((res,rej)=>{ if ([...document.scripts].some(s=>s.src===src)) return res();
+    const s=document.createElement('script'); s.src=src; s.async=true; s.onload=res; s.onerror=()=>rej(new Error('load '+src));
+    (document.head||document.documentElement).appendChild(s);
+  });}
 
   async function boot(){
     await load(CDN+'firebase-app.js');
     await load(CDN+'firebase-database.js');
     await load(CDN+'firebase-auth.js');
-    if(!firebase.apps.length) firebase.initializeApp(CFG);
-
-    if (firebase.auth().currentUser){ saveUid(firebase.auth().currentUser.uid); return; }
-
-    const gotUser=new Promise(r=>{const off=firebase.auth().onAuthStateChanged(u=>{if(u){saveUid(u.uid);off();r();}});});
-    await firebase.auth().signInAnonymously().catch(e=>{console.warn('anon sign-in failed',e); throw e;});
-    await gotUser;
+    if (!firebase.apps.length) firebase.initializeApp(CONFIG);
+    try{
+      // すでにログイン済みなら何もしない
+      await (firebase.auth().currentUser ? Promise.resolve() : firebase.auth().signInAnonymously());
+      const uid = firebase.auth().currentUser?.uid;
+      try{ localStorage.setItem('uid', uid); }catch{}
+    }catch(e){ console.warn('[web] anon auth failed', e); }
   }
 
-  window.firebaseReadyPromise = (async()=>{ await boot(); 
-    document.dispatchEvent(new CustomEvent('firebase-ready',{detail:{uid:firebase.auth().currentUser.uid}}));
-    return {firebase, uid: firebase.auth().currentUser.uid};
-  })();
-  window.getUid = ()=> (firebase.auth().currentUser && firebase.auth().currentUser.uid) || localStorage.getItem('uid');
+  window.firebaseReadyPromise = (window.firebaseReadyPromise || boot());
 })();
