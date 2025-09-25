@@ -106,3 +106,50 @@ function initMapPage(){
   window.addEventListener('pageshow', ()=> loadAndRenderStamps());
 }
 document.addEventListener('DOMContentLoaded', initMapPage);
+/* === Spot Picker === */
+function showSpotPicker() {
+  var backdrop = document.getElementById('spotBackdrop');
+  var modal = document.getElementById('spotModal');
+  if (!backdrop || !modal) return;
+  backdrop.style.display = 'block';
+  modal.style.display = 'block';
+}
+function hideSpotPicker() {
+  var backdrop = document.getElementById('spotBackdrop');
+  var modal = document.getElementById('spotModal');
+  if (!backdrop || !modal) return;
+  backdrop.style.display = 'none';
+  modal.style.display = 'none';
+}
+
+function initSpotPickerBindings() {
+  var backdrop = document.getElementById('spotBackdrop');
+  var modal = document.getElementById('spotModal');
+  var cancel = document.getElementById('spotCancel');
+  if (!modal) return;
+
+  // モーダル内の各アイテムにハンドラ
+  Array.prototype.forEach.call(modal.querySelectorAll('.spot-item'), function (el) {
+    el.addEventListener('click', function () {
+      var spot = el.getAttribute('data-spot') || 'spot1';
+      try { localStorage.setItem('lastSpotId', spot); } catch (e) {}
+      hideSpotPicker();
+      openXRForSpot(spot);
+    });
+  });
+
+  // 外側クリック & キャンセル
+  backdrop && backdrop.addEventListener('click', hideSpotPicker);
+  cancel && cancel.addEventListener('click', hideSpotPicker);
+
+  // 「カメラ起動」ボタンに紐づける
+  var cam = document.getElementById('cameraBtn');
+  cam && cam.addEventListener('click', function () {
+    showSpotPicker();
+  });
+}
+
+// 既存の initMapPage の最後あたりで追加
+document.addEventListener('DOMContentLoaded', function () {
+  initSpotPickerBindings();
+});

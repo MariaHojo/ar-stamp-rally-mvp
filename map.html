@@ -18,6 +18,24 @@
     .stamp-placeholder{width:100%;max-width:140px;margin:6px auto 4px;padding:28px 0;border:2px dashed #c7c7c7;border-radius:10px;color:#888;font-weight:600}
     .stamp-status{font-size:13px;font-weight:600;margin-top:2px}
     .obtained{color:#1a7f37}.not-obtained{color:#b02a37}
+    /* === Spot Picker Modal === */
+.spot-modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,.35); display: none; z-index: 9998;
+}
+.spot-modal {
+  position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  width: min(92vw, 420px); background: #fff; border-radius: 16px; box-shadow: 0 24px 60px rgba(0,0,0,.25);
+  padding: 18px; display: none; z-index: 9999;
+}
+.spot-modal h3 { margin: 0 0 8px; font-size: 18px; }
+.spot-list { display: grid; gap: 10px; margin-top: 8px; }
+.spot-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1.5px solid #e7e7e7; border-radius: 12px; cursor: pointer; }
+.spot-item:hover { border-color: #0a58ca; background: #f6f9ff; }
+.spot-item img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; background:#f2f2f2; }
+.spot-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+.btn { padding: 10px 14px; border-radius: 10px; border: 0; cursor: pointer; font-weight: 600; }
+.btn-cancel { background: #e9ecef; color: #333; }
+
   </style>
   <script src="js/firebase.js" defer></script>
   <script src="js/map.js" defer></script>
@@ -70,5 +88,37 @@
   <div style="max-width:900px;margin:12px auto;text-align:center">
     <button id="cameraBtn" type="button">カメラ起動</button>
   </div>
+  <!-- Spot Picker Modal -->
+<div id="spotBackdrop" class="spot-modal-backdrop"></div>
+<div id="spotModal" class="spot-modal" role="dialog" aria-modal="true" aria-labelledby="spotModalTitle">
+  <h3 id="spotModalTitle">スポットを選んでカメラを起動</h3>
+  <div class="spot-list">
+    <div class="spot-item" data-spot="spot1">
+      <img src="assets/images/stamp01.png" alt="スポット1">
+      <div>
+        <div>スポット1</div>
+        <small>史料館前</small>
+      </div>
+    </div>
+    <div class="spot-item" data-spot="spot2">
+      <img src="assets/images/stamp02.png" alt="スポット2">
+      <div>
+        <div>スポット2</div>
+        <small>時計台</small>
+      </div>
+    </div>
+    <div class="spot-item" data-spot="spot3">
+      <img src="assets/images/stamp03.png" alt="スポット3">
+      <div>
+        <div>スポット3</div>
+        <small>中庭</small>
+      </div>
+    </div>
+  </div>
+  <div class="spot-actions">
+    <button id="spotCancel" class="btn btn-cancel" type="button">キャンセル</button>
+  </div>
+</div>
+
 </body>
 </html>

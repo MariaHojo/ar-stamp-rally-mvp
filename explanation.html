@@ -5,20 +5,27 @@
   <title>解説ページ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .hero{max-width:900px;margin:16px auto;display:grid;gap:12px;grid-template-columns:120px 1fr;align-items:flex-start}
+    .hero img{width:120px;height:120px;object-fit:contain}
+    .content{max-width:900px;margin:0 auto;}
+  </style>
   <script src="js/firebase.js" defer></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', ()=>{
-      const qs = new URLSearchParams(location.search);
-      const sid = qs.get('spotId') || 'spot1';
-      document.getElementById('sid').textContent = sid;
-    });
-  </script>
+  <script src="js/explanation.js" defer></script>
 </head>
 <body>
-  <main style="max-width:900px;margin:24px auto">
-    <h1>スポット解説：<span id="sid">spot1</span></h1>
-    <p>ここにスポットの解説テキストや画像を配置します。</p>
-    <p><a href="map.html" id="back">マップへ戻る</a></p>
+  <main class="content">
+    <div class="hero">
+      <img id="spotImage" src="" alt="スタンプ画像">
+      <div>
+        <h1 id="spotTitle">スポット</h1>
+        <div id="spotSubtitle" style="color:#666"></div>
+      </div>
+    </div>
+    <article id="spotBody">
+      <!-- スポットの本文は JS で差し込み -->
+    </article>
+    <p style="margin-top:16px"><a href="map.html" id="backToMap">マップへ戻る</a></p>
   </main>
 </body>
 </html>
