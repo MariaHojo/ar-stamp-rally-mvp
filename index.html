@@ -6,35 +6,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    .login-wrap { max-width: 720px; margin: 32px auto; padding: 20px; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(0,0,0,.06); }
-    .login-wrap h1 { margin: 0 0 12px; font-size: 22px; }
-    .login-wrap p { color:#555; margin: 0 0 14px; }
-    .form-row { display:flex; gap: 8px; margin: 10px 0 4px; }
-    .form-row input[type="text"] { flex:1; font-size:16px; padding:10px 12px; border-radius:10px; border:1px solid #d0d7de; }
-    .btn { display:inline-block; padding:10px 16px; border-radius:10px; border:0; background:#0a58ca; color:#fff; font-size:16px; cursor:pointer; }
-    .btn:disabled { opacity:.6; cursor:not-allowed; }
-    .msg { font-size: 14px; color: #b02a37; min-height: 1.2em; margin-top: 6px; }
-    .note { font-size:12px; color:#666; margin-top:10px; }
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;padding:24px;background:#f6f7fb}
+    .wrap{max-width:520px;margin:0 auto}
+    .card{background:#fff;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.08);padding:20px}
+    h1{font-size:20px;margin:0 0 12px}
+    label{display:block;font-weight:700;margin:12px 0 6px}
+    input{width:100%;padding:12px;border:1px solid #e2e6ef;border-radius:10px;font-size:16px}
+    .row{display:flex;gap:10px;margin-top:16px;justify-content:flex-end}
+    .btn{appearance:none;border:0;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:700}
+    .btn-primary{background:#0a58ca;color:#fff}
+    .btn-ghost{background:#e9ecef;color:#333}
+    .muted{color:#666;font-size:13px;margin-top:8px}
+    .hidden{display:none !important}
   </style>
 </head>
 <body>
-  <main class="login-wrap">
-    <h1>ARスタンプラリー ログイン</h1>
-    <p>表示名（ニックネーム）を入力してスタートしてください。</p>
-
-    <form id="loginForm" autocomplete="on">
-      <div class="form-row">
-        <input id="loginName" type="text" inputmode="text" maxlength="40" placeholder="例）たろう"
-               aria-label="表示名" required />
-        <button id="startBtn" type="submit" class="btn">スタート</button>
+  <div class="wrap">
+    <!-- 既存ユーザーが端末に残っているときに出るカード -->
+    <div id="loggedInCard" class="card hidden" aria-live="polite">
+      <h1>現在のユーザー</h1>
+      <p style="margin:0 0 12px">ニックネーム：<strong id="currentName">-</strong></p>
+      <div class="row">
+        <a id="goMap" class="btn btn-primary" href="map.html">マップへ進む</a>
+        <button id="switchAccount" class="btn btn-ghost" type="button">別のユーザーでログイン</button>
       </div>
-      <div id="msg" class="msg"></div>
-      <p class="note">※匿名認証でログインします。表示名は端末に保存されます。</p>
-    </form>
-  </main>
+      <p class="muted">※「別のユーザーでログイン」でフォームが表示されます。</p>
+    </div>
 
-  <!-- スクリプトは必ずこの順番（先に firebase、次にページ固有） -->
-  <script src="js/firebase.js?v=2" defer></script>
-  <script src="js/login.js?v=2" defer></script>
+    <!-- 新規/切替ログイン用フォーム -->
+    <div id="loginSection" class="card">
+      <h1>ログイン</h1>
+      <form id="loginForm" autocomplete="off">
+        <label for="loginName">ニックネーム</label>
+        <input id="loginName" name="loginName" type="text" inputmode="text" placeholder="例：taro" required />
+
+        <label for="loginPin">PIN（4桁）</label>
+        <input id="loginPin" name="loginPin" type="password" inputmode="numeric" pattern="\\d{4}" maxlength="4" placeholder="0000" required />
+
+        <div class="row">
+          <button class="btn btn-primary" type="submit">はじめる</button>
+        </div>
+      </form>
+      <p class="muted">※ 初回はこのニックネームに PIN を登録します。2回目以降は同じ PIN でログインできます。</p>
+    </div>
+  </div>
+
+  <!-- Firebase（既存）→ Login ロジック -->
+  <script src="js/firebase.js" defer></script>
+  <script src="js/login.js" defer></script>
 </body>
 </html>

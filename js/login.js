@@ -1,12 +1,8 @@
 // js/login.js
-// フォーム要件：
-// <form id="loginForm">
-//   <input id="loginName" ...>
-//   <input id="loginPin"  ...>  // 4桁数字
-//   <button type="submit">はじめる</button>
-// </form>
+// 必須のDOM要素：#loginForm, #loginName, #loginPin
+// 任意（あると便利）：#loggedInCard, #currentName, #goMap, #switchAccount
 
-(async function(){
+(function(){
   function $(s){ return document.querySelector(s); }
   const PEPPER = 'arstamprally_pepper_v1';
 
@@ -16,10 +12,8 @@
     return Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');
   }
   function normName(name){ return (name||'').trim().toLowerCase().replace(/\s+/g,''); }
-
   async function computeAccountKey(name, pin){
-    const nameKey = normName(name);
-    return await sha256Hex(`${nameKey}|${pin}|${PEPPER}`);
+    return await sha256Hex(`${normName(name)}|${pin}|${PEPPER}`);
   }
 
   async function ensureFirebaseReady(){
@@ -28,30 +22,23 @@
       throw new Error('Firebase not initialized');
     }
   }
-
   async function getNameIndex(nameKey){
     await ensureFirebaseReady();
     const snap = await firebase.database().ref('nameIndex/'+nameKey).once('value');
     return snap.val();
   }
-
   async function setNameIndex(nameKey, accountKey, displayName){
     await ensureFirebaseReady();
     const now = Date.now();
-    await firebase.database().ref('nameIndex/'+nameKey).set({
-      accountKey, displayName, createdAt: now
-    });
-    // プロフィールも作成（既存でも上書き安全）
-    await firebase.database().ref('users/'+accountKey+'/profile').update({
-      displayName, updatedAt: now
-    });
+    await firebase.database().ref('nameIndex/'+nameKey).set({ accountKey, displayName, createdAt: now });
+    await firebase.database().ref('users/'+accountKey+'/profile').update({ displayName, updatedAt: now });
   }
 
-  // 旧ローカルキー掃除
   function cleanupLegacyLocal(){
     try{
+      // 旧キー（ユーザー分離なし）を削除
       ['spot1','spot2','spot3'].forEach(s => localStorage.removeItem('stamp_'+s));
-      localStorage.removeItem('uid'); // 以前の一時保存があれば
+      localStorage.removeItem('uid');
     }catch{}
   }
 
@@ -65,32 +52,60 @@
     const nameKey = normName(name);
     const accountKey = await computeAccountKey(name, pin);
 
-    // 区別：既存か新規か
     const idx = await getNameIndex(nameKey);
     if(idx && idx.accountKey){
       if(idx.accountKey !== accountKey){
         alert('このニックネームは既に登録済みですが、PINが一致しません。PINを確認してください。');
         return;
       }
-      // 既存アカウントでOK（再ログイン）
+      // 既存：OK
     }else{
-      // 新規登録
+      // 新規：予約
       await setNameIndex(nameKey, accountKey, name);
     }
 
-    // ここで「誰であるか」をローカルに保持（全ページ共通で使う）
     try{
       localStorage.setItem('accountKey', accountKey);
       localStorage.setItem('loginName', name);
-      // 旧フォーマットのスタンプ残骸掃除
       cleanupLegacyLocal();
     }catch{}
 
-    // マップへ
     location.href = 'map.html';
   }
 
+  function showLoggedInCard(){
+    const ak = localStorage.getItem('accountKey');
+    const ln = localStorage.getItem('loginName');
+    const has = !!ak;
+    const card = $('#loggedInCard');
+    const sec  = $('#loginSection');
+
+    if(has && card){
+      card.classList.remove('hidden');
+      $('#currentName') && ($('#currentName').textContent = ln || '(未設定)');
+      sec && sec.classList.add('hidden');
+    }else{
+      card && card.classList.add('hidden');
+      sec && sec.classList.remove('hidden');
+    }
+  }
+
+  function bindSwitch(){
+    $('#switchAccount')?.addEventListener('click', ()=>{
+      try{
+        localStorage.removeItem('accountKey');
+        // loginName は残しておくと再入力が楽
+      }catch{}
+      showLoggedInCard();
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', ()=>{
+    // フォーム送信
     $('#loginForm')?.addEventListener('submit', onSubmit);
+
+    // 既存ユーザー表示/切替
+    showLoggedInCard();
+    bindSwitch();
   });
 })();
