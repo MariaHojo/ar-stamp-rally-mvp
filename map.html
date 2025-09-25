@@ -18,25 +18,34 @@
     .stamp-placeholder{width:100%;max-width:140px;margin:6px auto 4px;padding:28px 0;border:2px dashed #c7c7c7;border-radius:10px;color:#888;font-weight:600}
     .stamp-status{font-size:13px;font-weight:600;margin-top:2px}
     .obtained{color:#1a7f37}.not-obtained{color:#b02a37}
-    /* === Spot Picker Modal === */
-.spot-modal-backdrop {
-  position: fixed; inset: 0; background: rgba(0,0,0,.35); display: none; z-index: 9998;
-}
-.spot-modal {
-  position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%);
-  width: min(92vw, 420px); background: #fff; border-radius: 16px; box-shadow: 0 24px 60px rgba(0,0,0,.25);
-  padding: 18px; display: none; z-index: 9999;
-}
-.spot-modal h3 { margin: 0 0 8px; font-size: 18px; }
-.spot-list { display: grid; gap: 10px; margin-top: 8px; }
-.spot-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1.5px solid #e7e7e7; border-radius: 12px; cursor: pointer; }
-.spot-item:hover { border-color: #0a58ca; background: #f6f9ff; }
-.spot-item img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; background:#f2f2f2; }
-.spot-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
-.btn { padding: 10px 14px; border-radius: 10px; border: 0; cursor: pointer; font-weight: 600; }
-.btn-cancel { background: #e9ecef; color: #333; }
 
+    /* カメラ起動のスポット選択UI（吹き出し） */
+    .camera-chooser-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.3); z-index: 9998;
+    }
+    .camera-chooser {
+      position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+      width: min(92vw, 520px);
+      background: #fff; border-radius: 16px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.2);
+      padding: 14px; z-index: 9999;
+    }
+    .camera-chooser h3 { margin: 6px 8px 10px; font-size: 16px; }
+    .camera-chooser .list { display: grid; gap: 8px; margin: 0 8px 10px; }
+    .camera-chooser .item-btn {
+      appearance: none; border: 1px solid #e2e6ef; background: #f7f9ff;
+      border-radius: 12px; padding: 10px 12px; font-size: 15px; text-align: left; cursor: pointer;
+    }
+    .camera-chooser .item-btn strong { color: #0a58ca; }
+    .camera-chooser .row { display:flex; gap:8px; justify-content: flex-end; }
+    .camera-chooser .close-btn {
+      appearance: none; border: 0; background: #e9ecef; color: #333;
+      border-radius: 10px; padding: 8px 12px; cursor: pointer;
+    }
+    [hidden] { display: none !important; }
   </style>
+
+  <!-- Firebase & page script -->
   <script src="js/firebase.js" defer></script>
   <script src="js/map.js" defer></script>
 </head>
@@ -71,7 +80,7 @@
 
   <div class="map-wrap">
     <img src="assets/images/campus-map.png" alt="マップ" class="map-image" id="mapImage" />
-    <!-- ピン（例）: data- 属性は経路遷移に使う -->
+    <!-- ピン（例） -->
     <button class="pin" data-spot="spot1" data-label="Spot1" data-lat="35.686917" data-lng="139.529194" style="left:32%;top:58%;">
       <img src="assets/images/map_pin.png" alt="1">
     </button>
@@ -86,39 +95,16 @@
   <div class="legend"><p>ピンをタップすると地図アプリが開きます。現地で<strong>カメラ起動</strong>からARへ進んでください。</p></div>
 
   <div style="max-width:900px;margin:12px auto;text-align:center">
+    <!-- ※ 重複禁止：cameraBtnは1つだけ -->
     <button id="cameraBtn" type="button">カメラ起動</button>
   </div>
-  <!-- Spot Picker Modal -->
-<div id="spotBackdrop" class="spot-modal-backdrop"></div>
-<div id="spotModal" class="spot-modal" role="dialog" aria-modal="true" aria-labelledby="spotModalTitle">
-  <h3 id="spotModalTitle">スポットを選んでカメラを起動</h3>
-  <div class="spot-list">
-    <div class="spot-item" data-spot="spot1">
-      <img src="assets/images/stamp01.png" alt="スポット1">
-      <div>
-        <div>スポット1</div>
-        <small>史料館前</small>
-      </div>
-    </div>
-    <div class="spot-item" data-spot="spot2">
-      <img src="assets/images/stamp02.png" alt="スポット2">
-      <div>
-        <div>スポット2</div>
-        <small>時計台</small>
-      </div>
-    </div>
-    <div class="spot-item" data-spot="spot3">
-      <img src="assets/images/stamp03.png" alt="スポット3">
-      <div>
-        <div>スポット3</div>
-        <small>中庭</small>
-      </div>
-    </div>
-  </div>
-  <div class="spot-actions">
-    <button id="spotCancel" class="btn btn-cancel" type="button">キャンセル</button>
-  </div>
-</div>
 
+  <!-- ▼ スポット選択の吹き出し -->
+  <div id="cameraChooserOverlay" class="camera-chooser-overlay" hidden></div>
+  <div id="cameraChooser" class="camera-chooser" hidden role="dialog" aria-modal="true" aria-labelledby="cameraChooserTitle">
+    <h3 id="cameraChooserTitle">スポットを選んでください</h3>
+    <div id="cameraChooserList" class="list"><!-- JSで生成 --></div>
+    <div class="row"><button id="cameraChooserClose" class="close-btn" type="button">キャンセル</button></div>
+  </div>
 </body>
 </html>
