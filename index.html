@@ -2,68 +2,25 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>ログイン | ARスタンプラリー</title>
+  <title>ARスタンプラリー | 初回アンケートへ移動</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="css/style.css" />
-  <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;padding:24px;background:#f6f7fb}
-    .wrap{max-width:520px;margin:0 auto}
-    .card{background:#fff;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.08);padding:20px}
-    h1{font-size:20px;margin:0 0 12px}
-    label{display:block;font-weight:700;margin:12px 0 6px}
-    input{width:100%;padding:12px;border:1px solid #e2e6ef;border-radius:10px;font-size:16px}
-    .row{display:flex;gap:10px;margin-top:16px;justify-content:flex-end}
-    .btn{appearance:none;border:0;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:700}
-    .btn-primary{background:#0a58ca;color:#fff}
-    .btn-ghost{background:#e9ecef;color:#333}
-    .muted{color:#666;font-size:13px;margin-top:8px}
-    .hidden{display:none !important}
-  </style>
+  <!-- JSが無効でも即時遷移（検索エンジン/古い端末向け） -->
+  <meta http-equiv="refresh" content="0; url=initial-survey.html">
+  <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;padding:24px}</style>
 </head>
 <body>
-  <div class="wrap">
-    <!-- 既存ユーザーが端末に残っているときに出るカード -->
-    <div id="loggedInCard" class="card hidden" aria-live="polite">
-      <h1>現在のユーザー</h1>
-      <p style="margin:0 0 12px">ニックネーム：<strong id="currentName">-</strong></p>
-      <div class="row">
-        <a id="goMap" class="btn btn-primary" href="map.html">マップへ進む</a>
-        <button id="switchAccount" class="btn btn-ghost" type="button">別のユーザーでログイン</button>
-      </div>
-      <p class="muted">※「別のユーザーでログイン」でフォームが表示されます。</p>
-    </div>
-
-    <!-- 新規/切替ログイン用フォーム -->
-    <div id="loginSection" class="card">
-      <h1>ログイン</h1>
-      <form id="loginForm" autocomplete="off" novalidate>
-        <label for="loginName">ニックネーム</label>
-        <input id="loginName" name="loginName" type="text" inputmode="text" placeholder="例：taro" required />
-
-        <label for="loginPin">PIN（4桁）</label>
-        <input
-          id="loginPin"
-          name="loginPin"
-          type="password"
-          inputmode="numeric"
-          pattern="^[0-9]{4}$"
-          maxlength="4"
-          placeholder="0000"
-          required
-          autocomplete="one-time-code"
-        />
-
-        <div class="row">
-          <button class="btn btn-primary" type="submit">はじめる</button>
-        </div>
-      </form>
-      <p class="muted">※ 初回はこのニックネームに PIN を登録します。2回目以降は同じ PIN でログインできます。</p>
-    </div>
-  </div>
-
-  <!-- Firebase（初期化＋匿名サインイン） -->
-  <script src="js/firebase.js" defer></script>
-  <!-- ログインページのロジック -->
-  <script src="js/login.js" defer></script>
+  <p>初回アンケートへ移動しています…<br>
+    自動で切り替わらない場合は <a id="fallback" href="initial-survey.html">こちら</a> をタップしてください。
+  </p>
+  <script>
+    (function () {
+      // クエリ文字列や #hash が付いていたら引き継いで遷移
+      var target = 'initial-survey.html' + window.location.search + window.location.hash;
+      // 履歴を汚さない
+      window.location.replace(target);
+      // noscript用リンクも差し替え
+      var a = document.getElementById('fallback'); if (a) a.href = target;
+    })();
+  </script>
 </body>
 </html>
