@@ -36,12 +36,22 @@
     <!-- 新規/切替ログイン用フォーム -->
     <div id="loginSection" class="card">
       <h1>ログイン</h1>
-      <form id="loginForm" autocomplete="off">
+      <form id="loginForm" autocomplete="off" novalidate>
         <label for="loginName">ニックネーム</label>
         <input id="loginName" name="loginName" type="text" inputmode="text" placeholder="例：taro" required />
 
         <label for="loginPin">PIN（4桁）</label>
-        <input id="loginPin" name="loginPin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="0000" required />
+        <input
+          id="loginPin"
+          name="loginPin"
+          type="password"
+          inputmode="numeric"
+          pattern="^[0-9]{4}$"
+          maxlength="4"
+          placeholder="0000"
+          required
+          autocomplete="one-time-code"
+        />
 
         <div class="row">
           <button class="btn btn-primary" type="submit">はじめる</button>
@@ -51,8 +61,9 @@
     </div>
   </div>
 
-  <!-- Firebase（既存）→ Login ロジック -->
+  <!-- Firebase（初期化＋匿名サインイン） -->
   <script src="js/firebase.js" defer></script>
+  <!-- ログインページのロジック -->
   <script src="js/login.js" defer></script>
 </body>
 </html>
