@@ -2,70 +2,38 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>コンプリート | ARスタンプラリー</title>
+  <title>コンプリート結果</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    .wrap { max-width: 900px; margin: 24px auto; background:#fff; border-radius:16px; box-shadow:0 8px 24px rgba(0,0,0,.06); padding: 20px; }
-    h1 { margin: 0 0 8px; font-size: 24px; }
-    .lead { color:#555; margin: 0 0 12px; }
-    .badge { display:inline-block; padding:6px 10px; border-radius:999px; background:#e8f5ed; color:#1a7f37; font-weight:600; font-size:12px; }
-    .badgeng { background:#fdecea; color:#b02a37; }
-    .grid { display:grid; grid-template-columns: repeat(3,1fr); gap:12px; margin: 16px 0; }
-    .cell { background:#fff; border-radius:12px; padding:12px; box-shadow:0 4px 16px rgba(0,0,0,.06); text-align:center; }
-    .img { width:100%; max-width:160px; height:auto; display:block; margin:6px auto 4px; }
-    .placeholder { width:100%; max-width:160px; margin:6px auto 4px; padding:28px 0; border:2px dashed #c7c7c7; border-radius:10px; color:#888; font-weight:600; }
-    .status { font-size:13px; font-weight:600; margin-top:2px; }
-    .obtained { color:#1a7f37; }
-    .not { color:#b02a37; }
-    .btns { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
-    .btn { padding:10px 16px; border-radius:10px; border:0; background:#0a58ca; color:#fff; font-size:16px; cursor:pointer; }
-    .btn.secondary { background:#6c757d; }
-    .note { font-size:12px; color:#666; margin-top:8px; }
-    .card { padding:12px; border-radius:12px; background:#f6f7fb; }
+    .wrap{max-width:900px;margin:16px auto;padding:0 8px}
+    .notice{background:#fff3cd;color:#664d03;border-radius:10px;padding:12px}
+    /* map と同じ見た目のモーダル */
+    .complete-modal{
+      margin:16px auto; max-width:520px; background:#fff; border-radius:16px;
+      box-shadow:0 24px 60px rgba(0,0,0,.12); padding:20px
+    }
+    .complete-modal h2{margin:0 0 8px;font-size:20px}
+    .complete-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+    .btn{padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:600}
+    .btn-primary{background:#0a58ca;color:#fff}
+    .btn-ghost{background:#e9ecef;color:#333}
   </style>
+  <script src="js/firebase.js" defer></script>
+  <script src="js/complete.js" defer></script>
 </head>
 <body>
-  <main class="wrap">
+  <div class="wrap">
     <h1>コンプリート</h1>
-    <p id="lead" class="lead">3つのスポットをすべて集めるとコンプリートです。</p>
-    <span id="allBadge" class="badge badgeng">未コンプリート</span>
+    <div id="notComplete" class="notice" style="display:none">まだ3つすべてのスタンプが揃っていません。<a href="map.html">マップへ戻る</a></div>
 
-    <div class="grid">
-      <div class="cell">
-        <div>スポット1</div>
-        <img id="s1img" class="img" src="assets/images/stamp01.png" alt="スタンプ1" style="display:none;">
-        <div id="s1ph" class="placeholder">未取得</div>
-        <div id="s1st" class="status not">未取得</div>
-      </div>
-      <div class="cell">
-        <div>スポット2</div>
-        <img id="s2img" class="img" src="assets/images/stamp02.png" alt="スタンプ2" style="display:none;">
-        <div id="s2ph" class="placeholder">未取得</div>
-        <div id="s2st" class="status not">未取得</div>
-      </div>
-      <div class="cell">
-        <div>スポット3</div>
-        <img id="s3img" class="img" src="assets/images/stamp03.png" alt="スタンプ3" style="display:none;">
-        <div id="s3ph" class="placeholder">未取得</div>
-        <div id="s3st" class="status not">未取得</div>
+    <div id="completeCard" class="complete-modal" style="display:none">
+      <h2>おめでとうございます！</h2>
+      <p>3つのスタンプをコンプリートしました。<br>体験へのご参加、ありがとうございました。</p>
+      <div class="complete-actions">
+        <a class="btn btn-primary" href="map.html">マップへ戻る</a>
       </div>
     </div>
-
-    <div class="card" id="completeCard" style="display:none;">
-      🎉 おめでとうございます！3スポット達成です。下のボタンから次へ進んでください。
-    </div>
-
-    <div class="btns">
-      <button id="toMap" class="btn secondary" type="button">マップへ戻る</button>
-      <button id="toPost" class="btn" type="button" disabled>事後アンケートへ</button>
-    </div>
-
-    <p class="note">※ スタンプ反映に時間がかかる場合があります。更新しても改善しない場合はマップに戻って数秒後に再度ご確認ください。</p>
-  </main>
-
-  <!-- スクリプト（必ずこの順） -->
-  <script src="js/firebase.js?v=2" defer></script>
-  <script src="js/complete.js?v=2" defer></script>
+  </div>
 </body>
 </html>

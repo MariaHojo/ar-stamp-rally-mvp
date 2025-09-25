@@ -60,15 +60,16 @@ async function fetchStampsOnce(key){
   }catch(e){ console.warn('[map] read failed for',key,e?.message||e); return {}; }
 }
 
+// ★ 状態を返す
 async function loadAndRenderStamps(){
   const merged = getLocalStampFallback();
-  setStampUI(1, !!merged.spot1);
-  setStampUI(2, !!merged.spot2);
-  setStampUI(3, !!merged.spot3);
+  setStampUI(1, !!merged.spot1); setStampUI(2, !!merged.spot2); setStampUI(3, !!merged.spot3);
 
   if (window.firebaseReadyPromise) { try{ await window.firebaseReadyPromise; }catch{} }
   if (!(window.firebase && firebase.apps && firebase.apps.length)) {
-    console.log('[map] firebase not ready. local only'); return;
+    console.log('[map] firebase not ready. local only');
+    const completeLocal = !!merged.spot1 && !!merged.spot2 && !!merged.spot3;
+    return { ...merged, complete: completeLocal };
   }
 
   for (const k of getUserKeyCandidates()){
@@ -78,20 +79,13 @@ async function loadAndRenderStamps(){
     merged.spot3 = merged.spot3 || !!v.spot3;
     if (merged.spot1 && merged.spot2 && merged.spot3) break;
   }
-  setStampUI(1, !!merged.spot1);
-  setStampUI(2, !!merged.spot2);
-  setStampUI(3, !!merged.spot3);
-}
-window.loadAndRenderStamps = loadAndRenderStamps;
+  setStampUI(1, !!merged.spot1); setStampUI(2, !!merged.spot2); setStampUI(3, !!merged.spot3);
 
-function openDirections(lat,lng,label){
-  const ll=`${lat},${lng}`;
-  saveLastSpotId(label&&/spot\d/i.test(label)?label.toLowerCase():getLastSpotId());
-  if (/Android/i.test(navigator.userAgent)) location.href=`geo:${ll}?q=${ll}(${label||''})`;
-  else if (/iPad|iPhone|iPod/i.test(navigator.userAgent)) location.href=`http://maps.apple.com/?daddr=${ll}&dirflg=w`;
-  else location.href=`https://www.google.com/maps/dir/?api=1&destination=${ll}&travelmode=walking`;
+  const complete = !!merged.spot1 && !!merged.spot2 && !!merged.spot3;
+  return { ...merged, complete };
 }
 
+// 8th Wall 起動
 async function openXRForSpot(spotId){
   spotId = spotId || getLastSpotId() || 'spot1';
   const base = EIGHTHWALL_URLS[spotId];
@@ -102,6 +96,20 @@ async function openXRForSpot(spotId){
   const loginName = getLoginName() || '';
   const url = `${base}?spotId=${encodeURIComponent(spotId)}&uid=${encodeURIComponent(uid)}&loginName=${encodeURIComponent(loginName)}`;
   location.href = url;
+}
+
+// 地図アプリで経路案内
+function openDirections(lat,lng,label){
+  const ll=`${lat},${lng}`;
+  // ピンのラベルが spotX 形式ならそれを保存
+  saveLastSpotId(label && /spot\d/i.test(label) ? label.toLowerCase() : getLastSpotId());
+  if (/Android/i.test(navigator.userAgent)) {
+    location.href = `geo:${ll}?q=${ll}(${label||''})`;
+  } else if (/iPad|iPhone|iPod/i.test(navigator.userAgent)) {
+    location.href = `http://maps.apple.com/?daddr=${ll}&dirflg=w`;
+  } else {
+    location.href = `https://www.google.com/maps/dir/?api=1&destination=${ll}&travelmode=walking`;
+  }
 }
 
 /* ===== カメラ起動：スポット選択の吹き出し ===== */
@@ -164,7 +172,74 @@ function hideCameraChooser() {
   if (chooser) chooser.hidden = true;
 }
 
-/* ===== 初期化 ===== */
+/* ===== コンプリートUI制御 ===== */
+function getUserKeyForFlags(){
+  return getUid() || getLoginName() || 'guest';
+}
+function getFlagKeys(){
+  const key = getUserKeyForFlags();
+  return {
+    seenKey: `complete_seen_${key}`,
+    linkKey: `complete_link_enabled_${key}`,
+  };
+}
+function setLocalFlag(k, val){ try{ localStorage.setItem(k, String(!!val)); }catch{} }
+function getLocalFlag(k){ try{ return localStorage.getItem(k) === 'true'; }catch{ return false; } }
+
+function setCompleteLinkVisible(visible){
+  const area = document.getElementById('completeLinkArea');
+  if (!area) return;
+  area.style.display = visible ? 'block' : 'none';
+}
+
+function showCompleteOverlay(){
+  const ov = document.getElementById('completeOverlay');
+  if (ov) ov.style.display = 'block';
+}
+function hideCompleteOverlay(){
+  const ov = document.getElementById('completeOverlay');
+  if (ov) ov.style.display = 'none';
+}
+
+/** スタンプ状態を受け取って、初回だけモーダルを出す＆リンクON */
+async function handleCompletionUI(state){
+  if (!state?.complete) {
+    const { linkKey } = getFlagKeys();
+    if (!getLocalFlag(linkKey)) setCompleteLinkVisible(false);
+    return;
+  }
+  const { seenKey, linkKey } = getFlagKeys();
+
+  if (getLocalFlag(seenKey)) {
+    setCompleteLinkVisible(true);
+    return;
+  }
+
+  // 初達成：モーダルを出す
+  showCompleteOverlay();
+
+  // 閉じるボタン群
+  const closeBtn  = document.getElementById('completeClose');
+  const laterBtn  = document.getElementById('completeLater');
+  const closeOnce = () => {
+    hideCompleteOverlay();
+    setLocalFlag(seenKey, true);     // 「見た」フラグON
+    setLocalFlag(linkKey, true);     // 以降リンクを常時表示
+    setCompleteLinkVisible(true);
+    closeBtn?.removeEventListener('click', closeOnce);
+    laterBtn?.removeEventListener('click', closeOnce);
+  };
+  closeBtn?.addEventListener('click', closeOnce);
+  laterBtn?.addEventListener('click', closeOnce);
+}
+
+// 初期化フロー
+async function bootCompletionFlow(){
+  const state = await loadAndRenderStamps();
+  await handleCompletionUI(state);
+}
+
+/* ===== 初期化（一本化） ===== */
 function initMapPage(){
   // スタンプ帳の開閉
   const toggleBtn=$('#stampToggle'), book=$('#stampBook');
@@ -178,18 +253,21 @@ function initMapPage(){
   $all('.pin').forEach(btn=>{
     btn.addEventListener('click',()=>{
       const lat=parseFloat(btn.dataset.lat), lng=parseFloat(btn.dataset.lng), label=btn.dataset.label||btn.dataset.spot||'spot1';
-      saveLastSpotId(btn.dataset.spot||'spot1'); openDirections(lat,lng,label);
+      saveLastSpotId(btn.dataset.spot||'spot1');
+      openDirections(lat,lng,label);
     });
   });
 
-  // カメラ起動 → 吹き出しを表示（※直行起動は削除）
+  // カメラ起動 → 吹き出し表示
   const cam = $('#cameraBtn');
   if (cam) cam.addEventListener('click', () => showCameraChooser());
 
-  // スタンプ初期描画 & 画面復帰時の再取得
-  loadAndRenderStamps();
-  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) loadAndRenderStamps(); });
-  window.addEventListener('pageshow', ()=> loadAndRenderStamps());
+  // スタンプ状態＆コンプリートUI
+  bootCompletionFlow();
+
+  // 戻り時の再チェック
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) bootCompletionFlow(); });
+  window.addEventListener('pageshow', ()=> bootCompletionFlow());
 }
 
 document.addEventListener('DOMContentLoaded', initMapPage);
