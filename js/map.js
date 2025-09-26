@@ -1,173 +1,200 @@
-/* map.js（匿名UID専用）
-   - スタンプUI更新（users/{uid}/stamps を読む）
-   - ローカルフォールバックは uid 名前空間付き
-   - カメラ起動：スポット選択 → 8th Wall へ uid を付与
-   - 完了検知：初回は complete.html へ自動遷移。その後はリンク常時表示
+/* map.js（匿名UID専用・AR3スポット達成でモーダル表示）
+   - スタンプ状態の読み込み（Firebase/ローカル併用）
+   - カメラ起動：スポット選択→8th Wall へ遷移（uid付与）
+   - ★ 3スポット達成時：map.html を暗くし、complete相当のモーダルを自動表示
+     （一度表示したら uid別フラグで再表示しない）
 */
 
-// ← 3スポットの 8th Wall URL を実URLに置換
+// -------- 設定 --------
+// 8th Wall のURL（必要に応じて置換）
 const EIGHTHWALL_URLS = {
   spot1: 'https://maria261081.8thwall.app/test-3/',
   spot2: 'https://maria261081.8thwall.app/spot2/',
   spot3: 'https://maria261081.8thwall.app/spot3/',
 };
 
-function $(s){ return document.querySelector(s); }
-function $all(s){ return Array.from(document.querySelectorAll(s)); }
+// 対象スポット：今回は AR 3箇所
+const REQUIRED_SPOTS = ['spot1','spot2','spot3'];
+const REQUIRED_COUNT = REQUIRED_SPOTS.length; // ← 6スポット判定にしたい場合は配列を差し替え
 
-function getUidSync(){ try{ return firebase?.auth?.()?.currentUser?.uid || localStorage.getItem('uid'); }catch{ return null; } }
-function lsKey(spot){ const uid=getUidSync() || 'nouid'; return `stamp_${uid}_${spot}`; }
+// -------- ユーティリティ --------
+const $ = (s)=>document.querySelector(s);
+const $$ = (s)=>Array.from(document.querySelectorAll(s));
+const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
 
-function getLocalStampFallback(){
+function lsGet(key){ try{return localStorage.getItem(key);}catch{return null;} }
+function lsSet(key,val){ try{localStorage.setItem(key,val);}catch{} }
+function lsKeyStamp(uid, spot){ return `stamp_${uid}_${spot}`; }
+function seenKey(uid){ return `complete_ar3_seen_${uid}`; } // AR3 達成モーダルの既視フラグ
+
+// firebase.js で window.ensureAnon を想定。無い場合はフォールバック。
+async function ensureAnonSafe() {
+  if (typeof window.ensureAnon === 'function') {
+    try { const uid = await window.ensureAnon(); if (uid) return uid; } catch(e){}
+  }
+  // v8想定フォールバック
   try {
-    return {
-      spot1: localStorage.getItem(lsKey('spot1')) === 'true',
-      spot2: localStorage.getItem(lsKey('spot2')) === 'true',
-      spot3: localStorage.getItem(lsKey('spot3')) === 'true',
-    };
-  } catch { return { spot1:false, spot2:false, spot3:false }; }
-}
-function persistLocalStamps(v){
-  try {
-    if (typeof v.spot1 !== 'undefined') localStorage.setItem(lsKey('spot1'), String(!!v.spot1));
-    if (typeof v.spot2 !== 'undefined') localStorage.setItem(lsKey('spot2'), String(!!v.spot2));
-    if (typeof v.spot3 !== 'undefined') localStorage.setItem(lsKey('spot3'), String(!!v.spot3));
-  } catch {}
-}
-
-function setStampUI(i, ok){
-  const img=$('#stamp'+i+'Img'), ph=$('#stamp'+i+'Placeholder'), st=$('#stamp'+i+'Status');
-  if(!img||!st||!ph) return;
-  if(ok){ img.style.display='block'; ph.style.display='none'; st.textContent='取得済み'; st.classList.add('obtained'); st.classList.remove('not-obtained'); }
-  else { img.style.display='none'; ph.style.display='block'; ph.textContent='未取得'; st.textContent='未取得'; st.classList.add('not-obtained'); st.classList.remove('obtained'); }
-}
-
-async function loadAndRenderStamps(){
-  const merged = getLocalStampFallback();
-  setStampUI(1, !!merged.spot1); setStampUI(2, !!merged.spot2); setStampUI(3, !!merged.spot3);
-
-  const uid = await window.ensureAnon();
-  const db = firebase.database();
-  try {
-    const snap = await db.ref(`users/${uid}/stamps`).once('value');
-    const v = snap.val() || {};
-    merged.spot1 = !!v.spot1;
-    merged.spot2 = !!v.spot2;
-    merged.spot3 = !!v.spot3;
-    persistLocalStamps(merged);
+    if (!firebase?.apps?.length && typeof firebaseConfig !== 'undefined') {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+    if (auth.currentUser) return auth.currentUser.uid;
+    const cred = await auth.signInAnonymously();
+    return cred.user && cred.user.uid;
   } catch(e) {
-    console.warn('[map] fetch failed:', e?.message||e);
+    console.warn('[map] ensureAnon fallback failed:', e?.message||e);
+    return lsGet('uid') || null;
   }
-
-  setStampUI(1, !!merged.spot1); setStampUI(2, !!merged.spot2); setStampUI(3, !!merged.spot3);
-  const complete = !!merged.spot1 && !!merged.spot2 && !!merged.spot3;
-  return { ...merged, complete };
 }
 
-function saveLastSpotId(s){ try{ localStorage.setItem('lastSpotId', s); }catch{} }
-function getLastSpotId(){ try{ return localStorage.getItem('lastSpotId') || 'spot1'; }catch{ return 'spot1'; } }
-
-/* ===== カメラ起動：スポット選択 ===== */
-function getAvailableSpots(){
-  const items=[];
-  for (const spotId of ['spot1','spot2','spot3']){
-    const url=EIGHTHWALL_URLS[spotId];
-    if (url && /^https?:\/\//i.test(url)) items.push({ spotId, label:`スポット${spotId.replace('spot','')}` });
+// -------- スタンプ読み込み & UI反映 --------
+async function fetchStamps(uid) {
+  // Firebase優先、なければローカル
+  let remote = null;
+  try {
+    const snap = await firebase.database().ref(`users/${uid}/stamps`).get();
+    remote = snap.exists() ? snap.val() : null;
+  } catch(e) {
+    console.warn('[map] fetch stamps remote failed:', e?.message||e);
   }
-  return items;
+
+  const stamps = {};
+  REQUIRED_SPOTS.forEach(id=>{
+    const local = lsGet(lsKeyStamp(uid,id)) === 'true';
+    stamps[id] = (remote && !!remote[id]) || local || false;
+  });
+  return stamps;
 }
+
+function renderStampUI(stamps){
+  // 既存のスタンプ帳UIがあれば、ここで反映（例：.stamp-cell[data-spot])
+  $$('.stamp-cell[data-spot]').forEach(cell=>{
+    const spot = cell.dataset.spot;
+    const got = !!stamps[spot];
+    cell.classList.toggle('is-got', got);
+    const mark = cell.querySelector('.mark');
+    if (mark) mark.textContent = got ? '✅取得済' : '未取得';
+  });
+}
+
+function countCollected(stamps){
+  return REQUIRED_SPOTS.reduce((acc, id)=> acc + (stamps[id] ? 1 : 0), 0);
+}
+
+// -------- コンプリート・モーダル制御 --------
+function openCompleteModal(){
+  const overlay = $('#completeOverlay');
+  const modal = $('#completeModal');
+  const page = $('#pageRoot');
+  if (overlay && modal && page) {
+    overlay.classList.add('is-open');
+    modal.classList.add('is-open');
+    page.classList.add('is-dim');
+    overlay.setAttribute('aria-hidden','false');
+  }
+}
+function closeCompleteModal(){
+  const overlay = $('#completeOverlay');
+  const modal = $('#completeModal');
+  const page = $('#pageRoot');
+  if (overlay && modal && page) {
+    overlay.classList.remove('is-open');
+    modal.classList.remove('is-open');
+    page.classList.remove('is-dim');
+    overlay.setAttribute('aria-hidden','true');
+  }
+}
+
+// 「マップに戻る」ボタン（モーダルクローズ）
+function bindCompleteModalButtons(){
+  $('#closeComplete')?.addEventListener('click', ()=> closeCompleteModal());
+  // 背景タップで閉じる（必要に応じて無効化可）
+  $('#completeOverlay')?.addEventListener('click', ()=> closeCompleteModal());
+}
+
+// 達成時のフロー：初回だけモーダル、それ以降はリンク常設で運用
+async function handleCompletionFlow(uid, stamps){
+  const got = countCollected(stamps);
+  if (got < REQUIRED_COUNT) return;
+
+  // 既視なら何もしない（手動リンクのみ）
+  if (lsGet(seenKey(uid)) === 'true') return;
+
+  // 初回：モーダルを自動表示
+  openCompleteModal();
+  lsSet(seenKey(uid), 'true');
+}
+
+// -------- カメラ起動（スポット選択の吹き出し） --------
 function showCameraChooser(){
-  const overlay=$('#cameraChooserOverlay'), chooser=$('#cameraChooser'), list=$('#cameraChooserList'), close=$('#cameraChooserClose');
-  if(!overlay||!chooser||!list||!close) return;
-  list.innerHTML='';
-  const items=getAvailableSpots();
-  if(items.length===1){ saveLastSpotId(items[0].spotId); openXRForSpot(items[0].spotId); return; }
-  items.forEach(({spotId,label})=>{
-    const btn=document.createElement('button');
-    btn.type='button'; btn.className='item-btn'; btn.dataset.spot=spotId;
-    btn.innerHTML=`<strong>${label}</strong> のARを起動`;
-    btn.addEventListener('click',()=>{ hideCameraChooser(); saveLastSpotId(spotId); openXRForSpot(spotId); });
-    list.appendChild(btn);
-  });
-  overlay.hidden=false; chooser.hidden=false;
-  const onClose=()=>hideCameraChooser();
-  overlay.addEventListener('click', onClose, {once:true});
-  close.addEventListener('click', onClose, {once:true});
-}
-function hideCameraChooser(){ $('#cameraChooserOverlay')?.setAttribute('hidden',''); $('#cameraChooser')?.setAttribute('hidden',''); }
+  const overlay = $('#cameraChooserOverlay');
+  const panel = $('#cameraChooser');
+  if (!overlay || !panel) return;
 
-async function openXRForSpot(spotId){
-  spotId = spotId || getLastSpotId() || 'spot1';
-  const base = EIGHTHWALL_URLS[spotId];
-  if (!base) { alert('このスポットのAR URLが未設定です'); return; }
-  const uid = await window.ensureAnon();
-  const url = `${base}?spotId=${encodeURIComponent(spotId)}&uid=${encodeURIComponent(uid)}`;
-  location.href = url;
-}
-
-/* ===== 完了UI（初回は自動遷移、以後はリンク表示） ===== */
-function completeFlagKeys(){
-  const uid = getUidSync() || 'nouid';
-  return {
-    redirectedKey: `complete_redirected_${uid}`, // 初回遷移したか
-    linkKey:       `complete_link_enabled_${uid}`, // 常時リンク表示
-  };
-}
-function setLocalFlag(k,val){ try{ localStorage.setItem(k, String(!!val)); }catch{} }
-function getLocalFlag(k){ try{ return localStorage.getItem(k)==='true'; }catch{ return false; } }
-function setCompleteLinkVisible(v){ const area=$('#completeLinkArea'); if(area) area.style.display = v ? 'block':'none'; }
-
-async function handleCompletionFlow(state){
-  const { redirectedKey, linkKey } = completeFlagKeys();
-  if(!state?.complete){
-    if(!getLocalFlag(linkKey)) setCompleteLinkVisible(false);
-    return;
-  }
-  // すでに遷移済み → リンクだけ表示
-  if(getLocalFlag(redirectedKey)){
-    setLocalFlag(linkKey, true);
-    setCompleteLinkVisible(true);
-    return;
-  }
-  // 初達成：complete.html へ遷移（戻ってきたらリンク常時表示）
-  setLocalFlag(redirectedKey, true);
-  setLocalFlag(linkKey, true);
-  setCompleteLinkVisible(true);
-  location.href = 'complete.html';
-}
-
-/* ===== ページ初期化 ===== */
-function openDirections(lat,lng,label){
-  const ll=`${lat},${lng}`;
-  saveLastSpotId(label&&/spot\d/i.test(label)?label.toLowerCase():getLastSpotId());
-  if(/Android/i.test(navigator.userAgent)) location.href=`geo:${ll}?q=${ll}(${label||''})`;
-  else if(/iPad|iPhone|iPod/i.test(navigator.userAgent)) location.href=`http://maps.apple.com/?daddr=${ll}&dirflg=w`;
-  else location.href=`https://www.google.com/maps/dir/?api=1&destination=${ll}&travelmode=walking`;
-}
-
-async function boot(){
-  await window.ensureAnon();
-  // スタンプ帳の開閉
-  const toggleBtn=$('#stampToggle'), book=$('#stampBook');
-  if(toggleBtn && book){
-    const closed=()=>{ book.style.display='none'; toggleBtn.textContent='▼スタンプ帳'; };
-    const open=()=>{ book.style.display='block'; toggleBtn.textContent='▲スタンプ帳'; };
-    closed(); toggleBtn.addEventListener('click', ()=> (book.style.display==='block'?closed():open()));
-  }
-  // ピン → 経路案内
-  $all('.pin').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const lat=parseFloat(btn.dataset.lat), lng=parseFloat(btn.dataset.lng), label=btn.dataset.label||btn.dataset.spot||'spot1';
-      saveLastSpotId(btn.dataset.spot||'spot1'); openDirections(lat,lng,label);
+  const list = $('#cameraChooserList');
+  if (list) {
+    list.innerHTML = '';
+    REQUIRED_SPOTS.forEach(id=>{
+      const li = document.createElement('div');
+      li.className = 'item';
+      li.innerHTML = `
+        <div class="thumb"><img src="assets/${id}.jpg" alt="${id}" onerror="this.style.opacity=.15"></div>
+        <div class="meta">
+          <div class="name">${id.toUpperCase()}</div>
+          <div class="type">ARスポット</div>
+        </div>
+        <div class="go"><button class="btn" data-spot="${id}">起動</button></div>
+      `;
+      list.appendChild(li);
     });
-  });
-  // カメラ起動 → 吹き出し
-  $('#cameraBtn')?.addEventListener('click', ()=> showCameraChooser());
 
-  const state = await loadAndRenderStamps();
-  await handleCompletionFlow(state);
+    // 起動ボタン
+    list.querySelectorAll('button[data-spot]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const spot = btn.dataset.spot;
+        const uid = await ensureAnonSafe();
+        const base = EIGHTHWALL_URLS[spot] || EIGHTHWALL_URLS.spot1;
+        const url = new URL(base);
+        url.searchParams.set('spotId', spot);
+        if (uid) url.searchParams.set('uid', uid);
+        location.href = url.toString();
+      });
+    });
+  }
 
-  document.addEventListener('visibilitychange', async ()=>{ if(!document.hidden){ const s = await loadAndRenderStamps(); await handleCompletionFlow(s); } });
-  window.addEventListener('pageshow', async ()=>{ const s = await loadAndRenderStamps(); await handleCompletionFlow(s); });
+  overlay.hidden = false;
+  panel.hidden = false;
 }
+function hideCameraChooser(){
+  $('#cameraChooserOverlay')?.setAttribute('hidden','');
+  $('#cameraChooser')?.setAttribute('hidden','');
+}
+
+// -------- 起動 --------
+async function boot(){
+  bindCompleteModalButtons();
+  $('#cameraBtn')?.addEventListener('click', showCameraChooser);
+  $('#cameraChooserClose')?.addEventListener('click', hideCameraChooser);
+  $('#cameraChooserOverlay')?.addEventListener('click', hideCameraChooser);
+
+  const uid = await ensureAnonSafe();
+  const stamps = await fetchStamps(uid);
+  renderStampUI(stamps);
+  await handleCompletionFlow(uid, stamps);
+
+  // explanation.html から戻った直後など、ページ復帰時にも再チェック
+  document.addEventListener('visibilitychange', async ()=>{
+    if (document.visibilityState === 'visible') {
+      const s = await fetchStamps(uid);
+      renderStampUI(s);
+      await handleCompletionFlow(uid, s);
+    }
+  });
+  window.addEventListener('pageshow', async ()=>{
+    const s = await fetchStamps(uid);
+    renderStampUI(s);
+    await handleCompletionFlow(uid, s);
+  });
+}
+
 document.addEventListener('DOMContentLoaded', boot);
