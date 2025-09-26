@@ -2,18 +2,67 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>マップ</title>
+  <title>マップ | ARスタンプラリー</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    /* ---- 既存のレイアウト（簡略。必要に応じて既存CSSが優先されます） ---- */
-    .container{max-width:900px;margin:0 auto;padding:12px}
-    .row{display:flex;gap:8px;flex-wrap:wrap}
-    .btn{appearance:none;border:0;border-radius:12px;padding:12px 16px;font-weight:800;background:#005ABB;color:#fff;cursor:pointer}
+    :root{
+      --accent:#005ABB;
+    }
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      background:#ffffff; color:#111;
+    }
+    .container{max-width:960px;margin:0 auto;padding:12px}
+    header.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .btn{appearance:none;border:0;border-radius:12px;padding:12px 16px;font-weight:800;background:var(--accent);color:#fff;cursor:pointer}
     .btn-secondary{background:#e9eef6;color:#111}
-    .legend{margin:8px 0;padding:8px 12px;font-size:14px;background:#f6f7fb;border-radius:10px;color:#333}
+    a.btn{text-decoration:none;display:inline-block}
+    .muted{color:#555;font-size:14px}
 
-    /* ---- スポット選択の吹き出し（既存） ---- */
+    /* ====== スタンプ帳 ====== */
+    .stampbook{
+      margin-top:12px;
+      background:#f6f7fb;border:1px solid #e9eef6;border-radius:14px;
+      padding:12px;
+    }
+    .stampbook h2{margin:0 0 8px 0;font-size:16px}
+    .stamp-grid{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+    }
+    .stamp-cell{
+      background:#fff;border:1px solid #e3eaf6;border-radius:12px;
+      padding:10px;min-height:72px;display:flex;flex-direction:column;justify-content:center;align-items:center;
+      text-align:center;
+    }
+    .stamp-cell .name{font-weight:800;margin-bottom:4px}
+    .stamp-cell .mark{font-size:13px;color:#333}
+    .stamp-cell.is-got{border-color:#b7d8ff;box-shadow:0 8px 24px rgba(0,90,187,.12)}
+    .stamp-cell.is-got .mark{color:#0a7b24}
+
+    /* ====== キャンパス地図（中央表示） ====== */
+    .map-wrap{
+      position:relative;
+      margin:14px auto;
+      width:min(92vw, 820px);
+      aspect-ratio: 16 / 10;  /* 画像比率に応じて調整可 */
+      background:#fff;border:1px solid #e9eef6;border-radius:14px;overflow:hidden;
+      box-shadow:0 10px 28px rgba(0,0,0,.06);
+    }
+    .map-img{
+      position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#fff;
+    }
+
+    /* ピン（地図アプリリンク） */
+    .pin{
+      position:absolute; width:34px; height:34px; transform:translate(-50%,-100%); /* 先端を座標に合わせる */
+      display:block;
+    }
+    .pin img{width:100%; height:100%; display:block}
+    .pin:focus-visible{outline:3px solid rgba(0,90,187,.5); border-radius:8px}
+
+    /* ====== カメラ起動用の既存吹き出し ====== */
     .camera-chooser-overlay{
       position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);
       z-index:998;display:block;
@@ -34,7 +83,7 @@
     .camera-chooser .meta .type{font-size:12px;color:#333}
     .camera-chooser .go{white-space:nowrap}
 
-    /* ---- ★ コンプリート・モーダル（今回追加） ---- */
+    /* ====== 完走モーダル（complete.html相当） ====== */
     .complete-overlay{
       position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);
       z-index:1000;display:none;
@@ -43,8 +92,7 @@
     .complete-modal{
       position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
       width:min(92vw,560px);max-height:80vh;overflow:auto;background:#fff;border-radius:18px;
-      box-shadow:0 20px 60px rgba(0,0,0,.35);padding:20px;z-index:1001;
-      display:none;
+      box-shadow:0 20px 60px rgba(0,0,0,.35);padding:20px;z-index:1001;display:none;
     }
     .complete-modal.is-open{display:block}
     .complete-title{margin:0 0 6px;font-size:20px}
@@ -54,52 +102,32 @@
     .dim-when-modal{transition:opacity .2s ease}
     .dim-when-modal.is-dim{opacity:.15;pointer-events:none}
 
-    /* iOSセーフエリア */
-    .safe-pad-bottom{padding-bottom:max(18px,env(safe-area-inset-bottom))}
+    footer{
+      margin:16px 0 24px;
+      display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;
+    }
+    footer a{color:var(--accent);text-decoration:none;font-weight:700}
   </style>
 </head>
 <body>
+  <!-- 背景を暗転させるためのラッパ -->
   <div id="pageRoot" class="dim-when-modal">
     <div class="container">
+      <!-- ヘッダー -->
       <header class="row">
-        <button id="cameraBtn" class="btn">カメラ起動</button>
-        <a class="btn btn-secondary" href="tutorial.html">チュートリアル</a>
+        <div class="left">
+          <button id="cameraBtn" class="btn">カメラ起動</button>
+          <a class="btn btn-secondary" href="tutorial.html">チュートリアル</a>
+        </div>
+        <div class="right muted">
+          <a href="terms.html">利用規約・プライバシー</a>
+        </div>
       </header>
 
-      <div class="legend">マップからスポットを選び、ARでスタンプを集めましょう（全3箇所：ARスポット）</div>
-
-      <!-- ここにマップ本体やピン、スタンプ帳など既存のDOMがある想定 -->
-      <div id="mapArea"><!-- 既存のマップUIをそのまま残してください --></div>
-      <div id="stampBook"><!-- 既存のスタンプ帳UIをそのまま残してください --></div>
-
-      <!-- 完了リンク（任意、常時リンク） -->
-      <div id="completeLinkArea" style="margin-top:10px;">
-        <a href="complete.html">🎉 コンプリートを確認する</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- 既存：スポット選択の吹き出し -->
-  <div id="cameraChooserOverlay" class="camera-chooser-overlay" hidden></div>
-  <div id="cameraChooser" class="camera-chooser" hidden role="dialog" aria-modal="true" aria-labelledby="cameraChooserTitle">
-    <h3 id="cameraChooserTitle">スポットを選んでください</h3>
-    <div id="cameraChooserList" class="list"></div>
-    <div class="row safe-pad-bottom"><button id="cameraChooserClose" class="btn btn-secondary" type="button">キャンセル</button></div>
-  </div>
-
-  <!-- ★ 追加：コンプリート・モーダル（complete.html 相当の内容） -->
-  <div id="completeOverlay" class="complete-overlay" aria-hidden="true"></div>
-  <div id="completeModal" class="complete-modal" role="dialog" aria-modal="true" aria-labelledby="completeTitle" aria-describedby="completeLead">
-    <h2 id="completeTitle" class="complete-title">🎉 コンプリート！</h2>
-    <p id="completeLead" class="complete-lead">全てのスタンプを集めました。ご参加ありがとうございます！</p>
-    <div class="complete-row safe-pad-bottom">
-      <button id="closeComplete" class="btn btn-secondary" type="button">マップに戻る</button>
-      <a id="toSurvey" class="btn" href="post-survey.html">アンケートへ（お答えいただいた方にはスペシャルコンテンツがあります！）</a>
-    </div>
-  </div>
-
-  <!-- スクリプト -->
-  <script src="js/firebase.js" defer></script>
-  <script src="js/map.js?v=20250926c" defer></script>
-</body>
-</html>
+      <!-- スタンプ帳（map.js が .is-got を付与 / .mark を更新） -->
+      <section class="stampbook" aria-labelledby="stampbookTitle">
+        <h2 id="stampbookTitle">スタンプ帳（全6箇所）</h2>
+        <div class="stamp-grid" id="stampGrid">
+          <div class="stamp-cell" data-spot="spot1"><div class="name">スポット1</div><div class="mark">未取得</div></div>
+          <div class="stamp-cell" data-spot="spot2"><div class="name">スポット2</div><div class="mark">未取得</div></div>
+          <div class="stamp-cell" data-spot="spot3"><div class="name">スポット3</div><div class="mark">未取得</div></
