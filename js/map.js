@@ -1,38 +1,35 @@
-/* map.js（匿名UID専用・AR3スポット達成でモーダル表示）
-   - スタンプ状態の読み込み（Firebase/ローカル併用）
-   - カメラ起動：スポット選択→8th Wall へ遷移（uid付与）
-   - ★ 3スポット達成時：map.html を暗くし、complete相当のモーダルを自動表示
-     （一度表示したら uid別フラグで再表示しない）
-*/
+/* map.js
+ * 変更点：
+ * - カメラ起動の吹き出しに spot1〜spot6 を表示（1〜3はAR起動、4〜6は非ARのため起動ボタンを無効化）
+ * - スタンプ帳（6箇所）へ反映、カウント表示（#stampCount）更新
+ * - 全6箇所取得時：スタンプ帳ボタン直下に complete.html へのリンク表示、モーダルも初回だけ自動表示
+ */
 
-// -------- 設定 --------
-// 8th Wall のURL（必要に応じて置換）
+const $  = (s)=>document.querySelector(s);
+const $$ = (s)=>Array.from(document.querySelectorAll(s));
+
+// ===== 設定 =====
 const EIGHTHWALL_URLS = {
   spot1: 'https://maria261081.8thwall.app/test-3/',
   spot2: 'https://maria261081.8thwall.app/spot2/',
   spot3: 'https://maria261081.8thwall.app/spot3/',
+  // spot4〜6は非AR想定（ここではURL無し）
 };
+const ALL_SPOTS       = ['spot1','spot2','spot3','spot4','spot5','spot6'];
+const AR_SPOTS        = ['spot1','spot2','spot3']; // カメラ起動対象
+const COMPLETE_TARGET = 6; // 全6箇所達成でコンプリート扱い
 
-// 対象スポット：今回は AR 3箇所
-const REQUIRED_SPOTS = ['spot1','spot2','spot3'];
-const REQUIRED_COUNT = REQUIRED_SPOTS.length; // ← 6スポット判定にしたい場合は配列を差し替え
-
-// -------- ユーティリティ --------
-const $ = (s)=>document.querySelector(s);
-const $$ = (s)=>Array.from(document.querySelectorAll(s));
-const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
-
-function lsGet(key){ try{return localStorage.getItem(key);}catch{return null;} }
-function lsSet(key,val){ try{localStorage.setItem(key,val);}catch{} }
+// ローカルストレージキー
+function lsGet(k){ try{return localStorage.getItem(k);}catch{return null;} }
+function lsSet(k,v){ try{localStorage.setItem(k,v);}catch{} }
 function lsKeyStamp(uid, spot){ return `stamp_${uid}_${spot}`; }
-function seenKey(uid){ return `complete_ar3_seen_${uid}`; } // AR3 達成モーダルの既視フラグ
+function seenKey(uid){ return `complete_6_seen_${uid}`; }
 
-// firebase.js で window.ensureAnon を想定。無い場合はフォールバック。
+// Firebase匿名UID
 async function ensureAnonSafe() {
   if (typeof window.ensureAnon === 'function') {
     try { const uid = await window.ensureAnon(); if (uid) return uid; } catch(e){}
   }
-  // v8想定フォールバック
   try {
     if (!firebase?.apps?.length && typeof firebaseConfig !== 'undefined') {
       firebase.initializeApp(firebaseConfig);
@@ -47,9 +44,8 @@ async function ensureAnonSafe() {
   }
 }
 
-// -------- スタンプ読み込み & UI反映 --------
+// ===== スタンプ取得状態 =====
 async function fetchStamps(uid) {
-  // Firebase優先、なければローカル
   let remote = null;
   try {
     const snap = await firebase.database().ref(`users/${uid}/stamps`).get();
@@ -59,7 +55,7 @@ async function fetchStamps(uid) {
   }
 
   const stamps = {};
-  REQUIRED_SPOTS.forEach(id=>{
+  ALL_SPOTS.forEach(id=>{
     const local = lsGet(lsKeyStamp(uid,id)) === 'true';
     stamps[id] = (remote && !!remote[id]) || local || false;
   });
@@ -67,7 +63,7 @@ async function fetchStamps(uid) {
 }
 
 function renderStampUI(stamps){
-  // 既存のスタンプ帳UIがあれば、ここで反映（例：.stamp-cell[data-spot])
+  // スタンプセル反映
   $$('.stamp-cell[data-spot]').forEach(cell=>{
     const spot = cell.dataset.spot;
     const got = !!stamps[spot];
@@ -75,104 +71,97 @@ function renderStampUI(stamps){
     const mark = cell.querySelector('.mark');
     if (mark) mark.textContent = got ? '✅取得済' : '未取得';
   });
+
+  // カウント表示
+  const cnt = ALL_SPOTS.reduce((n, id)=> n + (stamps[id] ? 1 : 0), 0);
+  const elCount = $('#stampCount');
+  if (elCount) elCount.textContent = `${cnt}/${ALL_SPOTS.length}`;
+
+  // 完了リンク（スタンプ帳ボタン直下）
+  const inline = $('#completeInline');
+  if (inline) inline.style.display = (cnt >= COMPLETE_TARGET) ? 'block' : 'none';
 }
 
 function countCollected(stamps){
-  return REQUIRED_SPOTS.reduce((acc, id)=> acc + (stamps[id] ? 1 : 0), 0);
+  return ALL_SPOTS.reduce((acc, id)=> acc + (stamps[id] ? 1 : 0), 0);
 }
 
-// -------- コンプリート・モーダル制御 --------
+// ===== 完走モーダル =====
 function openCompleteModal(){
-  const overlay = $('#completeOverlay');
-  const modal = $('#completeModal');
-  const page = $('#pageRoot');
-  if (overlay && modal && page) {
-    overlay.classList.add('is-open');
-    modal.classList.add('is-open');
-    page.classList.add('is-dim');
-    overlay.setAttribute('aria-hidden','false');
-  }
+  $('#completeOverlay')?.classList.add('is-open');
+  $('#completeModal')?.classList.add('is-open');
 }
 function closeCompleteModal(){
-  const overlay = $('#completeOverlay');
-  const modal = $('#completeModal');
-  const page = $('#pageRoot');
-  if (overlay && modal && page) {
-    overlay.classList.remove('is-open');
-    modal.classList.remove('is-open');
-    page.classList.remove('is-dim');
-    overlay.setAttribute('aria-hidden','true');
-  }
+  $('#completeOverlay')?.classList.remove('is-open');
+  $('#completeModal')?.classList.remove('is-open');
 }
-
-// 「マップに戻る」ボタン（モーダルクローズ）
 function bindCompleteModalButtons(){
-  $('#closeComplete')?.addEventListener('click', ()=> closeCompleteModal());
-  // 背景タップで閉じる（必要に応じて無効化可）
-  $('#completeOverlay')?.addEventListener('click', ()=> closeCompleteModal());
+  $('#closeComplete')?.addEventListener('click', closeCompleteModal);
+  $('#completeOverlay')?.addEventListener('click', closeCompleteModal);
 }
 
-// 達成時のフロー：初回だけモーダル、それ以降はリンク常設で運用
 async function handleCompletionFlow(uid, stamps){
   const got = countCollected(stamps);
-  if (got < REQUIRED_COUNT) return;
-
-  // 既視なら何もしない（手動リンクのみ）
+  if (got < COMPLETE_TARGET) return;
   if (lsGet(seenKey(uid)) === 'true') return;
-
-  // 初回：モーダルを自動表示
   openCompleteModal();
   lsSet(seenKey(uid), 'true');
 }
 
-// -------- カメラ起動（スポット選択の吹き出し） --------
-function showCameraChooser(){
-  const overlay = $('#cameraChooserOverlay');
-  const panel = $('#cameraChooser');
-  if (!overlay || !panel) return;
-
+// ===== カメラ起動（スポット選択の吹き出し） =====
+function buildCameraChooserItems(){
   const list = $('#cameraChooserList');
-  if (list) {
-    list.innerHTML = '';
-    REQUIRED_SPOTS.forEach(id=>{
-      const li = document.createElement('div');
-      li.className = 'item';
-      li.innerHTML = `
-        <div class="thumb"><img src="assets/${id}.jpg" alt="${id}" onerror="this.style.opacity=.15"></div>
-        <div class="meta">
-          <div class="name">${id.toUpperCase()}</div>
-          <div class="type">ARスポット</div>
-        </div>
-        <div class="go"><button class="btn" data-spot="${id}">起動</button></div>
-      `;
-      list.appendChild(li);
-    });
+  if (!list) return;
+  list.innerHTML = '';
 
-    // 起動ボタン
-    list.querySelectorAll('button[data-spot]').forEach(btn=>{
-      btn.addEventListener('click', async ()=>{
-        const spot = btn.dataset.spot;
-        const uid = await ensureAnonSafe();
-        const base = EIGHTHWALL_URLS[spot] || EIGHTHWALL_URLS.spot1;
-        const url = new URL(base);
-        url.searchParams.set('spotId', spot);
-        if (uid) url.searchParams.set('uid', uid);
-        location.href = url.toString();
-      });
-    });
-  }
+  ALL_SPOTS.forEach((id, idx)=>{
+    const isAR = AR_SPOTS.includes(id);
+    const thumb = `assets/images/stamp0${(idx%3)+1}.png`;
 
-  overlay.hidden = false;
-  panel.hidden = false;
+    const item = document.createElement('div');
+    item.className = 'item';
+    item.innerHTML = `
+      <div class="thumb"><img src="${thumb}" alt="${id}"></div>
+      <div class="meta">
+        <div class="name">${id.toUpperCase()}</div>
+        <div class="type">${isAR ? 'ARスポット' : '非ARスポット'}</div>
+      </div>
+      <div class="go">
+        <button class="btn ${isAR ? '' : 'btn-secondary'}" data-spot="${id}" ${isAR ? '' : 'disabled'}>${isAR ? '起動' : '起動不可'}</button>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+
+  // 起動ボタン（spot1〜3のみ有効）
+  list.querySelectorAll('button[data-spot]').forEach(btn=>{
+    const spot = btn.dataset.spot;
+    if (!AR_SPOTS.includes(spot)) return; // 非ARは何もしない
+    btn.addEventListener('click', async ()=>{
+      const uid = await ensureAnonSafe();
+      const base = EIGHTHWALL_URLS[spot] || EIGHTHWALL_URLS.spot1;
+      const url = new URL(base);
+      url.searchParams.set('spotId', spot);
+      if (uid) url.searchParams.set('uid', uid);
+      location.href = url.toString();
+    });
+  });
+}
+
+function showCameraChooser(){
+  buildCameraChooserItems();
+  $('#cameraChooserOverlay')?.classList.add('is-open');
+  $('#cameraChooser')?.classList.add('is-open');
 }
 function hideCameraChooser(){
-  $('#cameraChooserOverlay')?.setAttribute('hidden','');
-  $('#cameraChooser')?.setAttribute('hidden','');
+  $('#cameraChooserOverlay')?.classList.remove('is-open');
+  $('#cameraChooser')?.classList.remove('is-open');
 }
 
-// -------- 起動 --------
+// ===== 起動 =====
 async function boot(){
   bindCompleteModalButtons();
+
   $('#cameraBtn')?.addEventListener('click', showCameraChooser);
   $('#cameraChooserClose')?.addEventListener('click', hideCameraChooser);
   $('#cameraChooserOverlay')?.addEventListener('click', hideCameraChooser);
@@ -182,7 +171,7 @@ async function boot(){
   renderStampUI(stamps);
   await handleCompletionFlow(uid, stamps);
 
-  // explanation.html から戻った直後など、ページ復帰時にも再チェック
+  // 復帰時にも最新反映（explanation.html→戻る）
   document.addEventListener('visibilitychange', async ()=>{
     if (document.visibilityState === 'visible') {
       const s = await fetchStamps(uid);
