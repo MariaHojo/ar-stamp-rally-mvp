@@ -126,6 +126,10 @@
     .complete-title{margin:0 0 6px;font-size:20px}
     .complete-lead{margin:0 0 14px}
     .complete-row{display:flex;gap:8px;flex-wrap:wrap}
+
+     /* 未取得のスタンプは薄く表示。取得済みでくっきり */
+  .stamp-cell .stamp-thumb img { opacity:.25; filter: grayscale(0.2); transition: opacity .2s }
+  .stamp-cell.is-got .stamp-thumb img { opacity:1; filter:none }
   </style>
 </head>
 <body>
