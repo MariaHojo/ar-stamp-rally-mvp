@@ -1,19 +1,42 @@
-// post-survey.js (mobile-first survey)
-// 必須: 1) 年代, 2) 歴史に興味, 3) 自分で調べたこと
+// post-survey.js
+// 指定の設問をスマホ向けUIでバリデーション → Firebase Realtime DB に保存。
 // 保存先: users/{uid}/survey （単一オブジェクト）
-// 失敗・オフライン時はローカル退避 → 復帰時に自動同期
+// オフライン/失敗時は localStorage にペンディング保存し、オンライン復帰時に再送。
+// 送信後は complete.html に戻ります（必要なら遷移先を変更可）。
 
 (function () {
   const BTN_ID = 'submitSurveyBtn';
   const FORM_ID = 'surveyForm';
   const PENDING_KEY = 'postSurvey_pending_payload_v2';
 
-  // --------- utils ----------
-  const nowTs = () => Date.now();
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  // ---- Likert のタップ操作：選択状態の見た目を更新 ----
+  function initLikertPills() {
+    document.querySelectorAll('.likert').forEach(group => {
+      group.addEventListener('click', (ev) => {
+        const label = ev.target.closest('.radio-pill');
+        if (!label) return;
+        // ラジオをONにして .is-active を更新
+        const input = label.querySelector('input[type="radio"]');
+        if (input) {
+          input.checked = true;
+          // 同グループの見た目更新
+          group.querySelectorAll('.radio-pill').forEach(l => l.classList.remove('is-active'));
+          label.classList.add('is-active');
+        }
+      });
+      // 初期状態の反映
+      group.querySelectorAll('input[type="radio"]').forEach(input => {
+        if (input.checked) input.closest('.radio-pill')?.classList.add('is-active');
+      });
+    });
+  }
 
-  function $(s) { return document.querySelector(s); }
-  function $all(s) { return Array.from(document.querySelectorAll(s)); }
+  // ---- 便利関数 ----
+  const nowTs = () => Date.now();
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+  function qSel(sel, root=document){ return root.querySelector(sel); }
+  function qSelAll(sel, root=document){ return Array.from(root.querySelectorAll(sel)); }
 
   function savePendingLocally(payload) {
     try { localStorage.setItem(PENDING_KEY, JSON.stringify(payload)); } catch {}
@@ -38,110 +61,84 @@
       const cred = await auth.signInAnonymously();
       return cred.user && cred.user.uid;
     } catch (e) {
-      console.warn('[survey] anon sign-in fallback failed:', e?.message || e);
+      console.warn('[post-survey] anonymous sign-in failed:', e?.message || e);
       try { return localStorage.getItem('uid') || null; } catch { return null; }
     }
   }
 
+  // ---- 収集 & バリデーション ----
   function getRadioValue(name) {
-    const el = document.querySelector(`input[name="${name}"]:checked`);
+    const el = qSel(`input[name="${name}"]:checked`);
     return el ? Number(el.value) : null;
   }
-
-  function sanitizeAge(raw) {
-    if (!raw) return null;
-    const v = String(raw).replace(/[^\d]/g, '').slice(0, 3);
-    if (v === '') return null;
-    const n = parseInt(v, 10);
-    if (Number.isNaN(n) || n <= 0 || n > 120) return null;
-    return n;
+  function setError(id, show) {
+    const el = qSel(`#${id}`);
+    if (el) el.style.display = show ? 'block' : 'none';
   }
-
-  function setBusy(busy) {
-    const btn = document.getElementById(BTN_ID);
-    if (!btn) return;
-    btn.disabled = !!busy;
-    btn.setAttribute('aria-busy', busy ? 'true' : 'false');
-    btn.textContent = busy ? '送信中…' : 'アンケート送信';
-  }
-
-  function showError(id, on) {
-    const box = document.getElementById(id);
+  function scrollToField(fieldId) {
+    const box = qSel(`#${fieldId}`);
     if (!box) return;
-    if (on) box.classList.add('has-error');
-    else box.classList.remove('has-error');
+    box.scrollIntoView({behavior:'smooth', block:'center'});
   }
 
-  function firstErrorScroll() {
-    const first = document.querySelector('.has-error');
-    if (!first) return;
-    first.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
+  function collectAndValidate() {
+    // 年代（必須：半角数字）
+    const ageInput = qSel('#age');
+    const ageRaw = (ageInput?.value || '').trim();
+    const ageOk = /^[0-9]+$/.test(ageRaw) && ageRaw.length > 0;
+    setError('ageErr', !ageOk);
 
-  function buildPayload() {
-    const ageRaw = $('#age')?.value ?? '';
-    const age = sanitizeAge(ageRaw);
+    // 必須ラジオ
+    const q2 = getRadioValue('q2'); setError('q2Err', !q2);
+    const q3 = getRadioValue('q3'); setError('q3Err', !q3);
+    const q5 = getRadioValue('q5'); setError('q5Err', !q5);
+    const q7 = getRadioValue('q7'); setError('q7Err', !q7);
+    const q9 = getRadioValue('q9'); setError('q9Err', !q9);
+    const q11 = getRadioValue('q11'); setError('q11Err', !q11);
+
+    const firstErrorId =
+      (!ageOk && 'f-age') ||
+      (!q2 && 'f-q2') || (!q3 && 'f-q3') ||
+      (!q5 && 'f-q5') || (!q7 && 'f-q7') ||
+      (!q9 && 'f-q9') || (!q11 && 'f-q11') || null;
+
+    const ok = ageOk && q2 && q3 && q5 && q7 && q9 && q11;
 
     const payload = {
       version: 2,
       submittedAt: nowTs(),
+      answers: {
+        age: ageRaw,                        // 1
+        interest_history: q2,               // 2
+        self_research: q3,                  // 3
+        why_self_research: qSel('#q4')?.value || '',     // 4
+        interest_icu_history: q5,           // 5
+        why_interest_icu_history: qSel('#q6')?.value || '', // 6
+        interest_preservation: q7,          // 7
+        why_interest_preservation: qSel('#q8')?.value || '', // 8
 
-      // 必須
-      age, // number | null
-      hist_interest: getRadioValue('hist_interest'),     // 1-5 | null
-      self_research: getRadioValue('self_research'),     // 1-5 | null
+        fun: q9,                            // 9
+        why_fun: qSel('#q10')?.value || '', // 10
+        usability: q11,                     // 11
+        why_usability: qSel('#q12')?.value || '', // 12
 
-      // 任意
-      why_self_research: $('#why_self_research')?.value?.trim() || null,
-
-      icu_interest: getRadioValue('icu_interest'),       // 1-5 | null
-      why_icu_interest: $('#why_icu_interest')?.value?.trim() || null,
-
-      preserve_interest: getRadioValue('preserve_interest'), // 1-5 | null
-      why_preserve_interest: $('#why_preserve_interest')?.value?.trim() || null,
-
-      ar_fun: getRadioValue('ar_fun'),                   // 1-5 | null
-      why_ar_fun: $('#why_ar_fun')?.value?.trim() || null,
-
-      ar_usability: getRadioValue('ar_usability'),       // 1-5 | null
-      why_ar_usability: $('#why_ar_usability')?.value?.trim() || null,
-
-      free_text: $('#free_text')?.value?.trim() || null,
-
+        free_text: qSel('#q13')?.value || '' // 13
+      },
       client: {
         ua: (typeof navigator !== 'undefined' ? navigator.userAgent : ''),
         lang: (typeof navigator !== 'undefined' ? navigator.language : ''),
         path: (typeof location !== 'undefined' ? location.pathname + location.search : ''),
-        online: (typeof navigator !== 'undefined' ? navigator.onLine : undefined),
       },
     };
-    return payload;
+
+    return { ok, firstErrorId, payload };
   }
 
-  function validate(payload) {
-    // 必須: age, hist_interest, self_research
-    let ok = true;
-
-    const ageOk = typeof payload.age === 'number';
-    showError('q-age', !ageOk);
-    ok = ok && ageOk;
-
-    const hOk = typeof payload.hist_interest === 'number';
-    showError('q-histInterest', !hOk);
-    ok = ok && hOk;
-
-    const sOk = typeof payload.self_research === 'number';
-    showError('q-selfResearch', !sOk);
-    ok = ok && sOk;
-
-    if (!ok) firstErrorScroll();
-    return ok;
-  }
-
+  // ---- 送信処理 ----
   async function writeSurvey(uid, payload) {
     const db = firebase.database();
     const updates = {};
-    updates[`users/${uid}/survey`] = payload; // 単一回答として保存
+    updates[`users/${uid}/survey`] = payload;
     updates[`users/${uid}/meta/updatedAt`] = nowTs();
     await db.ref().update(updates);
   }
@@ -154,41 +151,47 @@
     try {
       await writeSurvey(uid, pending);
       clearPendingLocally();
-      console.log('[survey] pending synced');
+      console.log('[post-survey] pending synced');
     } catch (e) {
-      console.warn('[survey] pending sync failed:', e?.message || e);
+      console.warn('[post-survey] pending sync failed:', e?.message || e);
     }
   }
 
-  function notify(msg) {
-    try { alert(msg); } catch {}
+  function setBusy(busy) {
+    const btn = qSel('#' + BTN_ID);
+    if (!btn) return;
+    btn.setAttribute('aria-busy', busy ? 'true' : 'false');
+    btn.textContent = busy ? '送信中…' : 'アンケート送信';
+    btn.disabled = !!busy;
   }
+
+  function toast(msg) { try { alert(msg); } catch {} }
 
   async function onSubmit(ev) {
     ev?.preventDefault?.();
-    setBusy(true);
 
-    const payload = buildPayload();
-    if (!validate(payload)) {
-      setBusy(false);
+    // 収集＆検証
+    const { ok, firstErrorId, payload } = collectAndValidate();
+    if (!ok) {
+      if (firstErrorId) scrollToField(firstErrorId);
+      toast('必須項目を入力・選択してください。');
       return;
     }
 
-    // オフライン時はローカル退避
+    // オフラインはローカル退避
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       savePendingLocally(payload);
-      setBusy(false);
-      notify('オフラインのため、回答を一時保存しました。オンライン時に自動送信します。');
+      toast('オフラインのため、回答を一時保存しました。オンライン時に自動送信します。');
       location.href = 'complete.html';
       return;
     }
 
-    // UID確保 → 書き込み
+    setBusy(true);
     const uid = await ensureAnonSafe();
     if (!uid) {
       savePendingLocally(payload);
       setBusy(false);
-      notify('ユーザー識別に失敗したため、回答を一時保存しました。後ほど自動送信を試みます。');
+      toast('ユーザー識別に失敗したため、回答を一時保存しました。後でもう一度お試しください。');
       location.href = 'complete.html';
       return;
     }
@@ -196,41 +199,28 @@
     try {
       await writeSurvey(uid, payload);
       setBusy(false);
-      notify('ご協力ありがとうございます。回答を送信しました！');
-      // スペシャルコンテンツ導線を設ける場合はここで遷移先を変更可
+      toast('ご協力ありがとうございます。回答を送信しました！');
       location.href = 'complete.html';
     } catch (e) {
-      console.warn('[survey] write failed:', e?.message || e);
+      console.warn('[post-survey] write failed:', e?.message || e);
       savePendingLocally(payload);
       setBusy(false);
-      notify('通信に失敗したため、回答を一時保存しました。オンライン時に自動送信します。');
+      toast('通信に失敗したため、回答を一時保存しました。オンライン時に自動送信します。');
       location.href = 'complete.html';
     }
   }
 
+  // ---- 起動 ----
   async function boot() {
-    // 年代入力を数字のみに補正
-    const ageEl = $('#age');
-    if (ageEl) {
-      ageEl.addEventListener('input', () => {
-        const cleaned = ageEl.value.replace(/[^\d]/g, '').slice(0,3);
-        if (ageEl.value !== cleaned) ageEl.value = cleaned;
-      }, { passive: true });
-    }
+    initLikertPills();
 
-    // ペンディングの自動再送（軽くリトライ）
+    // ペンディング再送（軽くリトライ）
     for (let i = 0; i < 2; i++) {
-      await trySyncPending();
-      await sleep(200);
+      try { await trySyncPending(); break; } catch { await sleep(200); }
     }
 
-    const btn = document.getElementById(BTN_ID);
-    if (btn) btn.addEventListener('click', onSubmit, { passive: false });
-
-    // オンライン復帰時に同期
-    if (typeof window !== 'undefined') {
-      window.addEventListener('online', () => { trySyncPending(); });
-    }
+    const btn = qSel('#' + BTN_ID);
+    if (btn) btn.addEventListener('click', onSubmit, { passive:false });
   }
 
   document.addEventListener('DOMContentLoaded', boot);
