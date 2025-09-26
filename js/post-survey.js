@@ -1,50 +1,34 @@
-// post-survey.js
-// 最小実装：送信ボタン押下で匿名UIDの配下に回答オブジェクトを保存します。
-// - 保存先: users/{uid}/survey （単一オブジェクト想定）
-// - 失敗時は localStorage に一時保存し、次回起動時/オンライン復帰時に自動同期を試みます。
-// - 完了後は complete.html に戻ります（必要なら 'map.html' 等に変更してください）。
+// post-survey.js (mobile-first survey)
+// 必須: 1) 年代, 2) 歴史に興味, 3) 自分で調べたこと
+// 保存先: users/{uid}/survey （単一オブジェクト）
+// 失敗・オフライン時はローカル退避 → 復帰時に自動同期
 
 (function () {
   const BTN_ID = 'submitSurveyBtn';
-  const PENDING_KEY = 'postSurvey_pending_payload';
+  const FORM_ID = 'surveyForm';
+  const PENDING_KEY = 'postSurvey_pending_payload_v2';
 
-  // --- ユーティリティ ---
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  // --------- utils ----------
   const nowTs = () => Date.now();
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  function $(s) { return document.querySelector(s); }
+  function $all(s) { return Array.from(document.querySelectorAll(s)); }
 
   function savePendingLocally(payload) {
-    try {
-      localStorage.setItem(PENDING_KEY, JSON.stringify(payload));
-    } catch {}
+    try { localStorage.setItem(PENDING_KEY, JSON.stringify(payload)); } catch {}
   }
-
   function readPendingLocally() {
-    try {
-      const v = localStorage.getItem(PENDING_KEY);
-      return v ? JSON.parse(v) : null;
-    } catch {
-      return null;
-    }
+    try { const v = localStorage.getItem(PENDING_KEY); return v ? JSON.parse(v) : null; } catch { return null; }
   }
-
   function clearPendingLocally() {
-    try {
-      localStorage.removeItem(PENDING_KEY);
-    } catch {}
+    try { localStorage.removeItem(PENDING_KEY); } catch {}
   }
 
   async function ensureAnonSafe() {
-    // firebase.js に window.ensureAnon がある想定。なければフォールバック。
     if (typeof window.ensureAnon === 'function') {
-      try {
-        const uid = await window.ensureAnon();
-        if (uid) return uid;
-      } catch (e) {
-        console.warn('[post-survey] ensureAnon failed, fallback:', e);
-      }
+      try { const uid = await window.ensureAnon(); if (uid) return uid; } catch (e) {}
     }
-
-    // フォールバック（v8 API想定）
     try {
       if (!firebase?.apps?.length && typeof firebaseConfig !== 'undefined') {
         firebase.initializeApp(firebaseConfig);
@@ -54,40 +38,110 @@
       const cred = await auth.signInAnonymously();
       return cred.user && cred.user.uid;
     } catch (e) {
-      console.warn('[post-survey] anonymous sign-in fallback failed:', e?.message || e);
-      // それでもダメなら localStorage の uid を参照（ない場合は null）
-      try {
-        return localStorage.getItem('uid') || null;
-      } catch {
-        return null;
-      }
+      console.warn('[survey] anon sign-in fallback failed:', e?.message || e);
+      try { return localStorage.getItem('uid') || null; } catch { return null; }
     }
   }
 
+  function getRadioValue(name) {
+    const el = document.querySelector(`input[name="${name}"]:checked`);
+    return el ? Number(el.value) : null;
+  }
+
+  function sanitizeAge(raw) {
+    if (!raw) return null;
+    const v = String(raw).replace(/[^\d]/g, '').slice(0, 3);
+    if (v === '') return null;
+    const n = parseInt(v, 10);
+    if (Number.isNaN(n) || n <= 0 || n > 120) return null;
+    return n;
+  }
+
+  function setBusy(busy) {
+    const btn = document.getElementById(BTN_ID);
+    if (!btn) return;
+    btn.disabled = !!busy;
+    btn.setAttribute('aria-busy', busy ? 'true' : 'false');
+    btn.textContent = busy ? '送信中…' : 'アンケート送信';
+  }
+
+  function showError(id, on) {
+    const box = document.getElementById(id);
+    if (!box) return;
+    if (on) box.classList.add('has-error');
+    else box.classList.remove('has-error');
+  }
+
+  function firstErrorScroll() {
+    const first = document.querySelector('.has-error');
+    if (!first) return;
+    first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
   function buildPayload() {
-    // いまは設問が未定のため、プレースホルダーの回答のみ保存。
-    // 実際の設問を追加したら、このオブジェクトに項目を追記してください。
+    const ageRaw = $('#age')?.value ?? '';
+    const age = sanitizeAge(ageRaw);
+
     const payload = {
-      version: 1,
+      version: 2,
       submittedAt: nowTs(),
-      // ここに実際の回答項目を追加（例）
-      // q1_enjoyment: null,         // Likert 1-5
-      // q2_history_interest: null,  // Likert 1-5
-      // q3_free_text: "",           // 自由記述
+
+      // 必須
+      age, // number | null
+      hist_interest: getRadioValue('hist_interest'),     // 1-5 | null
+      self_research: getRadioValue('self_research'),     // 1-5 | null
+
+      // 任意
+      why_self_research: $('#why_self_research')?.value?.trim() || null,
+
+      icu_interest: getRadioValue('icu_interest'),       // 1-5 | null
+      why_icu_interest: $('#why_icu_interest')?.value?.trim() || null,
+
+      preserve_interest: getRadioValue('preserve_interest'), // 1-5 | null
+      why_preserve_interest: $('#why_preserve_interest')?.value?.trim() || null,
+
+      ar_fun: getRadioValue('ar_fun'),                   // 1-5 | null
+      why_ar_fun: $('#why_ar_fun')?.value?.trim() || null,
+
+      ar_usability: getRadioValue('ar_usability'),       // 1-5 | null
+      why_ar_usability: $('#why_ar_usability')?.value?.trim() || null,
+
+      free_text: $('#free_text')?.value?.trim() || null,
+
       client: {
         ua: (typeof navigator !== 'undefined' ? navigator.userAgent : ''),
         lang: (typeof navigator !== 'undefined' ? navigator.language : ''),
         path: (typeof location !== 'undefined' ? location.pathname + location.search : ''),
+        online: (typeof navigator !== 'undefined' ? navigator.onLine : undefined),
       },
     };
     return payload;
   }
 
+  function validate(payload) {
+    // 必須: age, hist_interest, self_research
+    let ok = true;
+
+    const ageOk = typeof payload.age === 'number';
+    showError('q-age', !ageOk);
+    ok = ok && ageOk;
+
+    const hOk = typeof payload.hist_interest === 'number';
+    showError('q-histInterest', !hOk);
+    ok = ok && hOk;
+
+    const sOk = typeof payload.self_research === 'number';
+    showError('q-selfResearch', !sOk);
+    ok = ok && sOk;
+
+    if (!ok) firstErrorScroll();
+    return ok;
+  }
+
   async function writeSurvey(uid, payload) {
     const db = firebase.database();
     const updates = {};
-    // 単一回答オブジェクトとして保存（複数回答にしたい場合は push() も可）
-    updates[`users/${uid}/survey`] = payload;
+    updates[`users/${uid}/survey`] = payload; // 単一回答として保存
     updates[`users/${uid}/meta/updatedAt`] = nowTs();
     await db.ref().update(updates);
   }
@@ -95,102 +149,87 @@
   async function trySyncPending() {
     const pending = readPendingLocally();
     if (!pending) return;
-
     const uid = await ensureAnonSafe();
-    if (!uid) return; // 次回へ
-
+    if (!uid) return;
     try {
       await writeSurvey(uid, pending);
       clearPendingLocally();
-      console.log('[post-survey] pending survey synced');
+      console.log('[survey] pending synced');
     } catch (e) {
-      console.warn('[post-survey] pending sync failed:', e?.message || e);
+      console.warn('[survey] pending sync failed:', e?.message || e);
     }
   }
 
-  function setBusy(btn, busy) {
-    if (!btn) return;
-    btn.disabled = !!busy;
-    btn.setAttribute('aria-busy', busy ? 'true' : 'false');
-    if (busy) btn.textContent = '送信中…';
-    else btn.textContent = 'アンケート送信';
-  }
-
-  function notify(kind, msg) {
-    // 最小実装：alert。必要に応じてトーストに差し替え可。
-    try {
-      alert(msg);
-    } catch {}
+  function notify(msg) {
+    try { alert(msg); } catch {}
   }
 
   async function onSubmit(ev) {
     ev?.preventDefault?.();
+    setBusy(true);
 
-    const btn = document.getElementById(BTN_ID);
-    setBusy(btn, true);
-
-    // 送信ペイロード作成
     const payload = buildPayload();
+    if (!validate(payload)) {
+      setBusy(false);
+      return;
+    }
 
-    // オフラインは即ローカル退避
+    // オフライン時はローカル退避
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       savePendingLocally(payload);
-      setBusy(btn, false);
-      notify('ok', 'オフラインのため、回答を一時保存しました。オンライン時に自動送信します。');
+      setBusy(false);
+      notify('オフラインのため、回答を一時保存しました。オンライン時に自動送信します。');
       location.href = 'complete.html';
       return;
     }
 
-    // オンライン時：匿名UIDを確保してDBへ保存
-    let uid = await ensureAnonSafe();
+    // UID確保 → 書き込み
+    const uid = await ensureAnonSafe();
     if (!uid) {
-      // UIDが確保できない場合はローカル保存に切り替え
       savePendingLocally(payload);
-      setBusy(btn, false);
-      notify('ok', 'ユーザー識別に失敗したため、回答を一時保存しました。後でもう一度お試しください。');
+      setBusy(false);
+      notify('ユーザー識別に失敗したため、回答を一時保存しました。後ほど自動送信を試みます。');
       location.href = 'complete.html';
       return;
     }
 
     try {
       await writeSurvey(uid, payload);
-      setBusy(btn, false);
-      notify('ok', 'ご協力ありがとうございます。回答を送信しました！');
-      // 必要に応じて「スペシャルコンテンツ」へ遷移する導線に変更可能
+      setBusy(false);
+      notify('ご協力ありがとうございます。回答を送信しました！');
+      // スペシャルコンテンツ導線を設ける場合はここで遷移先を変更可
       location.href = 'complete.html';
     } catch (e) {
-      console.warn('[post-survey] write failed:', e?.message || e);
-      // 失敗時はローカル退避
+      console.warn('[survey] write failed:', e?.message || e);
       savePendingLocally(payload);
-      setBusy(btn, false);
-      notify('warn', '通信に失敗したため、回答を一時保存しました。オンライン時に自動送信します。');
+      setBusy(false);
+      notify('通信に失敗したため、回答を一時保存しました。オンライン時に自動送信します。');
       location.href = 'complete.html';
     }
   }
 
   async function boot() {
-    // ペンディング分の自動再送（数回リトライ）
+    // 年代入力を数字のみに補正
+    const ageEl = $('#age');
+    if (ageEl) {
+      ageEl.addEventListener('input', () => {
+        const cleaned = ageEl.value.replace(/[^\d]/g, '').slice(0,3);
+        if (ageEl.value !== cleaned) ageEl.value = cleaned;
+      }, { passive: true });
+    }
+
+    // ペンディングの自動再送（軽くリトライ）
     for (let i = 0; i < 2; i++) {
-      try {
-        await trySyncPending();
-        break;
-      } catch {
-        await sleep(300);
-      }
+      await trySyncPending();
+      await sleep(200);
     }
 
     const btn = document.getElementById(BTN_ID);
-    if (btn) {
-      btn.addEventListener('click', onSubmit, { passive: false });
-    } else {
-      console.warn(`[post-survey] #${BTN_ID} が見つかりませんでした`);
-    }
+    if (btn) btn.addEventListener('click', onSubmit, { passive: false });
 
-    // オンライン復帰時にも同期を試みる
+    // オンライン復帰時に同期
     if (typeof window !== 'undefined') {
-      window.addEventListener('online', () => {
-        trySyncPending();
-      });
+      window.addEventListener('online', () => { trySyncPending(); });
     }
   }
 
