@@ -2,20 +2,24 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>ARスタンプラリー | 初回アンケートへ移動</title>
+  <title>ARスタンプラリー | チュートリアルへ移動</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="refresh" content="0; url=initial-survey.html">
-  <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;padding:24px}</style>
+  <!-- フォールバック（JS無効時） -->
+  <meta http-equiv="refresh" content="0; url=tutorial.html">
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;padding:24px}
+    a{color:#0a58ca;font-weight:700}
+  </style>
 </head>
 <body>
-  <p>初回アンケートへ移動しています… 自動で切り替わらない場合は
-    <a id="fallback" href="initial-survey.html">こちら</a>
+  <p>チュートリアルへ移動しています… 自動で切り替わらない場合は
+    <a id="fallback" href="tutorial.html">こちら</a>
   </p>
   <script>
-    (function(){
-      var target = 'initial-survey.html' + location.search + location.hash;
-      location.replace(target);
-      var a=document.getElementById('fallback'); if(a) a.href=target;
+    (function () {
+      var target = 'tutorial.html' + location.search + location.hash;
+      try { location.replace(target); } catch(e) { location.href = target; }
+      var a = document.getElementById('fallback'); if (a) a.href = target;
     })();
   </script>
 </body>

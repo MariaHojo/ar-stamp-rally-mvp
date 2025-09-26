@@ -2,65 +2,46 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>コンプリート！ | ARスタンプラリー</title>
+  <title>コンプリート | ARスタンプラリー</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="css/style.css" />
   <style>
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#f6f7fb}
-    .wrap{max-width:900px;margin:0 auto;padding:20px}
-    .card{background:#fff;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.08);padding:24px;text-align:center}
-    h1{margin:0 0 8px;font-size:24px}
-    p{margin:8px 0 0}
-    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
-    .stamp{background:#fff;border-radius:12px;padding:12px;box-shadow:0 4px 16px rgba(0,0,0,.06)}
-    .stamp img{width:100%;max-width:140px;height:auto;display:block;margin:0 auto}
-    .row{display:flex;gap:10px;margin-top:16px;justify-content:center}
-    .btn{appearance:none;border:0;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:700}
+    .wrap{max-width:900px;margin:20px auto;padding:20px}
+    .card{background:#fff;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.08);padding:24px}
+    h1{margin:0 0 8px;font-size:22px}
+    p.lead{color:#333;margin:0 0 16px}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .btn{appearance:none;border:0;border-radius:10px;padding:12px 16px;cursor:pointer;font-weight:800}
     .btn-primary{background:#0a58ca;color:#fff}
-    .btn-ghost{background:#e9ecef;color:#333}
-    .muted{color:#666;font-size:13px;margin-top:8px}
+    .btn-secondary{background:#e9ecef;color:#111}
+    #notComplete{display:none;background:#fff;border-radius:12px;padding:16px;box-shadow:0 6px 24px rgba(0,0,0,.06)}
   </style>
-  <script src="js/firebase.js" defer></script>
 </head>
 <body>
   <div class="wrap">
-    <div id="card" class="card" aria-live="polite">
-      <h1 id="title">コンプリート！🎉</h1>
-      <p id="desc">3つのスタンプを集めました。おめでとうございます！</p>
+    <!-- 取得が未達のときにcomplete.jsがこのボックスを表示 -->
+    <div id="notComplete">
+      <p>まだ全てのスタンプが集まっていません。マップに戻って続きをお楽しみください。</p>
+      <p><a class="btn btn-secondary" href="map.html">マップに戻る</a></p>
+    </div>
 
-      <div class="grid" style="margin-top:8px">
-        <div class="stamp"><img src="assets/images/stamp01.png" alt="スタンプ1"></div>
-        <div class="stamp"><img src="assets/images/stamp02.png" alt="スタンプ2"></div>
-        <div class="stamp"><img src="assets/images/stamp03.png" alt="スタンプ3"></div>
-      </div>
-
+    <!-- コンプリート時にcomplete.jsがこのカードを表示 -->
+    <div id="completeCard" class="card" style="display:none">
+      <h1>🎉 コンプリート！</h1>
+      <p class="lead">全てのスタンプを集めました。ご参加ありがとうございます！</p>
       <div class="row">
-        <a class="btn btn-primary" href="map.html">マップに戻る</a>
-        <a class="btn btn-ghost" href="tutorial.html">チュートリアルを見る</a>
+        <a class="btn btn-secondary" href="map.html">マップに戻る</a>
+        <!-- ★ 要件に合わせてボタン文言とリンクを更新 -->
+        <a class="btn btn-primary" href="post-survey.html" id="toSurvey">
+          アンケートへ（お答えいただいた方にはスペシャルコンテンツがあります！）
+        </a>
       </div>
-
-      <p id="note" class="muted"></p>
     </div>
   </div>
 
-  <script>
-    (async function(){
-      const uid = await window.ensureAnon();
-      const db = firebase.database();
-      try{
-        const snap = await db.ref('users/'+uid+'/stamps').once('value');
-        const v = snap.val() || {};
-        const complete = !!v.spot1 && !!v.spot2 && !!v.spot3;
-        if(!complete){
-          document.getElementById('title').textContent = 'まだコンプリートしていません';
-          document.getElementById('desc').textContent = 'マップから各スポットのARを起動して、3つ集めましょう。';
-        } else {
-          document.getElementById('note').textContent = '※ このページはいつでも再訪できます。';
-        }
-      }catch(e){
-        console.warn('[complete] read failed', e?.message||e);
-      }
-    })();
-  </script>
+  <!-- スクリプト（complete.jsが #completeCard / #notComplete を制御） -->
+  <script src="js/firebase.js" defer></script>
+  <script src="js/complete.js" defer></script>
 </body>
 </html>
