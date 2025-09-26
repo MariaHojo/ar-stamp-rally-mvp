@@ -1,56 +1,40 @@
 // post-survey.js
-// 指定の設問をスマホ向けUIでバリデーション → Firebase Realtime DB に保存。
-// 保存先: users/{uid}/survey （単一オブジェクト）
-// オフライン/失敗時は localStorage にペンディング保存し、オンライン復帰時に再送。
-// 送信後は complete.html に戻ります（必要なら遷移先を変更可）。
+// バリデーション → Firebase保存。送信後は map.html に戻る。
+// オフライン/失敗時は localStorage に一時保存し、オンライン復帰で自動送信を試行。
 
 (function () {
   const BTN_ID = 'submitSurveyBtn';
-  const FORM_ID = 'surveyForm';
   const PENDING_KEY = 'postSurvey_pending_payload_v2';
 
-  // ---- Likert のタップ操作：選択状態の見た目を更新 ----
   function initLikertPills() {
     document.querySelectorAll('.likert').forEach(group => {
       group.addEventListener('click', (ev) => {
         const label = ev.target.closest('.radio-pill');
         if (!label) return;
-        // ラジオをONにして .is-active を更新
         const input = label.querySelector('input[type="radio"]');
         if (input) {
           input.checked = true;
-          // 同グループの見た目更新
           group.querySelectorAll('.radio-pill').forEach(l => l.classList.remove('is-active'));
           label.classList.add('is-active');
         }
       });
-      // 初期状態の反映
       group.querySelectorAll('input[type="radio"]').forEach(input => {
         if (input.checked) input.closest('.radio-pill')?.classList.add('is-active');
       });
     });
   }
 
-  // ---- 便利関数 ----
   const nowTs = () => Date.now();
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+  const qs = (s, r=document)=> r.querySelector(s);
 
-  function qSel(sel, root=document){ return root.querySelector(sel); }
-  function qSelAll(sel, root=document){ return Array.from(root.querySelectorAll(sel)); }
-
-  function savePendingLocally(payload) {
-    try { localStorage.setItem(PENDING_KEY, JSON.stringify(payload)); } catch {}
-  }
-  function readPendingLocally() {
-    try { const v = localStorage.getItem(PENDING_KEY); return v ? JSON.parse(v) : null; } catch { return null; }
-  }
-  function clearPendingLocally() {
-    try { localStorage.removeItem(PENDING_KEY); } catch {}
-  }
+  function savePendingLocally(payload){ try{ localStorage.setItem(PENDING_KEY, JSON.stringify(payload)); }catch{} }
+  function readPendingLocally(){ try{ const v=localStorage.getItem(PENDING_KEY); return v?JSON.parse(v):null; }catch{ return null; } }
+  function clearPendingLocally(){ try{ localStorage.removeItem(PENDING_KEY); }catch{} }
 
   async function ensureAnonSafe() {
     if (typeof window.ensureAnon === 'function') {
-      try { const uid = await window.ensureAnon(); if (uid) return uid; } catch (e) {}
+      try { const uid = await window.ensureAnon(); if (uid) return uid; } catch {}
     }
     try {
       if (!firebase?.apps?.length && typeof firebaseConfig !== 'undefined') {
@@ -66,29 +50,25 @@
     }
   }
 
-  // ---- 収集 & バリデーション ----
   function getRadioValue(name) {
-    const el = qSel(`input[name="${name}"]:checked`);
+    const el = document.querySelector(`input[name="${name}"]:checked`);
     return el ? Number(el.value) : null;
   }
   function setError(id, show) {
-    const el = qSel(`#${id}`);
+    const el = document.getElementById(id);
     if (el) el.style.display = show ? 'block' : 'none';
   }
   function scrollToField(fieldId) {
-    const box = qSel(`#${fieldId}`);
-    if (!box) return;
-    box.scrollIntoView({behavior:'smooth', block:'center'});
+    const box = document.getElementById(fieldId);
+    if (box) box.scrollIntoView({behavior:'smooth', block:'center'});
   }
 
   function collectAndValidate() {
-    // 年代（必須：半角数字）
-    const ageInput = qSel('#age');
+    const ageInput = document.getElementById('age');
     const ageRaw = (ageInput?.value || '').trim();
     const ageOk = /^[0-9]+$/.test(ageRaw) && ageRaw.length > 0;
     setError('ageErr', !ageOk);
 
-    // 必須ラジオ
     const q2 = getRadioValue('q2'); setError('q2Err', !q2);
     const q3 = getRadioValue('q3'); setError('q3Err', !q3);
     const q5 = getRadioValue('q5'); setError('q5Err', !q5);
@@ -108,21 +88,19 @@
       version: 2,
       submittedAt: nowTs(),
       answers: {
-        age: ageRaw,                        // 1
-        interest_history: q2,               // 2
-        self_research: q3,                  // 3
-        why_self_research: qSel('#q4')?.value || '',     // 4
-        interest_icu_history: q5,           // 5
-        why_interest_icu_history: qSel('#q6')?.value || '', // 6
-        interest_preservation: q7,          // 7
-        why_interest_preservation: qSel('#q8')?.value || '', // 8
-
-        fun: q9,                            // 9
-        why_fun: qSel('#q10')?.value || '', // 10
-        usability: q11,                     // 11
-        why_usability: qSel('#q12')?.value || '', // 12
-
-        free_text: qSel('#q13')?.value || '' // 13
+        age: ageRaw,
+        interest_history: q2,
+        self_research: q3,
+        why_self_research: qs('#q4')?.value || '',
+        interest_icu_history: q5,
+        why_interest_icu_history: qs('#q6')?.value || '',
+        interest_preservation: q7,
+        why_interest_preservation: qs('#q8')?.value || '',
+        fun: q9,
+        why_fun: qs('#q10')?.value || '',
+        usability: q11,
+        why_usability: qs('#q12')?.value || '',
+        free_text: qs('#q13')?.value || '',
       },
       client: {
         ua: (typeof navigator !== 'undefined' ? navigator.userAgent : ''),
@@ -130,11 +108,9 @@
         path: (typeof location !== 'undefined' ? location.pathname + location.search : ''),
       },
     };
-
     return { ok, firstErrorId, payload };
   }
 
-  // ---- 送信処理 ----
   async function writeSurvey(uid, payload) {
     const db = firebase.database();
     const updates = {};
@@ -158,19 +134,19 @@
   }
 
   function setBusy(busy) {
-    const btn = qSel('#' + BTN_ID);
+    const btn = document.getElementById(BTN_ID);
     if (!btn) return;
     btn.setAttribute('aria-busy', busy ? 'true' : 'false');
     btn.textContent = busy ? '送信中…' : 'アンケート送信';
     btn.disabled = !!busy;
   }
 
-  function toast(msg) { try { alert(msg); } catch {} }
+  function toast(msg){ try{ alert(msg); }catch{} }
+  function goMap(){ location.href = 'map.html'; }
 
   async function onSubmit(ev) {
     ev?.preventDefault?.();
 
-    // 収集＆検証
     const { ok, firstErrorId, payload } = collectAndValidate();
     if (!ok) {
       if (firstErrorId) scrollToField(firstErrorId);
@@ -178,11 +154,10 @@
       return;
     }
 
-    // オフラインはローカル退避
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       savePendingLocally(payload);
       toast('オフラインのため、回答を一時保存しました。オンライン時に自動送信します。');
-      location.href = 'complete.html';
+      goMap(); // ★ 送信後は map.html へ
       return;
     }
 
@@ -192,7 +167,7 @@
       savePendingLocally(payload);
       setBusy(false);
       toast('ユーザー識別に失敗したため、回答を一時保存しました。後でもう一度お試しください。');
-      location.href = 'complete.html';
+      goMap(); // ★
       return;
     }
 
@@ -200,27 +175,20 @@
       await writeSurvey(uid, payload);
       setBusy(false);
       toast('ご協力ありがとうございます。回答を送信しました！');
-      location.href = 'complete.html';
+      goMap(); // ★
     } catch (e) {
       console.warn('[post-survey] write failed:', e?.message || e);
       savePendingLocally(payload);
       setBusy(false);
       toast('通信に失敗したため、回答を一時保存しました。オンライン時に自動送信します。');
-      location.href = 'complete.html';
+      goMap(); // ★
     }
   }
 
-  // ---- 起動 ----
   async function boot() {
     initLikertPills();
-
-    // ペンディング再送（軽くリトライ）
-    for (let i = 0; i < 2; i++) {
-      try { await trySyncPending(); break; } catch { await sleep(200); }
-    }
-
-    const btn = qSel('#' + BTN_ID);
-    if (btn) btn.addEventListener('click', onSubmit, { passive:false });
+    for (let i=0;i<2;i++){ try{ await trySyncPending(); break; } catch { await sleep(200); } }
+    document.getElementById(BTN_ID)?.addEventListener('click', onSubmit, { passive:false });
   }
 
   document.addEventListener('DOMContentLoaded', boot);
