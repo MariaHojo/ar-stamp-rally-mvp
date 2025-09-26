@@ -5,41 +5,47 @@
   <title>チュートリアル | ARスタンプラリー</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="css/style.css" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#f6f7fb}
-    .wrap{max-width:900px;margin:0 auto;padding:20px}
-    .card{background:#fff;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.08);padding:20px}
-    h1{margin:0 0 12px;font-size:20px}
-    ol{margin:0 0 10px;padding-left:20px}
-    .row{display:flex;gap:10px;margin-top:16px;justify-content:flex-end}
-    .btn{appearance:none;border:0;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:700}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#f6f7fb;color:#111}
+    .wrap{max-width:960px;margin:0 auto;padding:20px;min-height:100vh;display:flex;flex-direction:column}
+    header{padding:8px 0}
+    h1{font-size:22px;margin:0}
+    .card{background:#fff;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.08);padding:20px;margin-top:12px}
+    ul{margin:0 0 8px 1.2em}
+    .spacer{flex:1}
+    .cta{position:sticky;bottom:0;background:transparent;padding:16px 0}
+    .btn{appearance:none;border:0;border-radius:12px;padding:14px 16px;font-weight:800;cursor:pointer;display:inline-block;text-align:center;width:100%}
     .btn-primary{background:#0a58ca;color:#fff}
   </style>
-  <script src="js/firebase.js" defer></script>
 </head>
 <body>
   <div class="wrap">
-    <div class="card">
+    <header>
       <h1>チュートリアル</h1>
-      <ol>
-        <li>マップの「カメラ起動」を押すとスポットを選べます。</li>
-        <li>現地でARを起動し、表示される「保存して解説へ」ボタンを押すとスタンプが保存されます。</li>
-        <li>解説ページから「マップへ戻る」でマップに戻れます。</li>
-      </ol>
-      <div class="row">
-        <button id="goMap" class="btn btn-primary" type="button">マップへ進む</button>
-      </div>
+    </header>
+
+    <main class="card">
+      <p>遊び方：</p>
+      <ul>
+        <li>マップからスポットを選び、ARカメラを起動。</li>
+        <li>目印にかざしてスタンプを集めましょう（全6箇所）。</li>
+        <li>集め終わったらコンプリート画面からアンケートにご協力ください。</li>
+      </ul>
+      <p>安全のため、周囲に注意してご利用ください。</p>
+    </main>
+
+    <div class="spacer"></div>
+
+    <div class="cta">
+      <button id="startBtn" class="btn btn-primary">マップをひらく</button>
     </div>
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      await window.ensureAnon(); // 念のためUIDを先に確保
-      document.getElementById('goMap').addEventListener('click', () => {
-        try { localStorage.setItem('tutorial_seen', 'true'); }catch(e){}
-        location.href = 'map.html';
-      });
-    });
-  </script>
+  <!-- 必要最小限のみ。初回アンケ誘導の可能性がある login.js 等は読み込まない -->
+  <script src="js/firebase.js" defer></script>
+  <script src="js/tutorial.js?v=20250926" defer></script>
 </body>
 </html>

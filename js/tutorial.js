@@ -1,83 +1,40 @@
-/* tutorial.js（整理版）
-   - 匿名認証の準備を待機（あれば）
-   - 「カメラをテスト」：getUserMediaで許可確認→すぐ停止→/events にログ
-   - 「マップへ進む」：/events にログして map.html へ遷移
-*/
+// tutorial.js (no-initial-survey)
+// 役割：チュートリアル表示と「マップへ」遷移のみ。
+// - 初回アンケートへリダイレクトするロジックは一切含めません。
+// - 必要であれば匿名UIDの確保だけ行い、副作用を起こしません。
 
 (function () {
-  const $ = (s) => document.querySelector(s);
-  const testBtn = $('#testCameraBtn');
-  const goBtn   = $('#goMapBtn');
-  const status  = $('#camStatus');
-
-  function setStatusOk(msg){ status.innerHTML = `<span class="ok">✔ ${msg}</span>`; }
-  function setStatusNg(msg){ status.innerHTML = `<span class="ng">✖ ${msg}</span>`; }
-  function setStatus(msg){ status.textContent = msg || ''; }
-
-  async function ensureFirebaseReady() {
-    if (window.firebaseReadyPromise) {
-      try { await window.firebaseReadyPromise; } catch (e) { /* no-op */ }
+  async function ensureAnonSafe() {
+    // firebase.js 側の ensureAnon を利用（なければフォールバック）
+    if (typeof window.ensureAnon === 'function') {
+      try { return await window.ensureAnon(); } catch {}
     }
-    return (window.firebase && firebase.apps && firebase.apps.length) ? firebase : null;
-  }
-
-  // 最小イベントログ（任意）
-  async function logEvent(type, meta = {}) {
-    const fb = await ensureFirebaseReady();
-    if (!fb) return;
     try {
-      const uid = (firebase.auth().currentUser && firebase.auth().currentUser.uid) || localStorage.getItem('uid') || 'guest';
-      const ref = firebase.database().ref('events').push();
-      await ref.set({
-        uid,
-        type,          // 'tutorial_open' | 'camera_test' | 'go_map'
-        ...meta,       // { ok: true/false, err: '...' }
-        ts: (typeof firebase.database.ServerValue !== 'undefined' && firebase.database.ServerValue.TIMESTAMP) || Date.now(),
-        ua: navigator.userAgent
-      });
-    } catch (e) { /* no-op */ }
-  }
-
-  async function testCamera() {
-    setStatus('カメラ起動をテストしています…');
-    testBtn.disabled = true;
-    try {
-      // できるだけ軽い取得（フロントカメラを強制しない）
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-      // すぐ停止
-      try { stream.getTracks().forEach(t => t.stop()); } catch {}
-      setStatusOk('カメラの使用許可が確認できました。AR起動も問題ない見込みです。');
-      await logEvent('camera_test', { ok: true });
+      if (!firebase?.apps?.length && typeof firebaseConfig !== 'undefined') {
+        firebase.initializeApp(firebaseConfig);
+      }
+      const auth = firebase.auth();
+      if (auth.currentUser) return auth.currentUser.uid;
+      const cred = await auth.signInAnonymously();
+      return cred.user && cred.user.uid;
     } catch (e) {
-      // ブラウザ権限が拒否 / 端末にカメラ無し / ページが非HTTPS など
-      const msg = (e && e.name) ? `${e.name}: ${e.message || ''}` : (e && e.message) || '不明なエラー';
-      setStatusNg('カメラが使用できませんでした。ブラウザのサイト設定からカメラ許可をご確認ください。');
-      await logEvent('camera_test', { ok: false, err: msg });
-    } finally {
-      testBtn.disabled = false;
+      console.warn('[tutorial] anon sign-in skipped:', e?.message || e);
+      return null;
     }
   }
 
-  async function goToMap() {
-    goBtn.disabled = true;
-    setStatus('');
-    try {
-      await logEvent('go_map');
-    } finally {
-      location.href = 'map.html';
-    }
+  function goMap() {
+    // 余計な中継を避けて直接 map.html へ
+    location.href = 'map.html';
   }
 
-  async function init() {
-    // ページ表示をイベントログ（任意）
-    logEvent('tutorial_open').catch(()=>{});
+  function boot() {
+    const btn = document.getElementById('startBtn');
+    if (btn) btn.addEventListener('click', goMap, { passive: true });
 
-    if (testBtn) testBtn.addEventListener('click', testCamera);
-    if (goBtn)   goBtn.addEventListener('click', goToMap);
-
-    // iOS の戻るキャッシュ対策（戻ってきたら表示をクリア）
-    window.addEventListener('pageshow', () => setStatus(''));
+    // 匿名UIDだけ事前に確保（画面遷移やストレージ変更などの副作用は起こさない）
+    ensureAnonSafe();
   }
 
-  document.addEventListener('DOMContentLoaded', init);
+  document.addEventListener('DOMContentLoaded', boot);
 })();
