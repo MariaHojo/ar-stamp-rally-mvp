@@ -1,12 +1,11 @@
-// js/explanation.js（explanation.htmlのIDに合わせて修正済み）
+// explanation.js（差し替え版）
 // 役割：
-//  - ?spotId=spot1（優先）または <body data-spot="spot1"> から spotId を取得
-//  - タイトル/サブタイトル/画像/本文を spotId ごとに出し分け
-//  - 表示時に users/{uid}/stamps/{spotId} = true を保存（uidは firebase.js の ensureAnon で匿名発行）
-//  - uid名前空間付き localStorage をフォールバックとして更新
-
+//  - ?spotId=spot1..spot6（優先）または <body data-spot="spotN"> から spotId を取得
+//  - タイトル/サブタイトル/画像/本文を spotId ごとに出し分け（6件）
+//  - 表示時に users/{uid}/stamps/{spotId} = true を保存（匿名UIDは ensureAnon で保証）
+//  - uid名前空間付き localStorage（stamp_<uid>_<spotId>）をフォールバック更新
 (function () {
-  function $(s) { return document.querySelector(s); }
+  const $ = (s) => document.querySelector(s);
 
   // --- spotId 判定 ---
   function getQuery(key) {
@@ -14,7 +13,7 @@
   }
   function normalizeSpotId(v) {
     const id = String(v || '').trim().toLowerCase();
-    return /^spot[1-3]$/.test(id) ? id : 'spot1';
+    return /^spot[1-6]$/.test(id) ? id : 'spot1';
   }
   function getSpotId() {
     const urlId = getQuery('spotId');
@@ -26,7 +25,7 @@
   function getUidSync() {
     try {
       return (firebase && firebase.auth && firebase.auth().currentUser && firebase.auth().currentUser.uid)
-        || localStorage.getItem('uid');
+           || localStorage.getItem('uid');
     } catch { return null; }
   }
   function lsKey(spot) {
@@ -34,50 +33,28 @@
     return `stamp_${uid}_${spot}`;
   }
 
-  // --- 表示コンテンツ（必要に応じて編集） ---
+  // --- 表示コンテンツ（プレースホルダ：必要に応じて差し替え） ---
   const CONTENT = {
-    spot1: {
-      title: 'スポット1の解説',
-      subtitle: 'ここでは〇〇の歴史について学べます',
-      image: 'assets/images/explain-spot1.jpg',
-      bodyHtml: 'ARで見つけた印に注目してみましょう。'
-    },
-    spot2: {
-      title: 'スポット2の解説',
-      subtitle: 'この場所は△△で有名です',
-      image: 'assets/images/explain-spot2.jpg',
-      bodyHtml: '展示のポイントを見逃さないように！'
-    },
-    spot3: {
-      title: 'スポット3の解説',
-      subtitle: 'ゴール目前！□□の豆知識もチェック',
-      image: 'assets/images/explain-spot3.jpg',
-      bodyHtml: '最後まで楽しんでください。'
-    }
+    spot1: { title: 'スポット1の解説', subtitle: 'ここでは〇〇の歴史について学べます', image: 'assets/images/explain-spot1.jpg', bodyHtml: 'ARで見つけた印に注目してみましょう。' },
+    spot2: { title: 'スポット2の解説', subtitle: 'この場所は△△で有名です',           image: 'assets/images/explain-spot2.jpg', bodyHtml: '展示のポイントを見逃さないように！' },
+    spot3: { title: 'スポット3の解説', subtitle: 'ゴール目前！□□の豆知識もチェック',   image: 'assets/images/explain-spot3.jpg', bodyHtml: '最後まで楽しんでください。' },
+    spot4: { title: 'スポット4の解説', subtitle: '（差し替え）',                        image: 'assets/images/explain-spot4.jpg', bodyHtml: '（差し替え）' },
+    spot5: { title: 'スポット5の解説', subtitle: '（差し替え）',                        image: 'assets/images/explain-spot5.jpg', bodyHtml: '（差し替え）' },
+    spot6: { title: 'スポット6の解説', subtitle: '（差し替え）',                        image: 'assets/images/explain-spot6.jpg', bodyHtml: '（差し替え）' },
   };
 
   function renderContent(spotId) {
     const c = CONTENT[spotId] || CONTENT.spot1;
-
-    // <title> 更新（任意）
     try { document.title = `${c.title} | ARスタンプラリー`; } catch {}
-
-    // explanation.html の要素IDに合わせる
-    const ttl  = $('#spotTitle');
-    const sub  = $('#spotSubtitle');
-    const img  = $('#spotImage');
-    const body = $('#spotBody');
-
-    if (ttl) ttl.textContent = c.title;
-    if (sub) sub.textContent = c.subtitle || '';
-    if (img) { img.src = c.image; img.alt = c.title; }
-    if (body) body.innerHTML = c.bodyHtml;
+    $('#spotTitle')   && ($('#spotTitle').textContent = c.title);
+    $('#spotSubtitle')&& ($('#spotSubtitle').textContent = c.subtitle || '');
+    const img = $('#spotImage'); if (img) { img.src = c.image; img.alt = c.title; }
+    $('#spotBody')    && ($('#spotBody').innerHTML = c.bodyHtml);
   }
 
   // --- スタンプ保存（オンライン優先、失敗してもローカル反映） ---
   async function saveStamp(spotId) {
     let uid = null;
-    // 匿名サインインを保証（firebase.js で window.ensureAnon を定義済み）
     try { uid = await window.ensureAnon(); } catch (e) { console.warn('[explanation] ensureAnon failed:', e); }
 
     // ローカル先行
@@ -97,11 +74,17 @@
     }
   }
 
-  // 戻るリンクは <a href="map.html" id="backToMap"> なので追加処理不要
   function bindBack() {
     const btn = $('#backToMap');
-    if (!btn) return;
-    // aタグのデフォルト遷移でOK。buttonに変える場合のみ location.href を設定。
+    // aタグのデフォルト遷移でOK。必要に応じて withV('map.html') に書き換えも可。
+    if (btn && typeof window.withV === 'function') {
+      try {
+        const u = new URL(btn.getAttribute('href'), location.href);
+        if (u.pathname.endsWith('/map.html') || u.pathname.endsWith('map.html')) {
+          btn.setAttribute('href', window.withV('map.html'));
+        }
+      } catch {}
+    }
   }
 
   async function boot() {

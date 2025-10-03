@@ -20,27 +20,23 @@
 </head>
 <body>
   <div class="wrap">
-    <!-- 取得が未達のときにcomplete.jsがこのボックスを表示 -->
     <div id="notComplete">
       <p>まだ全てのスタンプが集まっていません。マップに戻って続きをお楽しみください。</p>
-      <p><a class="btn btn-secondary" href="map.html">マップに戻る</a></p>
+      <p><a class="btn btn-secondary" href="map.html?v=20251003">マップに戻る</a></p>
     </div>
 
-    <!-- コンプリート時にcomplete.jsがこのカードを表示 -->
     <div id="completeCard" class="card" style="display:none">
       <h1>🎉 コンプリート！</h1>
       <p class="lead">全てのスタンプを集めました。ご参加ありがとうございます！</p>
       <div class="row">
-        <a class="btn btn-secondary" href="map.html">マップに戻る</a>
-        <!-- ★ 要件に合わせてボタン文言とリンクを更新 -->
-        <a class="btn btn-primary" href="post-survey.html" id="toSurvey">
+        <a class="btn btn-secondary" href="map.html?v=20251003">マップに戻る</a>
+        <a class="btn btn-primary" href="post-survey.html?v=20251003" id="toSurvey">
           アンケートへ（お答えいただいた方にはスペシャルコンテンツがあります！）
         </a>
       </div>
     </div>
   </div>
 
-  <!-- スクリプト（complete.jsが #completeCard / #notComplete を制御） -->
   <script src="js/firebase.js" defer></script>
   <script src="js/complete.js" defer></script>
 </body>
