@@ -1,9 +1,9 @@
-/* map.js（差し替え版：写真の遅延読込＆再試行抑止）
+/* map.js（差し替え版：写真リンク＋オーバーレイ名表示／遅延読込）
  *  - スタンプ帳（6箇所）を Firebase v8 + localStorage で正しく反映
  *  - 6/6 達成で初回のみ完走モーダル表示＆インラインリンク表示
  *  - 「カメラ起動」→ スポット選択（写真カードの2列×3行グリッド）
- *  - 8th Wall 各プロジェクトURLへ遷移（spotId/uid をクエリ付与）
- *  - 写真はモーダル表示時のみ遅延ロード／一度だけ拡張子フォールバック／失敗後は再試行しない
+ *  - 写真はリンク埋め込み（クリック＝AR起動）。ARバッジ／spotXX表記／起動ボタンはナシ
+ *  - 画像はモーダル表示時のみ遅延ロード／jpg失敗時にpngを1回だけ試行／以降再試行しない
  */
 
 const $  = (s)=>document.querySelector(s);
@@ -87,8 +87,7 @@ function renderStampUI(stamps){
   });
 
   const cnt = ALL_SPOTS.reduce((n,id)=> n + (stamps[id] ? 1 : 0), 0);
-  const elCount = $('#stampCount');
-  if (elCount) elCount.textContent = `${cnt}/${ALL_SPOTS.length}`;
+  $('#stampCount')?.textContent = `${cnt}/${ALL_SPOTS.length}`;
 
   const inline = $('#completeInline');
   if (inline) inline.style.display = (cnt >= COMPLETE_TARGET) ? 'block' : 'none';
@@ -118,7 +117,7 @@ async function handleCompletionFlow(uid, stamps){
   lsSet(seenKey(uid), 'true');
 }
 
-/* ====== カメラ起動（写真の遅延読込を徹底） ====== */
+/* ====== カメラ起動（写真リンク：遅延読込を徹底） ====== */
 
 /* 画像URL生成（まず jpg を試し、必要なら png フォールバック） */
 function photoUrl(spotId, ext='jpg'){
@@ -142,10 +141,12 @@ function ensureObserver(){
   if (imgObserver) return imgObserver;
   imgObserver = new IntersectionObserver((entries)=>{
     entries.forEach(entry=>{
-      const img = entry.target;
+      const target = entry.target;
       if (!entry.isIntersecting) return;
-      imgObserver.unobserve(img);
-      lazyLoadImage(img);
+      imgObserver.unobserve(target);
+      // target は <img> かもしれないし、<a> かもしれないので判定
+      const img = target.tagName === 'IMG' ? target : target.querySelector('img[data-spot]');
+      if (img) lazyLoadImage(img);
     });
   }, {root: $('#cameraChooser'), rootMargin: '50px', threshold: 0.01});
   return imgObserver;
@@ -157,8 +158,7 @@ function lazyLoadImage(img){
   if (!sid) return;
 
   if (PHOTO_STATE[sid] === 'ok' || PHOTO_STATE[sid] === 'fail') {
-    // すでに決着済み（ok or 完全失敗）
-    return;
+    return; // すでに決着済み
   }
 
   // 1) jpg を試す
@@ -186,7 +186,7 @@ function lazyLoadImage(img){
   }
 }
 
-/* グリッドDOMの構築（初回のみ）。画像はここでは読み込まない（src未設定） */
+/* グリッドDOMの構築（初回のみ）。画像はここでは読み込まない（srcは1pxプレースホルダ） */
 function buildCameraChooserItemsOnce(){
   if (cameraGridBuilt) return;
   const grid = $('#cameraGrid');
@@ -195,62 +195,58 @@ function buildCameraChooserItemsOnce(){
 
   ALL_SPOTS.forEach((id)=>{
     const isAR = AR_SPOTS.includes(id);
+    // 画像がない／準備中であっても見た目は同一（ご要望に合わせてバッジ等は表示しない）
 
     const card = document.createElement('div');
-    card.className = 'spot-card' + (isAR ? '' : ' is-disabled');
+    card.className = 'spot-card';
 
-    // サムネ（正方形・丸角） ※ src は設定しない＝0リクエスト
+    // 画像リンク（写真全体がリンク）
+    const link = document.createElement('a');
+    link.href = 'javascript:void(0)';
+    link.className = 'spot-link';
+    link.setAttribute('role', 'button');
+    link.setAttribute('data-spot', id);
+    link.style.display = 'block';
+
+    // サムネ（正方形・丸角）
     const thumb = document.createElement('div');
-    thumb.className = 'spot-thumb';
+    thumb.className = 'spot-thumb';              // map.html 側CSS: position:relative; aspect-ratio:1/1;
 
     const img = document.createElement('img');
     img.alt = `${SPOT_LABEL[id] || id} の写真`;
     img.loading = 'lazy';
-    img.src = PLACEHOLDER;              // 透過的な灰色1px（ネットワークリクエストなし）
-    img.setAttribute('data-spot', id);  // 後で lazyLoadImage が参照
+    img.src = PLACEHOLDER;                       // ここではネットワークリクエストを発生させない
+    img.setAttribute('data-spot', id);
     thumb.appendChild(img);
 
-    // バッジ
-    const badge = document.createElement('div');
-    badge.className = 'badge' + (isAR ? '' : ' badge-gray');
-    badge.textContent = isAR ? 'AR' : '準備中';
-    thumb.appendChild(badge);
+    // オーバーレイのスポット名（ふち有文字） — 写真と重ねる
+    const nameOverlay = document.createElement('div');
+    nameOverlay.className = 'spot-name';
+    nameOverlay.textContent = SPOT_LABEL[id] || id.toUpperCase();
+    // 重ね表示のための最小スタイル（map.html の .spot-name がアウトライン指定済）
+    Object.assign(nameOverlay.style, {
+      position: 'absolute',
+      left: '10px',
+      bottom: '10px',
+      zIndex: 2,
+    });
+    thumb.appendChild(nameOverlay);
 
-    // 名称（ふち有）
-    const nameWrap = document.createElement('div');
-    nameWrap.className = 'spot-name-wrap';
-    const name = document.createElement('div');
-    name.className = 'spot-name';
-    name.textContent = SPOT_LABEL[id] || id.toUpperCase();
-    nameWrap.appendChild(name);
-
-    // アクション
-    const action = document.createElement('div');
-    action.className = 'spot-action';
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.textContent = isAR ? 'このスポットのARを起動' : '起動できません';
-    if (!isAR) {
-      btn.disabled = true;
-    } else {
-      btn.addEventListener('click', async ()=>{
-        const uid  = await ensureAnonSafe();
-        const base = EIGHTHWALL_URLS[id];
-        if (!base) { alert('このスポットのAR URLが未設定です'); return; }
-        const url = new URL(base);
-        url.searchParams.set('spotId', id);
-        if (uid) url.searchParams.set('uid', uid);
-        location.href = url.toString();
-      });
-    }
-    action.appendChild(btn);
-
-    // カード構築
-    card.appendChild(thumb);
-    card.appendChild(nameWrap);
-    card.appendChild(action);
-
+    link.appendChild(thumb);
+    card.appendChild(link);
     grid.appendChild(card);
+
+    // クリックで AR 起動
+    link.addEventListener('click', async ()=>{
+      if (!isAR) return; // すべてARだが念のため
+      const uid  = await ensureAnonSafe();
+      const base = EIGHTHWALL_URLS[id];
+      if (!base) { alert('このスポットのAR URLが未設定です'); return; }
+      const url = new URL(base);
+      url.searchParams.set('spotId', id);
+      if (uid) url.searchParams.set('uid', uid);
+      location.href = url.toString();
+    });
   });
 
   cameraGridBuilt = true;
@@ -260,17 +256,15 @@ function buildCameraChooserItemsOnce(){
 function showCameraChooser(){
   buildCameraChooserItemsOnce();
 
-  // 開いたあとに少し待ってから可視領域を監視（開くアニメーション考慮）
   $('#cameraChooserOverlay')?.classList.add('is-open');
   $('#cameraChooser')?.classList.add('is-open');
 
   setTimeout(()=>{
     const obs = ensureObserver();
-    // 既にOK/FAILがついているものは監視不要
+    // 画像要素を監視（見えたら jpg→png の順に一度だけ試行）
     $$('#cameraGrid img[data-spot]').forEach(img=>{
       const sid = img.getAttribute('data-spot');
-      if (PHOTO_STATE[sid] === 'ok' || PHOTO_STATE[sid] === 'fail') return; // 決着済
-      // まだ何も試していない場合だけ監視開始
+      if (PHOTO_STATE[sid] === 'ok' || PHOTO_STATE[sid] === 'fail') return; // 決着済は不要
       if (!PHOTO_STATE[sid]) obs.observe(img);
     });
   }, 120);
@@ -279,7 +273,6 @@ function showCameraChooser(){
 function hideCameraChooser(){
   $('#cameraChooserOverlay')?.classList.remove('is-open');
   $('#cameraChooser')?.classList.remove('is-open');
-  // 非表示にしても監視は維持（次回開いたときに未ロードの分だけ再計算）
 }
 
 /* ====== 起動 ====== */
@@ -311,7 +304,7 @@ async function boot(){
     await handleCompletionFlow(uid, s);
   });
 
-  // data-ar-spot / #openAR-spotN（直接ボタンがある場合のフォールバック）
+  // フォールバック：もし data-ar-spot / #openAR-spotN が別途ある場合
   document.querySelectorAll('[data-ar-spot]').forEach(btn=>{
     btn.addEventListener('click', async (ev)=>{
       ev.preventDefault();
