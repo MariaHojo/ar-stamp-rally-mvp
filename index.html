@@ -2,28 +2,30 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>ARスタンプラリー | チュートリアルへ移動</title>
+  <title>ARスタンプラリー | エントリ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- JS無効時フォールバック -->
-  <meta http-equiv="refresh" content="0; url=tutorial.html?v=20250926">
-  <!-- できるだけキャッシュ回避 -->
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-  <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;padding:24px}
-    a{color:#0a58ca;font-weight:700}
-  </style>
+  <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;padding:24px;line-height:1.6}</style>
 </head>
 <body>
-  <p>チュートリアルへ移動しています… 自動で切り替わらない場合は
-    <a id="fallback" href="tutorial.html?v=20250926">こちら</a>
-  </p>
+  <p>読み込み中です… 切り替わらない場合は <a id="fallback" href="tutorial.html">こちら</a></p>
   <script>
-    (function () {
-      var target = 'tutorial.html?v=20250926' + location.search + location.hash;
-      try { location.replace(target); } catch(e) { location.href = target; }
-      var a = document.getElementById('fallback'); if (a) a.href = target;
+    (function(){
+      // withV がまだ読み込まれていない環境用の簡易版
+      if (!window.withV) {
+        window.BUILD_V = window.BUILD_V || '20251003';
+        window.withV = function(url){ return url + (url.includes('?') ? '&' : '?') + 'v=' + window.BUILD_V; };
+      }
+      // NFC/QR のクエリを保持（将来用）
+      var p = new URLSearchParams(location.search);
+      try {
+        var sid = p.get('spotId'); if (sid) localStorage.setItem('pending_spotId', sid);
+        var via = p.get('via');    if (via) localStorage.setItem('via', via);
+      } catch(e){}
+      // 初回のみ tutorial、以降は map
+      var seen = false; try { seen = localStorage.getItem('tutorial_done') === '1'; } catch(e){}
+      var next = seen ? 'map.html' : 'tutorial.html';
+      var a = document.getElementById('fallback'); if (a) a.href = withV(next);
+      location.replace(withV(next));
     })();
   </script>
 </body>

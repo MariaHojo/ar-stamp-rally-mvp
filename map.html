@@ -114,7 +114,7 @@
     .camera-chooser .meta .type{font-size:12px;color:#333}
     .camera-chooser .go{white-space:nowrap}
 
-    /* ======= 完走モーダル（complete.html 相当） ======= */
+    /* ======= 完走モーダル ======= */
     .complete-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);z-index:1000;display:none}
     .complete-overlay.is-open{display:block}
     .complete-modal{
@@ -127,14 +127,13 @@
     .complete-lead{margin:0 0 14px}
     .complete-row{display:flex;gap:8px;flex-wrap:wrap}
 
-     /* 未取得のスタンプは薄く表示。取得済みでくっきり */
-  .stamp-cell .stamp-thumb img { opacity:0; filter: grayscale(0.2); transition: opacity .2s }
-  .stamp-cell.is-got .stamp-thumb img { opacity:1; filter:none }
+    /* 取得/未取得の見た目 */
+    .stamp-cell .stamp-thumb img { opacity:0; filter: grayscale(0.2); transition: opacity .2s }
+    .stamp-cell.is-got .stamp-thumb img { opacity:1; filter:none }
   </style>
 </head>
 <body>
   <div id="pageRoot">
-
     <div class="wrap">
       <!-- 上部 1/6 エリア -->
       <div class="top-grid" aria-label="上部メニュー">
@@ -217,7 +216,7 @@
   <div id="cameraChooserOverlay" class="camera-chooser-overlay" aria-hidden="true"></div>
   <div id="cameraChooser" class="camera-chooser" role="dialog" aria-modal="true" aria-labelledby="cameraChooserTitle" aria-describedby="cameraChooserDesc">
     <h3 id="cameraChooserTitle">スポットを選んでください</h3>
-    <p id="cameraChooserDesc" style="margin:0 0 10px;color:#333">ARスポット（1〜3）はカメラを起動します。非AR（4〜6）はこの吹き出しでは起動しません。</p>
+    <p id="cameraChooserDesc" style="margin:0 0 10px;color:#333">全6スポットでカメラを起動できます。</p>
     <div id="cameraChooserList" class="list"></div>
     <div style="margin-top:8px;text-align:right">
       <button id="cameraChooserClose" class="btn btn-secondary" type="button">閉じる</button>
@@ -235,7 +234,7 @@
     </div>
   </div>
 
-  <!-- 小さな補助スクリプト（折り畳みのみ）。アプリロジックは map.js に集約 -->
+  <!-- 折り畳み（最小） -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const btn = document.getElementById('stampToggle');
@@ -251,6 +250,6 @@
   </script>
 
   <script src="js/firebase.js" defer></script>
-  <script src="js/map.js?v=20250926d" defer></script>
+  <script src="js/map.js?v=20251003" defer></script>
 </body>
 </html>

@@ -27,5 +27,20 @@
     </article>
     <p style="margin-top:16px"><a href="map.html" id="backToMap">マップへ戻る</a></p>
   </main>
+<!-- explanation.html の </body> 直前に追記 -->
+<script>
+  (function(){
+    if (!window.withV) {
+      window.BUILD_V = window.BUILD_V || '20251003';
+      window.withV = (url) => url + (url.includes('?') ? '&' : '?') + 'v=' + window.BUILD_V;
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      var a = document.getElementById('backToMap');
+      if (a) a.href = withV('map.html');
+    });
+  })();
+</script>
+
+
 </body>
 </html>
