@@ -2,45 +2,99 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>解説ページ</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="css/style.css" />
+  <title>解説ページ | ARスタンプラリー</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
   <style>
-    .hero{max-width:900px;margin:16px auto;display:grid;gap:12px;grid-template-columns:120px 1fr;align-items:flex-start}
-    .hero img{width:120px;height:120px;object-fit:contain}
-    .content{max-width:900px;margin:0 auto;}
+    :root{
+      --brand:#005ABB;
+      --text:#111;
+      --muted:#6b7280;
+      --card:#ffffff;
+      --bg:#f6f7fb;
+      --radius:16px;
+      --shadow:0 14px 40px rgba(0,0,0,.10);
+    }
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;}
+    .wrap{max-width:760px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding:16px;box-sizing:border-box}
+    header{padding:2px 4px 12px}
+    h1{font-size:clamp(20px,4.8vw,28px);margin:0 0 4px;font-weight:900;color:var(--brand)}
+    .spot-sub{font-size:clamp(12px,3.2vw,14px);color:var(--muted);margin:0}
+
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin:10px 0}
+
+    .stamp-area{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap}
+    .stamp-img{width:min(50vw,240px);max-width:300px;height:auto;display:block;border-radius:12px;background:#fff}
+    .stamp-caption{font-size:clamp(11px,3.2vw,12px);color:#2f855a;text-align:center}
+
+    .quiz-title{
+      display:inline-block;margin:8px 0 4px;padding:4px 10px;border-radius:999px;
+      background:linear-gradient(90deg,#ffcf33,#ff8a33); color:#111; font-weight:900;
+      font-size:clamp(16px,4.6vw,22px); letter-spacing:.02em;
+      -webkit-text-stroke: 0.6px rgba(0,0,0,.25); text-shadow:0 2px 0 rgba(0,0,0,.06);
+    }
+
+    .photo{width:100%;border-radius:12px;display:block;background:#eee;object-fit:cover;aspect-ratio:16/9}
+
+    .quiz-body{font-size:clamp(14px,4.2vw,16px);line-height:1.6;margin:8px 0 6px}
+    .choices{list-style:none;padding:0;margin:6px 0;display:grid;gap:8px}
+    .choice{
+      border:1.5px solid #d7def0;border-radius:12px;padding:10px 12px;background:#fff;
+      font-size:clamp(14px,4.2vw,16px);line-height:1.5;display:flex;gap:10px;align-items:flex-start
+    }
+    .choice .label{font-weight:900;color:var(--brand);min-width:1.8em}
+
+    .btn{appearance:none;border:0;border-radius:12px;padding:14px 16px;font-weight:900;cursor:pointer;display:inline-block;text-align:center;width:100%}
+    .btn-primary{background:var(--brand);color:#fff;box-shadow:0 10px 28px rgba(0,90,187,.28)}
+    .btn-ghost{background:#eef3fb;color:#0a1d3a}
+    .btn:active{transform:translateY(1px)}
+
+    .answer{margin-top:10px;padding:14px;border-radius:12px;background:#fff5d8;border:1px solid #ffe6a3;display:none}
+    .answer .ansline{font-weight:900;font-size:clamp(18px,5vw,22px);margin-bottom:6px}
+    .explain{font-size:clamp(14px,4.2vw,16px);line-height:1.7;color:#2a2a2a}
+
+    footer{margin-top:auto;padding:12px 0}
   </style>
-  <script src="js/firebase.js" defer></script>
-  <script src="js/explanation.js" defer></script>
 </head>
 <body>
-  <main class="content">
-    <div class="hero">
-      <img id="spotImage" src="" alt="スタンプ画像">
-      <div>
-        <h1 id="spotTitle">スポット</h1>
-        <div id="spotSubtitle" style="color:#666"></div>
+  <div class="wrap">
+    <header>
+      <h1 id="spotName">スポット名（XX）</h1>
+      <p id="spotLead" class="spot-sub">ここにサブタイトルや一言（任意）</p>
+    </header>
+
+    <section class="card">
+      <div class="stamp-area">
+        <img id="stampImg" class="stamp-img" src="" alt="獲得スタンプ" />
+        <div class="stamp-caption">スタンプをゲットしました！</div>
       </div>
-    </div>
-    <article id="spotBody">
-      <!-- スポットの本文は JS で差し込み -->
-    </article>
-    <p style="margin-top:16px"><a href="map.html" id="backToMap">マップへ戻る</a></p>
-  </main>
-<!-- explanation.html の </body> 直前に追記 -->
-<script>
-  (function(){
-    if (!window.withV) {
-      window.BUILD_V = window.BUILD_V || '20251003';
-      window.withV = (url) => url + (url.includes('?') ? '&' : '?') + 'v=' + window.BUILD_V;
-    }
-    document.addEventListener('DOMContentLoaded', () => {
-      var a = document.getElementById('backToMap');
-      if (a) a.href = withV('map.html');
-    });
-  })();
-</script>
+    </section>
 
+    <section class="card">
+      <div class="quiz-title">クイズ</div>
+      <img id="spotPhoto" class="photo" src="" alt="スポット写真" />
+      <p id="quizText" class="quiz-body">（ここに60〜100文字程度のクイズ本文が入ります。XXを編集してください）</p>
+      <ul id="choices" class="choices">
+        <!-- JSで A/B/C を挿入 -->
+      </ul>
+      <button id="showAnswerBtn" class="btn btn-primary">答えを見る</button>
 
+      <div id="answerBox" class="answer">
+        <div id="answerLine" class="ansline">答え：A（XX）</div>
+        <div id="answerExplain" class="explain">（ここに解説本文。15〜18歳向けに、短く要点→驚き→もっと知る誘導の順で）</div>
+      </div>
+    </section>
+
+    <footer>
+      <a id="backToMap" class="btn btn-ghost" href="map.html">マップに戻る</a>
+    </footer>
+  </div>
+
+  <!-- 依存JS（firebase.js で ensureAnon が定義されている想定） -->
+  <script src="firebase.js"></script>
+  <script src="explanation.js"></script>
 </body>
 </html>
