@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <title>チュートリアル | ARスタンプラリー</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="css/style.css" />
+  <!-- 既存構成では style.css はルート直下。フォルダに入れていない場合はこちらを使ってください -->
+  <link rel="stylesheet" href="style.css" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
@@ -19,6 +20,8 @@
     .cta{position:sticky;bottom:0;background:transparent;padding:16px 0}
     .btn{appearance:none;border:0;border-radius:12px;padding:14px 16px;font-weight:800;cursor:pointer;display:inline-block;text-align:center;width:100%}
     .btn-primary{background:#0a58ca;color:#fff}
+    footer{margin-top:16px;text-align:center;font-size:12px;color:#444}
+    footer a{color:#0a58ca;text-decoration:underline}
   </style>
 </head>
 <body>
@@ -30,22 +33,42 @@
     <main class="card">
       <p>遊び方：</p>
       <ul>
-        <li>マップからスポットを選び、ARカメラを起動。</li>
-        <li>目印にかざしてスタンプを集めましょう（全6箇所）。</li>
-        <li>集め終わったらコンプリート画面からアンケートにご協力ください。</li>
+        <li>マップからスポットを選び、ARカメラを起動します（全6箇所）。</li>
+        <li>現地で体験後「保存して解説へ」→解説ページでスタンプが付きます。</li>
+        <li>6個集めたらコンプリート！アンケートにご協力ください。</li>
       </ul>
-      <p>安全のため、周囲に注意してご利用ください。</p>
+      <p>安全のため、周囲に注意してご利用ください（歩きスマホ禁止）。</p>
     </main>
 
     <div class="spacer"></div>
 
     <div class="cta">
-      <button id="startBtn" class="btn btn-primary">マップをひらく</button>
+      <button id="startBtn" class="btn btn-primary" aria-label="マップをひらく">マップをひらく</button>
     </div>
+
+    <footer>
+      <a href="terms.html">利用規約 / プライバシー</a>
+    </footer>
   </div>
 
-  <!-- 必要最小限のみ。初回アンケ誘導の可能性がある login.js 等は読み込まない -->
-  <script src="js/firebase.js" defer></script>
-  <script src="js/tutorial.js?v=20250926" defer></script>
+  <!-- 余計なJSは読み込まず、最小限で遷移だけ行う -->
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // withV が未定義でも動くようにフォールバック（firebase.jsに定義済みの想定）
+      if (!window.withV) {
+        window.BUILD_V = window.BUILD_V || '20251003';
+        window.withV = (url) => url + (url.includes('?') ? '&' : '?') + 'v=' + window.BUILD_V;
+      }
+
+      // 匿名UIDの確保（ensureAnon がある場合のみ）
+      try { await window.ensureAnon?.(); } catch (e) {}
+
+      const btn = document.getElementById('startBtn'); // ← HTMLのIDと一致
+      btn?.addEventListener('click', () => {
+        try { localStorage.setItem('tutorial_done', '1'); } catch (e) {}
+        location.href = withV('map.html'); // 版数付きで遷移（キャッシュ回避）
+      });
+    });
+  </script>
 </body>
 </html>
