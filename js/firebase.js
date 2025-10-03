@@ -46,3 +46,6 @@
     return user.uid;
   };
 })();
+// --- cache busting (build version) ---
+window.BUILD_V = '20251003';
+window.withV = (url) => url + (url.includes('?') ? '&' : '?') + 'v=' + window.BUILD_V;
