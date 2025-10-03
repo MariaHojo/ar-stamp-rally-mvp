@@ -2,9 +2,9 @@
  * 目的：
  *  - スタンプ帳（6箇所）を Firebase v8 + localStorage で正しく反映
  *  - 6/6 達成で初回のみ完走モーダル表示＆インラインリンク表示
- *  - 「カメラ起動」→ スポット選択吹き出し（6箇所すべて AR 起動）
+ *  - 「カメラ起動」→ スポット選択（写真カードの2列×3行グリッド）
  *  - 8th Wall 各プロジェクトURLへ遷移（spotId/uid をクエリ付与）
- *  - 「現在スポットの強調」機能は削除（不要要件のため）
+ *  - 「現在スポットの強調」機能は不要のため未実装
  */
 
 const $  = (s)=>document.querySelector(s);
@@ -26,6 +26,16 @@ const EIGHTHWALL_URLS = {
 const ALL_SPOTS       = ['spot1','spot2','spot3','spot4','spot5','spot6'];
 const AR_SPOTS        = ALL_SPOTS.slice();   // 6箇所すべて AR
 const COMPLETE_TARGET = 6;
+
+/* （UI表示名。必要なら編集） */
+const SPOT_LABEL = {
+  spot1: 'スポット1',
+  spot2: 'スポット2',
+  spot3: 'スポット3',
+  spot4: 'スポット4',
+  spot5: 'スポット5',
+  spot6: 'スポット6',
+};
 
 /* ====== LocalStorage util ====== */
 function lsGet(k){ try{return localStorage.getItem(k);}catch{return null;} }
@@ -117,42 +127,81 @@ async function handleCompletionFlow(uid, stamps){
   lsSet(seenKey(uid), 'true');
 }
 
-/* ====== カメラ起動（スポット選択の吹き出し） ====== */
+/* ====== カメラ起動（スポット選択：写真グリッド） ====== */
+
+/* 画像パス：まず jpg、404 のとき png にフォールバック */
+function photoSrcFor(spotId){
+  const n = spotId.replace('spot','').padStart(2,'0');
+  return `assets/images/Todays_photos/Todays_photos_${n}.jpg`;
+}
+function fallbackToPng(imgEl, spotId){
+  const n = spotId.replace('spot','').padStart(2,'0');
+  imgEl.onerror = null;
+  imgEl.src = `assets/images/Todays_photos/Todays_photos_${n}.png`;
+}
+
 function buildCameraChooserItems(){
-  const list = $('#cameraChooserList');
-  if (!list) return;
-  list.innerHTML = '';
+  const grid = $('#cameraGrid');          // ← map.html に合わせて ID を #cameraGrid に統一
+  if (!grid) return;
+  grid.innerHTML = '';
 
   ALL_SPOTS.forEach((id)=>{
-    const item = document.createElement('div');
-    item.className = 'item';
-    // サムネは未入稿のため枠のみ
-    item.innerHTML = `
-      <div class="thumb" aria-hidden="true"
-           style="background:#f3f6fc;border:1px dashed #c9d6ee;border-radius:10px;height:60px;"></div>
-      <div class="meta">
-        <div class="name">${id.toUpperCase()}</div>
-        <div class="type">ARスポット</div>
-      </div>
-      <div class="go">
-        <button class="btn" data-spot="${id}">起動</button>
-      </div>
-    `;
-    list.appendChild(item);
-  });
+    const isAR = AR_SPOTS.includes(id);
 
-  // 起動ボタン（6箇所すべて有効）
-  list.querySelectorAll('button[data-spot]').forEach(btn=>{
-    const spot = btn.dataset.spot;
-    btn.addEventListener('click', async ()=>{
-      const uid  = await ensureAnonSafe();
-      const base = EIGHTHWALL_URLS[spot];
-      if (!base) { alert('このスポットのAR URLが未設定です'); return; }
-      const url = new URL(base);
-      url.searchParams.set('spotId', spot);
-      if (uid) url.searchParams.set('uid', uid);
-      location.href = url.toString();
-    });
+    const card = document.createElement('div');
+    card.className = 'spot-card' + (isAR ? '' : ' is-disabled');
+
+    // サムネ（正方形・丸角）
+    const thumb = document.createElement('div');
+    thumb.className = 'spot-thumb';
+
+    const img = document.createElement('img');
+    img.alt = `${SPOT_LABEL[id] || id} の写真`;
+    img.src = photoSrcFor(id);
+    img.addEventListener('error', ()=> fallbackToPng(img, id));
+    thumb.appendChild(img);
+
+    // バッジ
+    const badge = document.createElement('div');
+    badge.className = 'badge' + (isAR ? '' : ' badge-gray');
+    badge.textContent = isAR ? 'AR' : '準備中';
+    thumb.appendChild(badge);
+
+    // 名称（ふち有）
+    const nameWrap = document.createElement('div');
+    nameWrap.className = 'spot-name-wrap';
+    const name = document.createElement('div');
+    name.className = 'spot-name';
+    name.textContent = SPOT_LABEL[id] || id.toUpperCase();
+    nameWrap.appendChild(name);
+
+    // アクション
+    const action = document.createElement('div');
+    action.className = 'spot-action';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = isAR ? 'このスポットのARを起動' : '起動できません';
+    if (!isAR) {
+      btn.disabled = true;
+    } else {
+      btn.addEventListener('click', async ()=>{
+        const uid  = await ensureAnonSafe();
+        const base = EIGHTHWALL_URLS[id];
+        if (!base) { alert('このスポットのAR URLが未設定です'); return; }
+        const url = new URL(base);
+        url.searchParams.set('spotId', id);
+        if (uid) url.searchParams.set('uid', uid);
+        location.href = url.toString();
+      });
+    }
+    action.appendChild(btn);
+
+    // カード構築
+    card.appendChild(thumb);
+    card.appendChild(nameWrap);
+    card.appendChild(action);
+
+    grid.appendChild(card);
   });
 }
 
@@ -170,7 +219,7 @@ function hideCameraChooser(){
 async function boot(){
   bindCompleteModalButtons();
 
-  // 「カメラ起動」→ 吹き出し
+  // 「カメラ起動」→ 写真グリッドのボトムシート
   $('#cameraBtn')?.addEventListener('click', showCameraChooser);
   $('#cameraChooserClose')?.addEventListener('click', hideCameraChooser);
   $('#cameraChooserOverlay')?.addEventListener('click', hideCameraChooser);
