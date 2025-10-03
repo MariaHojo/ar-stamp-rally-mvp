@@ -15,7 +15,7 @@ const $$ = (s)=>Array.from(document.querySelectorAll(s));
  * 例: 'https://yourname.8thwall.app/icu-spot1/'
  */
 const EIGHTHWALL_URLS = {
-  spot1: 'https://maria261081.8thwall.app/test-3/', // ←実URLに置換
+  spot1: 'https://maria261081.8thwall.app/spot1/', // ←実URLに置換
   spot2: 'https://maria261081.8thwall.app/spot2/',
   spot3: 'https://maria261081.8thwall.app/spot3/',
   spot4: 'https://maria261081.8thwall.app/spot4/',
