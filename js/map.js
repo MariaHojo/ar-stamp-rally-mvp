@@ -1,21 +1,17 @@
-/* map.js（差し替え版）
- * 目的：
+/* map.js（差し替え版：写真の遅延読込＆再試行抑止）
  *  - スタンプ帳（6箇所）を Firebase v8 + localStorage で正しく反映
  *  - 6/6 達成で初回のみ完走モーダル表示＆インラインリンク表示
  *  - 「カメラ起動」→ スポット選択（写真カードの2列×3行グリッド）
  *  - 8th Wall 各プロジェクトURLへ遷移（spotId/uid をクエリ付与）
- *  - 「現在スポットの強調」機能は不要のため未実装
+ *  - 写真はモーダル表示時のみ遅延ロード／一度だけ拡張子フォールバック／失敗後は再試行しない
  */
 
 const $  = (s)=>document.querySelector(s);
 const $$ = (s)=>Array.from(document.querySelectorAll(s));
 
-/* ====== 8th Wall 側 URL（要置換） ======
- * すべてあなたの実 URL に差し替えてください。
- * 例: 'https://yourname.8thwall.app/icu-spot1/'
- */
+/* ====== 8th Wall 側 URL（要置換） ====== */
 const EIGHTHWALL_URLS = {
-  spot1: 'https://maria261081.8thwall.app/spot1/', // ←実URLに置換
+  spot1: 'https://maria261081.8thwall.app/spot1/',
   spot2: 'https://maria261081.8thwall.app/spot2/',
   spot3: 'https://maria261081.8thwall.app/spot3/',
   spot4: 'https://maria261081.8thwall.app/spot4/',
@@ -27,7 +23,7 @@ const ALL_SPOTS       = ['spot1','spot2','spot3','spot4','spot5','spot6'];
 const AR_SPOTS        = ALL_SPOTS.slice();   // 6箇所すべて AR
 const COMPLETE_TARGET = 6;
 
-/* （UI表示名。必要なら編集） */
+/* 表示名（必要なら編集） */
 const SPOT_LABEL = {
   spot1: 'スポット1',
   spot2: 'スポット2',
@@ -45,11 +41,9 @@ function seenKey(uid){ return `complete_6_seen_${uid}`; }
 
 /* ====== Auth（匿名） ====== */
 async function ensureAnonSafe() {
-  // 既存の ensureAnon があればそれを優先
   if (typeof window.ensureAnon === 'function') {
     try { const uid = await window.ensureAnon(); if (uid) return uid; } catch(e){}
   }
-  // フォールバック（v8）
   try {
     if (!firebase?.apps?.length && typeof firebaseConfig !== 'undefined') {
       firebase.initializeApp(firebaseConfig);
@@ -84,7 +78,6 @@ async function fetchStamps(uid) {
 
 /* ====== スタンプ帳 UI 反映 ====== */
 function renderStampUI(stamps){
-  // 各セル（取得/未取得の文言・クラス）
   $$('.stamp-cell[data-spot]').forEach(cell=>{
     const spot = cell.dataset.spot;
     const got  = !!stamps[spot];
@@ -93,12 +86,10 @@ function renderStampUI(stamps){
     if (mark) mark.textContent = got ? '✅取得済' : '未取得';
   });
 
-  // 合計カウント
   const cnt = ALL_SPOTS.reduce((n,id)=> n + (stamps[id] ? 1 : 0), 0);
   const elCount = $('#stampCount');
   if (elCount) elCount.textContent = `${cnt}/${ALL_SPOTS.length}`;
 
-  // 完了インラインリンク（見出し直下）
   const inline = $('#completeInline');
   if (inline) inline.style.display = (cnt >= COMPLETE_TARGET) ? 'block' : 'none';
 }
@@ -127,21 +118,78 @@ async function handleCompletionFlow(uid, stamps){
   lsSet(seenKey(uid), 'true');
 }
 
-/* ====== カメラ起動（スポット選択：写真グリッド） ====== */
+/* ====== カメラ起動（写真の遅延読込を徹底） ====== */
 
-/* 画像パス：まず jpg、404 のとき png にフォールバック */
-function photoSrcFor(spotId){
+/* 画像URL生成（まず jpg を試し、必要なら png フォールバック） */
+function photoUrl(spotId, ext='jpg'){
   const n = spotId.replace('spot','').padStart(2,'0');
-  return `assets/images/Todays_photos/Todays_photos_${n}.jpg`;
-}
-function fallbackToPng(imgEl, spotId){
-  const n = spotId.replace('spot','').padStart(2,'0');
-  imgEl.onerror = null;
-  imgEl.src = `assets/images/Todays_photos/Todays_photos_${n}.png`;
+  return `assets/images/Todays_photos/Todays_photos_${n}.${ext}`;
 }
 
-function buildCameraChooserItems(){
-  const grid = $('#cameraGrid');          // ← map.html に合わせて ID を #cameraGrid に統一
+/* 軽量なプレースホルダ（グレーの1x1 PNG） */
+const PLACEHOLDER =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGP4zwAAAgABd8YI1QAAAABJRU5ErkJggg==';
+
+/* 画像ロード状態のキャッシュ（再試行抑止） */
+const PHOTO_STATE = Object.create(null);
+/* 値：'ok' | 'jpgfail' | 'fail'（jpgもpngも失敗） */
+
+let cameraGridBuilt = false;   // モーダルDOMは1回だけ構築
+let imgObserver = null;        // IntersectionObserver（可視範囲のみロード）
+
+/* 可視範囲に入ったときだけロード */
+function ensureObserver(){
+  if (imgObserver) return imgObserver;
+  imgObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      const img = entry.target;
+      if (!entry.isIntersecting) return;
+      imgObserver.unobserve(img);
+      lazyLoadImage(img);
+    });
+  }, {root: $('#cameraChooser'), rootMargin: '50px', threshold: 0.01});
+  return imgObserver;
+}
+
+/* 実際のロード処理：jpg → 失敗なら png → 失敗ならプレースホルダ確定（以後再試行なし） */
+function lazyLoadImage(img){
+  const sid = img.getAttribute('data-spot');
+  if (!sid) return;
+
+  if (PHOTO_STATE[sid] === 'ok' || PHOTO_STATE[sid] === 'fail') {
+    // すでに決着済み（ok or 完全失敗）
+    return;
+  }
+
+  // 1) jpg を試す
+  if (!PHOTO_STATE[sid]) {
+    PHOTO_STATE[sid] = 'loading-jpg';
+    img.onerror = () => {
+      PHOTO_STATE[sid] = 'jpgfail';
+      // 2) png を試す
+      img.onerror = () => {
+        PHOTO_STATE[sid] = 'fail';
+        img.src = PLACEHOLDER;   // 以降はプレースホルダ固定
+      };
+      img.src = photoUrl(sid, 'png');
+    };
+    img.onload = () => { PHOTO_STATE[sid] = 'ok'; };
+    img.src = photoUrl(sid, 'jpg');
+    return;
+  }
+
+  // 直前に jpg が失敗して 'jpgfail' 済み → png だけ試す
+  if (PHOTO_STATE[sid] === 'jpgfail') {
+    img.onerror = () => { PHOTO_STATE[sid] = 'fail'; img.src = PLACEHOLDER; };
+    img.onload  = () => { PHOTO_STATE[sid] = 'ok'; };
+    img.src     = photoUrl(sid, 'png');
+  }
+}
+
+/* グリッドDOMの構築（初回のみ）。画像はここでは読み込まない（src未設定） */
+function buildCameraChooserItemsOnce(){
+  if (cameraGridBuilt) return;
+  const grid = $('#cameraGrid');
   if (!grid) return;
   grid.innerHTML = '';
 
@@ -151,14 +199,15 @@ function buildCameraChooserItems(){
     const card = document.createElement('div');
     card.className = 'spot-card' + (isAR ? '' : ' is-disabled');
 
-    // サムネ（正方形・丸角）
+    // サムネ（正方形・丸角） ※ src は設定しない＝0リクエスト
     const thumb = document.createElement('div');
     thumb.className = 'spot-thumb';
 
     const img = document.createElement('img');
     img.alt = `${SPOT_LABEL[id] || id} の写真`;
-    img.src = photoSrcFor(id);
-    img.addEventListener('error', ()=> fallbackToPng(img, id));
+    img.loading = 'lazy';
+    img.src = PLACEHOLDER;              // 透過的な灰色1px（ネットワークリクエストなし）
+    img.setAttribute('data-spot', id);  // 後で lazyLoadImage が参照
     thumb.appendChild(img);
 
     // バッジ
@@ -203,16 +252,34 @@ function buildCameraChooserItems(){
 
     grid.appendChild(card);
   });
+
+  cameraGridBuilt = true;
 }
 
+/* モーダル表示：このタイミングで“見えているカードだけ”ロード開始 */
 function showCameraChooser(){
-  buildCameraChooserItems();
+  buildCameraChooserItemsOnce();
+
+  // 開いたあとに少し待ってから可視領域を監視（開くアニメーション考慮）
   $('#cameraChooserOverlay')?.classList.add('is-open');
   $('#cameraChooser')?.classList.add('is-open');
+
+  setTimeout(()=>{
+    const obs = ensureObserver();
+    // 既にOK/FAILがついているものは監視不要
+    $$('#cameraGrid img[data-spot]').forEach(img=>{
+      const sid = img.getAttribute('data-spot');
+      if (PHOTO_STATE[sid] === 'ok' || PHOTO_STATE[sid] === 'fail') return; // 決着済
+      // まだ何も試していない場合だけ監視開始
+      if (!PHOTO_STATE[sid]) obs.observe(img);
+    });
+  }, 120);
 }
+
 function hideCameraChooser(){
   $('#cameraChooserOverlay')?.classList.remove('is-open');
   $('#cameraChooser')?.classList.remove('is-open');
+  // 非表示にしても監視は維持（次回開いたときに未ロードの分だけ再計算）
 }
 
 /* ====== 起動 ====== */
@@ -230,7 +297,7 @@ async function boot(){
   renderStampUI(stamps);
   await handleCompletionFlow(uid, stamps);
 
-  // 復帰時に再反映
+  // 復帰時に再反映（写真の再試行は発生しない設計）
   document.addEventListener('visibilitychange', async ()=>{
     if (document.visibilityState === 'visible') {
       const s = await fetchStamps(uid);
