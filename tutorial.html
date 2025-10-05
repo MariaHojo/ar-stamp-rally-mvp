@@ -4,255 +4,75 @@
   <meta charset="UTF-8" />
   <title>チュートリアル | ARスタンプラリー</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
+  <link rel="stylesheet" href="css/style.css" />
   <style>
-    :root{
-      --brand:#005ABB;
-      --text:#111;
-      --muted:#666;
-      --bg:#f6f7fb;
-      --card:#fff;
-      --radius:16px;
-      --shadow:0 12px 32px rgba(0,0,0,.10);
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;}
-    .wrap{min-height:100vh;display:flex;flex-direction:column;margin:0 auto;max-width:860px;padding:12px}
-    header{padding:8px 8px 4px}
-    h1{margin:0;font-size:clamp(18px,4.6vw,22px);font-weight:900;color:var(--brand)}
-    .stage{
-      flex:1;display:flex;flex-direction:column;gap:12px;margin-top:6px
-    }
-    .card{
-      background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
-      padding:10px 10px 14px;display:flex;flex-direction:column;gap:10px;min-height:64vh
-    }
-    .hero{
-      display:flex;align-items:center;justify-content:center;flex:1;min-height:42vh;
-      background:#eaf0fb;border-radius:12px;overflow:hidden
-    }
-    .hero img{width:100%;height:100%;object-fit:contain}
-    .bottom{
-      margin-top:auto;background:#fff;border-radius:12px;padding:12px 12px 16px;border:1px solid #e6ecf8
-    }
-    .text{
-      font-size:clamp(14px,4.2vw,16px);line-height:1.7;margin:0 0 8px;color:#161b22
-    }
-    .pager{
-      display:flex;gap:6px;justify-content:center;align-items:center;margin:10px 0 6px
-    }
-    .dot{
-      width:10px;height:10px;border-radius:999px;background:#c9d6ee;display:inline-block
-    }
-    .dot.active{background:#1c3f87}
-    .btn{
-      appearance:none;border:0;border-radius:12px;padding:14px 16px;width:100%;
-      font-weight:900;cursor:pointer;display:inline-block;text-align:center
-    }
-    .btn-primary{background:var(--brand);color:#fff;box-shadow:0 10px 26px rgba(0,90,187,.26)}
-    .btn-ghost{background:#eef3fb;color:#0a1d3a}
-    .btn-text{background:transparent;color:#3b5fb7;font-weight:800}
-    .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .row .left{display:flex;align-items:center;gap:8px}
-    .check{width:20px;height:20px}
-    .tiny{font-size:clamp(12px,3.4vw,13px);color:#444}
-    .note{font-size:clamp(12px,3.6vw,14px);color:#374151;margin:6px 0 0}
-    .actions{display:flex;flex-direction:column;gap:8px;margin-top:10px}
-    .hidden{display:none !important}
-    .linklike{display:inline-block;padding:10px 12px;border-radius:10px;border:1px solid #d7def0;background:#f5f8ff;color:#0a1d3a;font-weight:800;text-decoration:none;text-align:center}
-    .foot{padding:8px 0}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#f6f7fb;color:#111}
+    .wrap{max-width:960px;margin:0 auto;padding:20px;min-height:100vh;display:flex;flex-direction:column}
+    header{padding:8px 0}
+    h1{font-size:22px;margin:0}
+    .card{background:#fff;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.08);padding:20px;margin-top:12px}
+    ul{margin:0 0 8px 1.2em}
+    .spacer{flex:1}
+    .cta{position:sticky;bottom:0;background:transparent;padding:16px 0}
+    .btn{appearance:none;border:0;border-radius:12px;padding:14px 16px;font-weight:800;cursor:pointer;display:inline-block;text-align:center;width:100%}
+    .btn-primary{background:#0a58ca;color:#fff}
+    .agree{display:flex;align-items:center;gap:10px;margin-top:10px}
+    .agree small{color:#333}
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <h1>はじめに（チュートリアル）</h1>
+      <h1>チュートリアル</h1>
     </header>
 
-    <main class="stage">
-      <section class="card" aria-live="polite">
-        <div class="hero" id="hero"><img id="heroImg" src="" alt="チュートリアル画像" /></div>
-
-        <div class="bottom">
-          <p class="text" id="pageText">…</p>
-
-          <!-- ページ1だけ表示：利用規約 + 同意チェック + 次へ -->
-          <div id="termsBlock" class="hidden">
-            <div class="actions">
-              <a class="linklike" href="terms.html" target="_blank" rel="noopener">利用規約をひらく</a>
-              <div class="row">
-                <label class="left tiny">
-                  <input id="agree" type="checkbox" class="check" />
-                  <span>利用規約を読み、同意します。</span>
-                </label>
-              </div>
-              <button id="nextAgree" class="btn btn-primary hidden">次へ</button>
-            </div>
-          </div>
-
-          <!-- ページ2〜7,8 共通：ページャ + 次へ/はじめる + skip -->
-          <div id="flowBlock">
-            <div class="pager" id="pager"></div>
-            <div class="actions">
-              <button id="nextBtn" class="btn btn-primary">次へ</button>
-              <button id="skipBtn" class="btn btn-ghost">skip</button>
-            </div>
-            <p id="hint" class="note hidden"></p>
-          </div>
-        </div>
-      </section>
+    <main class="card">
+      <p>遊び方：</p>
+      <ul>
+        <li>マップからスポットを選び、ARカメラを起動。</li>
+        <li>目印にかざしてスタンプを集めましょう（全6箇所）。</li>
+        <li>集め終わったらコンプリート画面からアンケートにご協力ください。</li>
+      </ul>
+      <p style="margin-top:10px">
+        <a href="terms.html" target="_blank" rel="noopener">利用規約・プライバシー</a> をお読みください（別タブで開きます）。
+      </p>
+      <label class="agree">
+        <input id="agreeChk" type="checkbox" />
+        <small>利用規約を読み、同意します。</small>
+      </label>
     </main>
 
-    <div class="foot"></div>
+    <div class="spacer"></div>
+
+    <div class="cta">
+      <button id="nextBtn" class="btn btn-primary" disabled>次へ</button>
+    </div>
   </div>
 
   <script>
-    (function(){
-      // --- 版数クエリを付与（キャッシュ回避） ---
-      if (!window.withV) {
-        window.BUILD_V = window.BUILD_V || '20251003';
-        window.withV = (url)=> url + (url.includes('?')?'&':'?') + 'v=' + window.BUILD_V;
-      }
+    // 版数付け（キャッシュ対策）
+    if (!window.withV) {
+      window.BUILD_V = window.BUILD_V || '20251005';
+      window.withV = (url) => url + (url.includes('?') ? '&' : '?') + 'v=' + window.BUILD_V;
+    }
 
-      const heroImg = document.getElementById('heroImg');
-      const pageText = document.getElementById('pageText');
-      const pager = document.getElementById('pager');
-      const flowBlock = document.getElementById('flowBlock');
-      const termsBlock = document.getElementById('termsBlock');
-      const nextBtn = document.getElementById('nextBtn');
-      const skipBtn = document.getElementById('skipBtn');
-      const agree = document.getElementById('agree');
-      const nextAgree = document.getElementById('nextAgree');
-      const hint = document.getElementById('hint');
+    document.addEventListener('DOMContentLoaded', async () => {
+      try { await window.ensureAnon?.(); } catch(e){}
 
-      // 8ページのテキスト（ご指定の文面）
-      const PAGES = [
-        { txt: 'ARスタンプラリーへようこそ！本アプリは𓏸𓏸による卒業研究のために開発されたものです。以下の注意事項を読み、同意してくださる方はチェックを入れてください。', needAgree: true },
-        { txt: 'スタンプ台に貼ってあるタグを読んでください。' },
-        { txt: '「カメラを起動」を押し、今いる場所を選択します。' },
-        { txt: 'カメラと位置情報の許可をしてください。', requestPerm: true },
-        { txt: 'ARを見て、楽しみましょう！' },
-        { txt: 'ここからスタンプが貰えます！' },
-        { txt: 'クイズ&解説ページへ行き、クイズに挑戦しましょう。' },
-        { txt: '6つ集めたらコンプリート！アンケートにお答えいただくとスペシャルコンテンツを見ることが出来ます' },
-      ];
+      const agree = document.getElementById('agreeChk');
+      const next  = document.getElementById('nextBtn');
 
-      let idx = 0;
-      let permRequested = false;
-
-      function imgPath(i){
-        const n = String(i+1).padStart(2,'0'); // 01..08
-        return `assets/images/tutorial_image${n}.png`; // 必要なら拡張子変更
-      }
-
-      function renderPager(){
-        pager.innerHTML = '';
-        for (let i=0;i<PAGES.length;i++){
-          const d = document.createElement('span');
-          d.className = 'dot' + (i===idx?' active':'');
-          pager.appendChild(d);
-        }
-      }
-
-      function navToMap(){
-        const url = typeof withV === 'function' ? withV('map.html') : 'map.html';
-        try{ localStorage.setItem('tutorial_done','1'); }catch(e){}
-        location.href = url;
-      }
-
-      async function requestPermissionsIfNeeded(){
-        // ページ4で一度だけ試行
-        if (!PAGES[idx]?.requestPerm || permRequested) return;
-        permRequested = true;
-        hint.classList.remove('hidden');
-        hint.textContent = '権限リクエスト中…（ブラウザのダイアログに従ってください）';
-
-        // カメラ
-        try{
-          if (navigator.mediaDevices?.getUserMedia){
-            await navigator.mediaDevices.getUserMedia({video:true});
-          }
-        }catch(e){
-          // 失敗しても続行
-        }
-
-        // 位置情報
-        try{
-          if (navigator.geolocation){
-            await new Promise((res)=> {
-              navigator.geolocation.getCurrentPosition(()=>res(), ()=>res(), {enableHighAccuracy:true, timeout:3000});
-            });
-          }
-        }catch(e){}
-
-        hint.textContent = '権限リクエストが完了しました。続行できます。';
-        setTimeout(()=> hint.classList.add('hidden'), 1800);
-      }
-
-      function render(){
-        const page = PAGES[idx];
-        // 画像・テキスト
-        heroImg.src = imgPath(idx);
-        heroImg.alt = `チュートリアル ${idx+1}枚目`;
-        pageText.textContent = page.txt;
-
-        // ページャ
-        renderPager();
-
-        // ボタン文言
-        nextBtn.textContent = (idx === PAGES.length-1) ? 'はじめる' : '次へ';
-
-        // ページ1専用UI（利用規約）
-        if (page.needAgree){
-          termsBlock.classList.remove('hidden');
-          flowBlock.classList.add('hidden');  // 下部アクションは termsBlock 内のUIで
-        }else{
-          termsBlock.classList.add('hidden');
-          flowBlock.classList.remove('hidden');
-        }
-
-        // ページ4：権限リクエスト
-        if (page.requestPerm){
-          requestPermissionsIfNeeded();
-        }else{
-          hint.classList.add('hidden');
-        }
-      }
-
-      // 同意チェック → 「次へ」表示
       agree?.addEventListener('change', ()=>{
-        if (agree.checked){
-          nextAgree.classList.remove('hidden');
-        }else{
-          nextAgree.classList.add('hidden');
-        }
+        next.disabled = !agree.checked;
       });
 
-      // 次へ（ページ1の「次へ」 in termsBlock）
-      nextAgree?.addEventListener('click', ()=>{
-        if (!agree.checked) return;
-        idx = Math.min(idx+1, PAGES.length-1);
-        render();
+      next?.addEventListener('click', ()=>{
+        try {
+          localStorage.setItem('tutorial_done', '1');
+        } catch {}
+        location.href = withV('map.html');
       });
-
-      // 共通：次へ / はじめる
-      nextBtn.addEventListener('click', ()=>{
-        if (idx === PAGES.length-1){
-          navToMap();
-          return;
-        }
-        idx = Math.min(idx+1, PAGES.length-1);
-        render();
-      });
-
-      // 共通：skip
-      skipBtn.addEventListener('click', navToMap);
-
-      // 初期表示
-      render();
-    })();
+    });
   </script>
 </body>
 </html>

@@ -1,191 +1,117 @@
-// explanation.js — スマホ最適・スタンプ保存・クイズ表示・可変データ対応（全置換）
+/* js/explanation.js （差し替え版）
+ * 役割：
+ *  - ?spotId=spot1..spot6 を取得し、スポット別に表示内容（タイトル/写真/スタンプ）を出し分け
+ *  - 表示時に users/{uid}/stamps/{spotId} = true を保存（firebase.js の ensureAnon が前提）
+ *  - uid 名前空間付き localStorage をフォールバックとして更新
+ */
 
-(function(){
-  // ------- ユーティリティ -------
-  const $ = (s) => document.querySelector(s);
+(function () {
+  const $  = (s) => document.querySelector(s);
 
-  function qp(key){
+  // ===== クエリ & 正規化 =====
+  function getQuery(key){
     try { return new URLSearchParams(location.search).get(key) } catch { return null }
   }
-  function normSpotId(v){
-    const id = String(v||'').trim().toLowerCase();
-    return /^spot[1-6]$/.test(id) ? id : 'spot1';
+  function normalizeSpotId(v){
+    const id = String(v || '').trim().toLowerCase();
+    return /^spot[1-6]$/.test(id) ? id : 'spot1';   // ← 1〜6に拡張
   }
-  function stampSrcFor(spotId){
-    // spot1 -> 01, spot2 -> 02...
-    const n = spotId.replace('spot','').padStart(2,'0');
-    return `assets/images/stamp${n}.png`;
+  function getSpotId(){
+    const urlId = getQuery('spotId');
+    const bodyId= document.body ? document.body.dataset.spot : null;
+    return normalizeSpotId(urlId || bodyId || 'spot1');
   }
 
-  // ------- スポット別データ（ここを編集すればOK） -------
-  // 15〜18歳向け：短く・ややカジュアル・“へえ”がある・調べ方に触れる
-  const DATA = {
-    spot1: {
-      name: 'スポット1（XX：本館 など）',     // ←編集
-      lead: '（一言リード：ここに驚きのフックを一文で）', // ←編集（任意）
-      photo: "assets/images/Photos_thesis/本館正面_1950年代.jpg", // ←編集
-      quiz: {
-        text: '（例）この建物が今の形になったのはいつごろ？ヒントは戦後の復興と関係があります。', // 60〜100文字
-        choices: {
-          A: 'A：XX年ごろ',
-          B: 'B：XX年ごろ',
-          C: 'C：XX年ごろ'
-        },
-        answer: 'A', // 'A' | 'B' | 'C'
-        explain: '（例）実はXX年ごろに大きな改修がありました。資料は図書館の◯◯コーナーやICUアーカイブズのWebで確認できます。'
-      }
-    },
-    // spot2 以降は必要になったら複製して編集
-    spot2: {
-      name: 'スポット2（XX）',
-      lead: '（リード）',
-      photo: "assets/images/Photos_thesis/XX.jpg",
-      quiz: {
-        text: '（XXのクイズ本文）',
-        choices: { A:'A：XX', B:'B：XX', C:'C：XX' },
-        answer: 'B',
-        explain: '（XXの解説）'
-      }
-    },
-    spot3: {
-      name: 'スポット3（XX）',
-      lead: '（リード）',
-      photo: "assets/images/Photos_thesis/XX.jpg",
-      quiz: {
-        text: '（XXのクイズ本文）',
-        choices: { A:'A：XX', B:'B：XX', C:'C：XX' },
-        answer: 'C',
-        explain: '（XXの解説）'
-      }
-    },
-    spot4: {
-      name: 'スポット4（XX）',
-      lead: '（リード）',
-      photo: "assets/images/Photos_thesis/XX.jpg",
-      quiz: {
-        text: '（XXのクイズ本文）',
-        choices: { A:'A：XX', B:'B：XX', C:'C：XX' },
-        answer: 'A',
-        explain: '（XXの解説）'
-      }
-    },
-    spot5: {
-      name: 'スポット5（XX）',
-      lead: '（リード）',
-      photo: "assets/images/Photos_thesis/XX.jpg",
-      quiz: {
-        text: '（XXのクイズ本文）',
-        choices: { A:'A：XX', B:'B：XX', C:'C：XX' },
-        answer: 'B',
-        explain: '（XXの解説）'
-      }
-    },
-    spot6: {
-      name: 'スポット6（XX）',
-      lead: '（リード）',
-      photo: "assets/images/Photos_thesis/XX.jpg",
-      quiz: {
-        text: '（XXのクイズ本文）',
-        choices: { A:'A：XX', B:'B：XX', C:'C：XX' },
-        answer: 'C',
-        explain: '（XXの解説）'
-      }
-    }
-  };
-
-  // ------- スタンプ保存（Firebase / ローカル） -------
-  async function ensureAnon(){
-    if (typeof window.ensureAnon === 'function') {
-      try { const uid = await window.ensureAnon(); if (uid) return uid } catch(e){}
-    }
-    // fallback: v8
-    try{
-      if (!firebase?.apps?.length && typeof firebaseConfig !== 'undefined') {
-        firebase.initializeApp(firebaseConfig);
-      }
-      const auth = firebase.auth();
-      if (auth.currentUser) return auth.currentUser.uid;
-      const cred = await auth.signInAnonymously();
-      return cred.user && cred.user.uid;
-    }catch(e){
-      console.warn('[explanation] ensureAnon fallback failed:', e?.message||e);
-      try { return localStorage.getItem('uid') } catch { return null }
-    }
-  }
-  function lsKey(uid, spot){ return `stamp_${uid||'nouid'}_${spot}` }
-
-  async function saveStamp(spotId){
-    // ローカル先行
-    let uid = null;
+  // ===== uid 名前空間付き LocalStorage =====
+  function getUidSync(){
     try {
-      uid = await ensureAnon();
-      localStorage.setItem(lsKey(uid, spotId), 'true');
-    } catch {}
-    // Firebase
+      return (firebase?.auth?.().currentUser?.uid) || localStorage.getItem('uid');
+    } catch {
+      return null;
+    }
+  }
+  function lsKey(spot){ const uid = getUidSync() || 'nouid'; return `stamp_${uid}_${spot}` }
+
+  // ===== スポット定義（名称 / 写真 / スタンプ画像）=====
+  // 画像パスは要件どおり：
+  //   スタンプ: assets/images/stamps/stampXX.png
+  //   写真   : assets/images/Photos_thesis/<各スポットごとのファイル名>
+  const SPOT_LABELS = {
+    spot1: '本館173前',
+    spot2: 'トロイヤー記念館（T館）前',
+    spot3: '学生食堂（ガッキ）前',
+    spot4: 'チャペル前',
+    spot5: '体育館（Pec-A）前',
+    spot6: '本館307前',
+  };
+  const SPOT_PHOTOS = {
+    // 実ファイルに合わせて後で置換してください（例はspot1のみ例示）
+    spot1: 'assets/images/Photos_thesis/本館正面_1950年代.jpg',
+    spot2: 'assets/images/Photos_thesis/spot2.jpg',
+    spot3: 'assets/images/Photos_thesis/spot3.jpg',
+    spot4: 'assets/images/Photos_thesis/spot4.jpg',
+    spot5: 'assets/images/Photos_thesis/spot5.jpg',
+    spot6: 'assets/images/Photos_thesis/spot6.jpg',
+  };
+  function toNN(spotId){ return String(spotId.replace('spot','')).padStart(2,'0') }
+  function stampSrc(spotId){ return `assets/images/stamps/stamp${toNN(spotId)}.png` }
+
+  // ===== 表示の更新 =====
+  function renderContent(spotId){
+    const title = SPOT_LABELS[spotId] || 'スポット';
+    const ttl   = $('#spotTitle');
+    const imgS  = $('#gotStampImage');
+    const small = $('#stampNote');
+    const photo = $('#spotPhoto');
+
+    if (ttl)   ttl.textContent = title;
+    if (imgS)  { imgS.src = stampSrc(spotId); imgS.alt = `${title} のスタンプ`; }
+    if (small) small.textContent = 'スタンプをゲットしました！';
+    if (photo) {
+      const p = SPOT_PHOTOS[spotId] || '';
+      if (p) { photo.src = p; photo.alt = `${title} の写真`; }
+    }
+  }
+
+  // ===== スタンプ保存（オンライン優先 / ローカル先行）=====
+  async function saveStamp(spotId){
+    let uid = null;
+    try { uid = await window.ensureAnon?.() } catch(e){ console.warn('[explanation] ensureAnon failed:', e) }
+
+    // ローカル先行
+    try { localStorage.setItem(lsKey(spotId), 'true') } catch {}
+
+    // Firebaseへ
     if (!uid) return;
-    try{
+    try {
       const db = firebase.database();
       const updates = {};
-      updates[`users/${uid}/stamps/${spotId}`] = true;
-      updates[`users/${uid}/meta/updatedAt`]   = Date.now();
+      updates[`users/${uid}/stamps/${spotId}`]   = true;
+      updates[`users/${uid}/meta/updatedAt`]     = Date.now();
       await db.ref().update(updates);
-      // console.log('[explanation] saved', spotId, 'for', uid);
-    }catch(e){
-      console.warn('[explanation] fb update failed:', e?.message||e);
+      console.log('[explanation] stamp saved:', uid, spotId);
+    } catch(e){
+      console.warn('[explanation] Firebase write failed:', e?.message || e);
     }
   }
 
-  // ------- 画面描画 -------
-  function render(spotId){
-    const d = DATA[spotId] || DATA.spot1;
-
-    $('#spotName').textContent = d.name || 'スポット（XX）';
-    $('#spotLead').textContent = d.lead || '';
-
-    const stampSrc = stampSrcFor(spotId);
-    $('#stampImg').src = stampSrc;
-    $('#stampImg').alt = '獲得スタンプ';
-
-    $('#spotPhoto').src = d.photo || '';
-    $('#spotPhoto').alt = d.name || 'スポット写真';
-
-    // クイズ
-    $('#quizText').textContent = d.quiz?.text || '（クイズ本文が未設定です）';
-
-    const ul = $('#choices');
-    ul.innerHTML = '';
-    const choices = d.quiz?.choices || {};
-    ['A','B','C'].forEach((key)=>{
-      const li = document.createElement('li');
-      li.className = 'choice';
-      li.innerHTML = `<span class="label">${key}</span><span class="text">${choices[key] || `${key}：XX`}</span>`;
-      ul.appendChild(li);
+  // ===== 答え表示ボタン =====
+  function bindAnswer(){
+    const btn = $('#showAnswerBtn');
+    const ans = $('#answerBlock');
+    if (!btn || !ans) return;
+    btn.addEventListener('click', () => {
+      ans.style.display = 'block';
+      btn.disabled = true;
     });
-
-    // 答え表示
-    $('#showAnswerBtn').addEventListener('click', ()=>{
-      const ans = (d.quiz?.answer || 'A').toUpperCase();
-      const txt = (d.quiz?.choices?.[ans] || 'XX');
-      $('#answerLine').textContent = `答え：${ans}（${txt.replace(/^[ABC]：?/, '')}）`;
-      $('#answerExplain').textContent = d.quiz?.explain || '（解説本文が未設定です）';
-      $('#answerBox').style.display = 'block';
-      // 画面内にスクロール
-      $('#answerBox').scrollIntoView({behavior:'smooth', block:'start'});
-    }, {once:true});
   }
 
-  // ------- 起動 -------
   async function boot(){
-    const spotId = normSpotId(qp('spotId') || document.body.dataset.spot || 'spot1');
-    render(spotId);
+    const spotId = getSpotId();
+    renderContent(spotId);
     await saveStamp(spotId);
-
-    // 戻るリンク：キャッシュ回避したい場合は withV を使う
-    const a = $('#backToMap');
-    if (a && typeof window.withV === 'function') {
-      a.href = window.withV('map.html');
-    }
+    bindAnswer();
   }
 
   document.addEventListener('DOMContentLoaded', boot);
-})();
+}());

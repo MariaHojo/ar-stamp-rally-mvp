@@ -10,16 +10,20 @@
     .wrap{max-width:840px;margin:0 auto;padding:16px 14px 24px}
     header{margin-bottom:8px}
     h1{font-size:20px;margin:0 0 8px}
+
     .got{display:flex;align-items:center;gap:12px;margin:10px 0 6px}
     .got img{width:120px;max-width:45vw;height:auto;border-radius:12px;border:1px solid #e9eef6;background:#f6f7fb}
     .got small{color:#333}
     .quizTitle{font-weight:900;font-size:18px;margin:14px 0 8px;color:#111;text-shadow:-1px 0 #fff, 1px 0 #fff, 0 -1px #fff, 0 1px #fff}
+
     .photo{width:100%;border-radius:14px;overflow:hidden;border:1px solid #e9eef6;background:#f6f7fb}
     .photo img{width:100%;height:auto;display:block}
+
+    .lead{margin:6px 0 12px;color:#111}
     .btn{appearance:none;border:0;border-radius:12px;padding:12px 14px;font-weight:900;background:#005ABB;color:#fff;cursor:pointer}
     .center{text-align:center}
     .answer{font-weight:900;font-size:20px;margin:10px 0;color:#111}
-    .lead{margin:6px 0 12px;color:#111}
+
     .footer{margin-top:16px;text-align:center}
     .footer a{display:inline-block;text-decoration:none}
     .footer .btn{min-width:220px}
@@ -28,12 +32,12 @@
 <body>
   <div class="wrap">
     <header>
-      <h1 id="spotTitle">スポット名（XX）</h1>
+      <h1 id="spotTitle">スポット名</h1>
     </header>
 
     <!-- 取得スタンプ -->
     <section class="got">
-      <img id="gotStampImage" src="assets/images/stamps/stamp01.png" alt="取得スタンプ">
+      <img id="gotStampImage" src="" alt="取得スタンプ">
       <div>
         <div style="font-weight:800">スタンプをゲットしました！</div>
         <small id="stampNote"></small>
@@ -43,12 +47,12 @@
     <!-- クイズ -->
     <div class="quizTitle">クイズ</div>
 
-    <!-- スポット写真（差し替え前でも空でOK） -->
+    <!-- スポット写真 -->
     <figure class="photo">
       <img id="spotPhoto" src="" alt="スポット写真">
     </figure>
 
-    <p id="quizBody" class="lead">（クイズ本文と選択肢 A/B/C をここに）</p>
+    <p id="quizBody" class="lead">（クイズ本文と選択肢 A / B / C をここに配置してください）</p>
 
     <div class="center">
       <button id="showAnswerBtn" class="btn" type="button">答えを見る</button>
@@ -63,49 +67,7 @@
     </div>
   </div>
 
-  <script>
-    // spotId → 01..06 へ
-    function spotNum2d(spotId){
-      try{
-        const n = String((spotId||'').replace('spot','')||'1');
-        return n.padStart(2,'0');
-      }catch(e){ return '01'; }
-    }
-    function getQuery(key){
-      try { return new URLSearchParams(location.search).get(key) } catch { return null }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const spotId = getQuery('spotId') || 'spot1';
-      const nn = spotNum2d(spotId);
-
-      // タイトル
-      var ttl = document.getElementById('spotTitle');
-      if (ttl) ttl.textContent = 'スポット' + String(parseInt(nn,10));
-
-      // 取得スタンプ画像（新パス）
-      var img = document.getElementById('gotStampImage');
-      if (img) img.src = 'assets/images/stamps/stamp' + nn + '.png';
-
-      // 任意：スタンプ取得メモ
-      var note = document.getElementById('stampNote');
-      if (note) note.textContent = '(' + spotId + ' に対応)';
-
-      // 写真・クイズ本文・解説などは後で差し込み
-      // 例：写真がある場合は下記のように:
-      // const photo = document.getElementById('spotPhoto');
-      // if (photo) photo.src = 'assets/images/Photos_thesis/XXXX.jpg';
-
-      // 答え表示
-      var btn = document.getElementById('showAnswerBtn');
-      var ans = document.getElementById('answerBlock');
-      if (btn && ans) {
-        btn.addEventListener('click', () => {
-          ans.style.display = 'block';
-          btn.disabled = true;
-        });
-      }
-    });
-  </script>
+  <script src="js/firebase.js" defer></script>
+  <script src="js/explanation.js" defer></script>
 </body>
 </html>
