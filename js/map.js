@@ -19,7 +19,14 @@ const EIGHTHWALL_URLS = {
   spot5: 'https://maria261081.8thwall.app/spot5/',
   spot6: 'https://maria261081.8thwall.app/spot6/'
 };
-
+/*
+spot1 本館173
+spot2 T館
+spot3 ガッキ
+spot4 チャペル
+spot5 体育館
+spot6 本館305
+*/
 const ALL_SPOTS       = ['spot1','spot2','spot3','spot4','spot5','spot6'];
 const AR_SPOTS        = ALL_SPOTS.slice();   // 6箇所すべて AR
 const COMPLETE_TARGET = 6;
