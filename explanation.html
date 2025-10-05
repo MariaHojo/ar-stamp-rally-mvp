@@ -1,104 +1,111 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>解説ページ | ARスタンプラリー</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-
+  <meta charset="UTF-8">
+  <title>解説 | ARスタンプラリー</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="stylesheet" href="css/style.css">
   <style>
-    :root{
-      --brand:#005ABB;
-      --text:#111;
-      --muted:#6b7280;
-      --card:#ffffff;
-      --bg:#f6f7fb;
-      --radius:16px;
-      --shadow:0 14px 40px rgba(0,0,0,.10);
-    }
-    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;}
-    .wrap{max-width:760px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding:16px;box-sizing:border-box}
-    header{padding:2px 4px 12px}
-    h1{font-size:clamp(20px,4.8vw,28px);margin:0 0 4px;font-weight:900;color:var(--brand)}
-    .spot-sub{font-size:clamp(12px,3.2vw,14px);color:var(--muted);margin:0}
-
-    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin:10px 0}
-
-    .stamp-area{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap}
-    .stamp-img{width:min(50vw,240px);max-width:300px;height:auto;display:block;border-radius:12px;background:#fff}
-    .stamp-caption{font-size:clamp(11px,3.2vw,12px);color:#2f855a;text-align:center}
-
-    .quiz-title{
-      display:inline-block;margin:8px 0 4px;padding:4px 10px;border-radius:999px;
-      background:linear-gradient(90deg,#ffcf33,#ff8a33); color:#111; font-weight:900;
-      font-size:clamp(16px,4.6vw,22px); letter-spacing:.02em;
-      -webkit-text-stroke: 0.6px rgba(0,0,0,.25); text-shadow:0 2px 0 rgba(0,0,0,.06);
-    }
-
-    .photo{width:100%;border-radius:12px;display:block;background:#eee;object-fit:cover;aspect-ratio:16/9}
-
-    .quiz-body{font-size:clamp(14px,4.2vw,16px);line-height:1.6;margin:8px 0 6px}
-    .choices{list-style:none;padding:0;margin:6px 0;display:grid;gap:8px}
-    .choice{
-      border:1.5px solid #d7def0;border-radius:12px;padding:10px 12px;background:#fff;
-      font-size:clamp(14px,4.2vw,16px);line-height:1.5;display:flex;gap:10px;align-items:flex-start
-    }
-    .choice .label{font-weight:900;color:var(--brand);min-width:1.8em}
-
-    .btn{appearance:none;border:0;border-radius:12px;padding:14px 16px;font-weight:900;cursor:pointer;display:inline-block;text-align:center;width:100%}
-    .btn-primary{background:var(--brand);color:#fff;box-shadow:0 10px 28px rgba(0,90,187,.28)}
-    .btn-ghost{background:#eef3fb;color:#0a1d3a}
-    .btn:active{transform:translateY(1px)}
-
-    .answer{margin-top:10px;padding:14px;border-radius:12px;background:#fff5d8;border:1px solid #ffe6a3;display:none}
-    .answer .ansline{font-weight:900;font-size:clamp(18px,5vw,22px);margin-bottom:6px}
-    .explain{font-size:clamp(14px,4.2vw,16px);line-height:1.7;color:#2a2a2a}
-
-    footer{margin-top:auto;padding:12px 0}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#fff;color:#111}
+    .wrap{max-width:840px;margin:0 auto;padding:16px 14px 24px}
+    header{margin-bottom:8px}
+    h1{font-size:20px;margin:0 0 8px}
+    .got{display:flex;align-items:center;gap:12px;margin:10px 0 6px}
+    .got img{width:120px;max-width:45vw;height:auto;border-radius:12px;border:1px solid #e9eef6;background:#f6f7fb}
+    .got small{color:#333}
+    .quizTitle{font-weight:900;font-size:18px;margin:14px 0 8px;color:#111;text-shadow:-1px 0 #fff, 1px 0 #fff, 0 -1px #fff, 0 1px #fff}
+    .photo{width:100%;border-radius:14px;overflow:hidden;border:1px solid #e9eef6;background:#f6f7fb}
+    .photo img{width:100%;height:auto;display:block}
+    .btn{appearance:none;border:0;border-radius:12px;padding:12px 14px;font-weight:900;background:#005ABB;color:#fff;cursor:pointer}
+    .center{text-align:center}
+    .answer{font-weight:900;font-size:20px;margin:10px 0;color:#111}
+    .lead{margin:6px 0 12px;color:#111}
+    .footer{margin-top:16px;text-align:center}
+    .footer a{display:inline-block;text-decoration:none}
+    .footer .btn{min-width:220px}
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <h1 id="spotName">スポット名（XX）</h1>
-      <p id="spotLead" class="spot-sub">ここにサブタイトルや一言（任意）</p>
+      <h1 id="spotTitle">スポット名（XX）</h1>
     </header>
 
-    <section class="card">
-      <div class="stamp-area">
-        <img id="stampImg" class="stamp-img" src="" alt="獲得スタンプ" />
-        <div class="stamp-caption">スタンプをゲットしました！</div>
+    <!-- 取得スタンプ -->
+    <section class="got">
+      <img id="gotStampImage" src="assets/images/stamps/stamp01.png" alt="取得スタンプ">
+      <div>
+        <div style="font-weight:800">スタンプをゲットしました！</div>
+        <small id="stampNote"></small>
       </div>
     </section>
 
-    <section class="card">
-      <div class="quiz-title">クイズ</div>
-      <img id="spotPhoto" class="photo" src="" alt="スポット写真" />
-      <p id="quizText" class="quiz-body">（ここに60〜100文字程度のクイズ本文が入ります。XXを編集してください）</p>
-      <ul id="choices" class="choices">
-        <!-- JSで A/B/C を挿入 -->
-      </ul>
-      <button id="showAnswerBtn" class="btn btn-primary">答えを見る</button>
+    <!-- クイズ -->
+    <div class="quizTitle">クイズ</div>
 
-      <div id="answerBox" class="answer">
-        <div id="answerLine" class="ansline">答え：A（XX）</div>
-        <div id="answerExplain" class="explain">（ここに解説本文。15〜18歳向けに、短く要点→驚き→もっと知る誘導の順で）</div>
-      </div>
-    </section>
+    <!-- スポット写真（差し替え前でも空でOK） -->
+    <figure class="photo">
+      <img id="spotPhoto" src="" alt="スポット写真">
+    </figure>
 
-    <footer>
-      <a id="backToMap" class="btn btn-ghost" href="map.html">マップに戻る</a>
-    </footer>
+    <p id="quizBody" class="lead">（クイズ本文と選択肢 A/B/C をここに）</p>
+
+    <div class="center">
+      <button id="showAnswerBtn" class="btn" type="button">答えを見る</button>
+    </div>
+
+    <div id="answerBlock" class="answer" style="display:none;">A. （正解の選択肢をここに）</div>
+
+    <p id="explainBody" class="lead">（解説本文をここに）</p>
+
+    <div class="footer">
+      <a class="btn" href="map.html">マップに戻る</a>
+    </div>
   </div>
 
-  <!-- 依存JS（相対パス / キャッシュ回避クエリ付き / defer） -->
   <script>
-    window.BUILD_V = window.BUILD_V || '20251003';
-    window.withV = (u)=> u + (u.includes('?') ? '&' : '?') + 'v=' + window.BUILD_V;
+    // spotId → 01..06 へ
+    function spotNum2d(spotId){
+      try{
+        const n = String((spotId||'').replace('spot','')||'1');
+        return n.padStart(2,'0');
+      }catch(e){ return '01'; }
+    }
+    function getQuery(key){
+      try { return new URLSearchParams(location.search).get(key) } catch { return null }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const spotId = getQuery('spotId') || 'spot1';
+      const nn = spotNum2d(spotId);
+
+      // タイトル
+      var ttl = document.getElementById('spotTitle');
+      if (ttl) ttl.textContent = 'スポット' + String(parseInt(nn,10));
+
+      // 取得スタンプ画像（新パス）
+      var img = document.getElementById('gotStampImage');
+      if (img) img.src = 'assets/images/stamps/stamp' + nn + '.png';
+
+      // 任意：スタンプ取得メモ
+      var note = document.getElementById('stampNote');
+      if (note) note.textContent = '(' + spotId + ' に対応)';
+
+      // 写真・クイズ本文・解説などは後で差し込み
+      // 例：写真がある場合は下記のように:
+      // const photo = document.getElementById('spotPhoto');
+      // if (photo) photo.src = 'assets/images/Photos_thesis/XXXX.jpg';
+
+      // 答え表示
+      var btn = document.getElementById('showAnswerBtn');
+      var ans = document.getElementById('answerBlock');
+      if (btn && ans) {
+        btn.addEventListener('click', () => {
+          ans.style.display = 'block';
+          btn.disabled = true;
+        });
+      }
+    });
   </script>
-  <script src="js/firebase.js" defer></script>
-  <script src="js/explanation.js" defer></script>
 </body>
 </html>
