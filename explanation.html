@@ -1,73 +1,113 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>解説 | ARスタンプラリー</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <link rel="stylesheet" href="css/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#fff;color:#111}
-    .wrap{max-width:840px;margin:0 auto;padding:16px 14px 24px}
-    header{margin-bottom:8px}
-    h1{font-size:20px;margin:0 0 8px}
+    :root{
+      --accent:#005ABB;
+      --text:#111;
+      --muted:#444;
+      --bg:#fff;
+      --card:#ffffff;
+      --radius:16px;
+      --shadow:0 12px 32px rgba(0,0,0,.08);
+    }
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.65}
+    .wrap{max-width:960px;margin:0 auto;padding:clamp(10px,3vw,16px)}
+    header{padding:6px 0 10px}
+    h1{margin:0;font-size:20px;font-weight:900}
 
-    .got{display:flex;align-items:center;gap:12px;margin:10px 0 6px}
-    .got img{width:120px;max-width:45vw;height:auto;border-radius:12px;border:1px solid #e9eef6;background:#f6f7fb}
-    .got small{color:#333}
-    .quizTitle{font-weight:900;font-size:18px;margin:14px 0 8px;color:#111;text-shadow:-1px 0 #fff, 1px 0 #fff, 0 -1px #fff, 0 1px #fff}
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:clamp(12px,3vw,18px)}
+    .row{display:grid;grid-template-columns:1fr;gap:12px}
+    @media (min-width:720px){ .row{grid-template-columns: 1fr 1fr} }
 
-    .photo{width:100%;border-radius:14px;overflow:hidden;border:1px solid #e9eef6;background:#f6f7fb}
-    .photo img{width:100%;height:auto;display:block}
+    .stampRow{display:flex;gap:10px;align-items:center;margin-top:6px}
+    .stampImg{width:min(44vw,220px);max-width:220px; border-radius:12px; border:1px solid #e9eef6; background:#f7f9ff}
+    .stampNote{font-size:13px;color:#333}
 
-    .lead{margin:6px 0 12px;color:#111}
-    .btn{appearance:none;border:0;border-radius:12px;padding:12px 14px;font-weight:900;background:#005ABB;color:#fff;cursor:pointer}
-    .center{text-align:center}
-    .answer{font-weight:900;font-size:20px;margin:10px 0;color:#111}
+    .photo{
+      width:100%; aspect-ratio:4/3; border-radius:12px; overflow:hidden;
+      background:#f3f6fc; border:1px solid #e9eef6; display:flex; align-items:center; justify-content:center;
+      margin:8px 0 0;
+    }
+    .photo img{width:100%;height:100%;object-fit:cover;display:block}
 
-    .footer{margin-top:16px;text-align:center}
-    .footer a{display:inline-block;text-decoration:none}
-    .footer .btn{min-width:220px}
+    .quizTitle{
+      margin:14px 0 6px; font-weight:900; font-size:18px;
+      color:#fff; text-shadow:-1px -1px 0 #003b8f, 1px -1px 0 #003b8f, -1px 1px 0 #003b8f, 1px 1px 0 #003b8f;
+      display:inline-block; background:#005ABB; padding:6px 10px; border-radius:10px;
+    }
+    .quizBody{margin:8px 0}
+    .choices{margin:6px 0 10px}
+    .choices p{margin:.2em 0}
+    .btn{
+      appearance:none;border:0;border-radius:12px;padding:12px 14px;font-weight:900;cursor:pointer;
+      background:var(--accent);color:#fff;box-shadow:0 10px 28px rgba(0,90,187,.25)
+    }
+    .btn[disabled]{opacity:.45;box-shadow:none;cursor:not-allowed}
+    .btn-secondary{background:#e9eef6;color:#111;box-shadow:none}
+    .answer{display:none;margin:10px 0 0;font-weight:900;font-size:18px}
+    .answer b{font-size:1.1em}
+
+    .explain{margin-top:10px}
+    .explain figure{margin:10px 0}
+    .explain img{width:100%;height:auto;border-radius:10px;border:1px solid #e9eef6}
+    .explain figcaption{font-size:12px;color:#333;margin-top:4px}
+
+    .ctaRow{margin-top:14px; display:flex; gap:10px; flex-wrap:wrap}
+    .back{display:inline-block; text-decoration:none}
+
+    .footerSpace{height:max(8px, env(safe-area-inset-bottom))}
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <h1 id="spotTitle">スポット名</h1>
+      <h1 id="spotTitle">スポット</h1>
     </header>
 
-    <!-- 取得スタンプ -->
-    <section class="got">
-      <img id="gotStampImage" src="" alt="取得スタンプ">
-      <div>
-        <div style="font-weight:800">スタンプをゲットしました！</div>
-        <small id="stampNote"></small>
+    <section class="card">
+      <!-- スタンプ取得 -->
+      <div class="stampRow">
+        <img id="gotStampImage" class="stampImg" src="" alt="取得スタンプ">
+        <div class="stampNote" id="stampNote">スタンプをゲットしました！</div>
+      </div>
+
+      <!-- メイン写真 -->
+      <div class="photo">
+        <img id="spotPhoto" src="" alt="スポット写真">
+      </div>
+
+      <!-- クイズ -->
+      <div id="quizSection">
+        <div class="quizTitle">クイズ</div>
+        <div id="quizBody" class="quizBody"></div>
+        <div id="quizChoices" class="choices"></div>
+        <button id="showAnswerBtn" class="btn" type="button">答えを見る</button>
+        <div id="answerBlock" class="answer"><span id="answerText"></span></div>
+      </div>
+
+      <!-- 解説 -->
+      <div id="explainBlock" class="explain"></div>
+
+      <!-- 6番はクイズ無しのメッセージ -->
+      <div id="specialMessage" style="display:none;margin-top:10px;"></div>
+
+      <!-- 戻る -->
+      <div class="ctaRow">
+        <a id="backToMap" class="btn back" href="map.html">マップに戻る</a>
       </div>
     </section>
 
-    <!-- クイズ -->
-    <div class="quizTitle">クイズ</div>
-
-    <!-- スポット写真 -->
-    <figure class="photo">
-      <img id="spotPhoto" src="" alt="スポット写真">
-    </figure>
-
-    <p id="quizBody" class="lead">（クイズ本文と選択肢 A / B / C をここに配置してください）</p>
-
-    <div class="center">
-      <button id="showAnswerBtn" class="btn" type="button">答えを見る</button>
-    </div>
-
-    <div id="answerBlock" class="answer" style="display:none;">A. （正解の選択肢をここに）</div>
-
-    <p id="explainBody" class="lead">（解説本文をここに）</p>
-
-    <div class="footer">
-      <a class="btn" href="map.html">マップに戻る</a>
-    </div>
+    <div class="footerSpace"></div>
   </div>
 
   <script src="js/firebase.js" defer></script>
-  <script src="js/explanation.js" defer></script>
+  <script src="js/explanation.js?v=20251008" defer></script>
 </body>
 </html>

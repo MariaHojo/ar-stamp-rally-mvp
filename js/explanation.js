@@ -1,11 +1,14 @@
-/* js/explanation.js
- * - ?spotId=spot1..spot6 を取得し、表示内容（タイトル/写真/スタンプ）を出し分け
- * - 表示時に users/{uid}/stamps/{spotId} = true を保存（firebase.js の ensureAnon 前提）
- * - uid 名前空間付き localStorage をフォールバックとして更新
+/* js/explanation.js（差し替え）
+ * - ?spotId=spot1..spot6 を判定し、写真・クイズ・解説を表示
+ * - 表示時に users/{uid}/stamps/{spotId} = true を保存（匿名UID）
+ * - スタンプ画像: assets/images/stamps/stampXX.png（XX=01..06）
+ * - 写真: assets/images/Photo_thesis/…（ご提供ファイル名）
  */
+
 (function () {
   const $  = (s) => document.querySelector(s);
 
+  // --------- 基本ユーティリティ ---------
   function getQuery(key){
     try { return new URLSearchParams(location.search).get(key) } catch { return null }
   }
@@ -18,17 +21,15 @@
     const bodyId= document.body ? document.body.dataset.spot : null;
     return normalizeSpotId(urlId || bodyId || 'spot1');
   }
-
   function getUidSync(){
-    try {
-      return (firebase?.auth?.().currentUser?.uid) || localStorage.getItem('uid');
-    } catch {
-      return null;
-    }
+    try { return (firebase?.auth?.().currentUser?.uid) || localStorage.getItem('uid'); } catch { return null; }
   }
   function lsKey(spot){ const uid = getUidSync() || 'nouid'; return `stamp_${uid}_${spot}` }
+  function toNN(spotId){ return String(spotId.replace('spot','')).padStart(2,'0') }
+  function stampSrc(spotId){ return `assets/images/stamps/stamp${toNN(spotId)}.png` }
 
-  const SPOT_LABELS = {
+  // --------- コンテンツ定義 ---------
+  const LABELS = {
     spot1: '本館173前',
     spot2: 'トロイヤー記念館（T館）前',
     spot3: '学生食堂（ガッキ）前',
@@ -36,38 +37,201 @@
     spot5: '体育館（Pec-A）前',
     spot6: '本館307前',
   };
-  const SPOT_PHOTOS = {
-    spot1: 'assets/images/Photos_thesis/本館正面_1950年代.jpg',
-    spot2: 'assets/images/Photos_thesis/spot2.jpg',
-    spot3: 'assets/images/Photos_thesis/spot3.jpg',
-    spot4: 'assets/images/Photos_thesis/spot4.jpg',
-    spot5: 'assets/images/Photos_thesis/spot5.jpg',
-    spot6: 'assets/images/Photos_thesis/spot6.jpg',
+
+  // 各スポットのデータ
+  const CONTENT = {
+    spot1: {
+      mainPhoto: 'assets/images/Photo_thesis/本館正面_1950年代.jpg',
+      quiz: {
+        q: '本館は昔何に使われていたでしょうか？',
+        choices: { A:'図書館', B:'畑', C:'飛行機の制作' },
+        answer: 'C'
+      },
+      explainHTML: `
+        <p>ICUがある所には昔、「中島飛行機」という名前の会社があったんだ。戦争のころには軍用機も多く作られていたんだよ。後に「富士重工業（現社名：SUBARU）」という会社になるよ。</p>
+        <figure>
+          <img src="assets/images/Photo_thesis/キャンパス内部_本館風景.jpg" alt="キャンパス内部 本館風景">
+          <figcaption>キャンパス内部 本館風景</figcaption>
+        </figure>
+        <p>これは改装前の写真だよ。<b>本館はもともと中島飛行機が使っていたもの</b>を1953年に改築したんだ。</p>
+        <figure>
+          <img src="assets/images/Photo_thesis/本館正面_1950年代.jpg" alt="本館正面 1950年代">
+          <figcaption>本館正面（1950年代）</figcaption>
+        </figure>
+        <p>この写真は1950年代のもので、改築はしてるけど<b>バカ山・アホ山がまだ無い</b>よね？ バカ山・アホ山は図書館の地下階を掘った時にできた土を盛って作られたんだよ！</p>
+      `
+    },
+    spot2: {
+      mainPhoto: 'assets/images/Photo_thesis/キャンパス全景_1970_航空写真_理学館と本館.jpg',
+      quiz: {
+        q: 'T館がある所には、昔何があったでしょうか？',
+        choices: { A:'教会', B:'道', C:'教室棟' },
+        answer: 'B'
+      },
+      explainHTML: `
+        <p>写真を見ると、横から見たら「E」みたいになっている本館と、十字の形の理学館があって、奥に三角のシーベリーチャペルがあるよね。でも、<b>T館はどこにもない</b>のはわかるかな？ これは1970年の写真だよ。本当に何もなかったんだ！</p>
+        <figure>
+          <img src="assets/images/Photo_thesis/キャンパス全景_1956_航空写真.jpg" alt="キャンパス全景 1956 航空写真">
+          <figcaption>キャンパス全景（1956年・航空写真）</figcaption>
+        </figure>
+        <p>理学館もないけど、本館だけは変わらないね。</p>
+      `
+    },
+    spot3: {
+      mainPhoto: 'assets/images/Photo_thesis/大学食堂全景_1955.jpg',
+      quiz: {
+        q: 'ガッキで行われていたことは何でしょう？',
+        choices: { A:'結婚式', B:'オーケストラコンクール', C:'ダンスバトル' },
+        answer: 'A'
+      },
+      explainHTML: `
+        <p><b>結婚式も、結婚式の披露宴も</b>行われていたよ。写真は1955年ごろのガッキ（学生キッチンの略）。昔はICUのガッキでは、中富商事の提供するフレンチ料理を食べることが出来たんだ。結婚式のときは、豪華な本格フレンチがふるまわれたとか。</p>
+        <p>中富商事は今でも本格フレンチのレストランを営んでいるよ。今目の前にあるガッキの中にある暖炉は、今は使われていないけど、現役で使われていた時代もあったんだ。</p>
+        <figure>
+          <img src="assets/images/Photo_thesis/ICUフェスティバルの日の食堂.jpg" alt="ICUフェスティバルの日の食堂">
+          <figcaption>ICU Festival の日の食堂</figcaption>
+        </figure>
+        <p>このころのガッキからさらに改築されて、2010年に今のガッキに建て替えられる前は、こんな感じだったよ。</p>
+        <figure>
+          <img src="assets/images/Photo_thesis/a.食堂・外観080415-04.JPG" alt="食堂 外観（改築前）">
+          <figcaption>食堂・外観（改築前）</figcaption>
+        </figure>
+        <p>今はもっと大きくなったね！</p>
+      `
+    },
+    spot4: {
+      mainPhoto: 'assets/images/Photo_thesis/礼拝堂_1955_左手から.jpg',
+      quiz: {
+        q: 'この写真と今のチャペルの形が違うのはなぜでしょうか？',
+        choices: { A:'建築士が喧嘩して建て直したから', B:'すぐに壊れて建て直したから', C:'音響が悪くて建て直したから' },
+        answer: 'C'
+      },
+      explainHTML: `
+        <p>ロマネスク様式の<b>バラ窓</b>が見事なチャペルだね。これは1954年にヴォーリズ建築事務所によって建てられたけど、ヴォーリズが引退した後、<b>1959年にレーモンド</b>というモダニズム建築士によって建て替えられたんだ。</p>
+        <figure>
+          <img src="assets/images/Photo_thesis/コミュニティスクール_教会学校_1970.jpg" alt="教会学校 1970">
+          <figcaption>建て替え後の礼拝堂（1970）</figcaption>
+        </figure>
+        <p>一説にはモダニズム建築のレーモンドがロマネスク様式を嫌って建て替えた…という話もあるみたいだけど、さすがに喧嘩したぐらいで、募金を募って建てられたICUのチャペル建て直しはできないよね…。第二次世界大戦後の日米で、和解を願って集められた寄付によって購入されたのが、このICUが建つ三鷹の土地なんだ。人々の善意によって建てられた大学に居るっていうのは、キュッと身を引き締めさせてくれるね。</p>
+      `
+    },
+    spot5: {
+      mainPhoto: 'assets/images/Photo_thesis/学生2_1950-1960年代_授業・クラブ活_体育館完成_1973.jpg',
+      quiz: {
+        q: '体育館にはA館とB館がありますが、B館はいつごろ建てられたでしょうか？',
+        choices: { A:'1990年代', B:'1970年代', C:'1950年代' },
+        answer: 'B'
+      },
+      explainHTML: `
+        <p><b>1973年の写真</b>だよ。B館に入ったことがある人は、このころから内装が変わっていないことが分かるね！50年も昔から、ここでいろんな学生が運動を楽しんでいるんだよ。もちろんジムもね！</p>
+        <figure>
+          <img src="assets/images/Photo_thesis/プール_学生2_1950-1960年代_授業・クラブ活_体育館完成_1973.jpg" alt="プール棟（1973）">
+          <figcaption>当時はプール棟もありました（1973）</figcaption>
+        </figure>
+        <p>2018年に新しくA館が出来たよ！ 木がきれいだね。この建築には建築士の隈研吾さんが関わっているよ。その時にプール棟は無くなって、新しくなったんだ。</p>
+      `
+    },
+    spot6: {
+      mainPhoto: '', // 未定なら空のまま
+      quiz: null,    // クイズなし
+      explainHTML: '',
+      message: `
+        <p>ここまで見てくれてありがとう！ マップに戻ったらアンケートにぜひ答えてね！</p>
+        <p>答えてくれた人にはスペシャルコンテンツが待ってるよ〜！</p>
+      `
+    }
   };
-  function toNN(spotId){ return String(spotId.replace('spot','')).padStart(2,'0') }
-  function stampSrc(spotId){ return `assets/images/stamps/stamp${toNN(spotId)}.png` }
 
-  function renderContent(spotId){
-    const title = SPOT_LABELS[spotId] || 'スポット';
-    const ttl   = $('#spotTitle');
-    const imgS  = $('#gotStampImage');
-    const note  = $('#stampNote');
+  // --------- 描画処理 ---------
+  function render(spotId){
+    const title = LABELS[spotId] || 'スポット';
+    const conf  = CONTENT[spotId] || CONTENT.spot1;
+
+    // タイトル
+    $('#spotTitle').textContent = title;
+
+    // スタンプ画像
+    const sImg = $('#gotStampImage');
+    if (sImg) { sImg.src = stampSrc(spotId); sImg.alt = `${title} のスタンプ`; }
+
+    // メイン写真
     const photo = $('#spotPhoto');
-
-    if (ttl)   ttl.textContent = title;
-    if (imgS)  { imgS.src = stampSrc(spotId); imgS.alt = `${title} のスタンプ`; }
-    if (note)  note.textContent = 'スタンプをゲットしました！';
     if (photo) {
-      const p = SPOT_PHOTOS[spotId] || '';
-      if (p) { photo.src = p; photo.alt = `${title} の写真`; }
+      if (conf.mainPhoto) {
+        photo.src = conf.mainPhoto;
+        photo.alt = `${title} の写真`;
+      } else {
+        photo.src = '';
+        photo.alt = '';
+      }
+    }
+
+    // クイズ（spot6は非表示）
+    const quizSection = $('#quizSection');
+    const quizBody    = $('#quizBody');
+    const quizChoices = $('#quizChoices');
+    const answerBlock = $('#answerBlock');
+    const answerText  = $('#answerText');
+    const showBtn     = $('#showAnswerBtn');
+    const special     = $('#specialMessage');
+
+    if (conf.quiz){
+      quizSection.style.display = 'block';
+      special.style.display     = 'none';
+
+      quizBody.innerHTML = `<p>${conf.quiz.q}</p>`;
+      quizChoices.innerHTML = `
+        <p>A. ${conf.quiz.choices.A}</p>
+        <p>B. ${conf.quiz.choices.B}</p>
+        <p>C. ${conf.quiz.choices.C}</p>
+      `;
+      answerBlock.style.display = 'none';
+      showBtn.disabled = false;
+      showBtn.onclick = () => {
+        answerText.innerHTML = `<b>答え：${conf.quiz.answer}</b>（${conf.quiz.choices[conf.quiz.answer]}）`;
+        answerBlock.style.display = 'block';
+        showBtn.disabled = true;
+      };
+    } else {
+      // クイズ無し（spot6）
+      quizSection.style.display = 'none';
+      special.style.display = 'block';
+      special.innerHTML = conf.message || '';
+    }
+
+    // 解説
+    const explain = $('#explainBlock');
+    explain.innerHTML = conf.explainHTML || '';
+
+    // 画面タイトル（ブラウザ）
+    try { document.title = `${title} | 解説`; } catch {}
+  }
+
+  // --------- 保存処理 ---------
+  async function ensureAnon() {
+    if (typeof window.ensureAnon === 'function') {
+      try { const uid = await window.ensureAnon(); if (uid) return uid; } catch(e){}
+    }
+    try {
+      if (!firebase?.apps?.length && typeof firebaseConfig !== 'undefined') {
+        firebase.initializeApp(firebaseConfig);
+      }
+      const auth = firebase.auth();
+      if (auth.currentUser) return auth.currentUser.uid;
+      const cred = await auth.signInAnonymously();
+      return cred.user && cred.user.uid;
+    } catch(e) {
+      console.warn('[explanation] ensureAnon fallback failed:', e?.message||e);
+      return getUidSync();
     }
   }
 
   async function saveStamp(spotId){
     let uid = null;
-    try { uid = await window.ensureAnon?.() } catch(e){ console.warn('[explanation] ensureAnon failed:', e) }
+    try { uid = await ensureAnon(); } catch(e){ console.warn('[explanation] ensureAnon failed:', e) }
 
-    try { localStorage.setItem(lsKey(spotId), 'true') } catch {}
+    // ローカル先行
+    try { localStorage.setItem(lsKey(spotId), 'true'); } catch {}
 
     if (!uid) return;
     try {
@@ -82,21 +246,11 @@
     }
   }
 
-  function bindAnswer(){
-    const btn = $('#showAnswerBtn');
-    const ans = $('#answerBlock');
-    if (!btn || !ans) return;
-    btn.addEventListener('click', () => {
-      ans.style.display = 'block';
-      btn.disabled = true;
-    });
-  }
-
+  // --------- 起動 ---------
   async function boot(){
     const spotId = getSpotId();
-    renderContent(spotId);
+    render(spotId);
     await saveStamp(spotId);
-    bindAnswer();
   }
 
   document.addEventListener('DOMContentLoaded', boot);
