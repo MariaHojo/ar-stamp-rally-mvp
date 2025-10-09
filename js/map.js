@@ -2,15 +2,16 @@
  * 目的：
  *  - スタンプ帳（6箇所）を Firebase v8 + localStorage で正しく反映
  *  - 6/6 達成で初回のみ完走モーダル表示＆インラインリンク表示
- *  - 「カメラ起動」→ スポット選択の写真グリッド（6箇所すべて AR 起動）
- *  - 写真ソースを assets/images/current_photos/spotXX.jpg に統一（XX=01..06）
- *  - 画像はモーダルを開いた時にだけ生成（負荷低減）＋ <img loading="lazy">
+ *  - 「カメラ起動」→ スポット選択吹き出し（6箇所すべて AR 起動）
+ *  - 8th Wall 各プロジェクトURLへ遷移（spotId/uid をクエリ付与）
+ *  - アンケート送信済みユーザーだけ「スペシャルコンテンツを見る」を表示
  */
 
 const $  = (s)=>document.querySelector(s);
 const $$ = (s)=>Array.from(document.querySelectorAll(s));
 
 /* ====== 8th Wall 側 URL（要置換） ======
+ * すべてあなたの実 URL に差し替えてください。
  * 例: 'https://yourname.8thwall.app/icu-spot1/'
  */
 const EIGHTHWALL_URLS = {
@@ -26,25 +27,17 @@ const ALL_SPOTS       = ['spot1','spot2','spot3','spot4','spot5','spot6'];
 const AR_SPOTS        = ALL_SPOTS.slice();   // 6箇所すべて AR
 const COMPLETE_TARGET = 6;
 
-/* ====== 表示名・写真パス ====== */
-const SPOT_LABELS = {
-  spot1: '本館173前',
-  spot2: 'トロイヤー記念館（T館）前',
-  spot3: '学生食堂（ガッキ）前',
-  spot4: 'チャペル前',
-  spot5: '体育館（Pec-A）前',
-  spot6: '本館307前',
-};
-const photoSrc = (spotId) => {
-  const nn = String(spotId.replace('spot','')).padStart(2,'0');
-  return `assets/images/current_photos/spot${nn}.JPG`; // ←今回の差し替えポイント
-};
-
 /* ====== LocalStorage util ====== */
 function lsGet(k){ try{return localStorage.getItem(k);}catch{return null;} }
 function lsSet(k,v){ try{localStorage.setItem(k,v);}catch{} }
 function lsKeyStamp(uid, spot){ return `stamp_${uid}_${spot}`; }
 function seenKey(uid){ return `complete_6_seen_${uid}`; }
+
+/* ====== 版数付与（キャッシュ回避） ====== */
+if (!window.withV) {
+  window.BUILD_V = window.BUILD_V || '20251009';
+  window.withV = (url) => url + (url.includes('?') ? '&' : '?') + 'v=' + window.BUILD_V;
+}
 
 /* ====== Auth（匿名） ====== */
 async function ensureAnonSafe() {
@@ -85,6 +78,23 @@ async function fetchStamps(uid) {
   return stamps;
 }
 
+/* ====== アンケート送信済みかを確認 ======
+ *  users/{uid}/survey が存在すれば true
+ */
+async function fetchSurveySubmitted(uid){
+  if (!uid) return false;
+  try{
+    const snap = await firebase.database().ref(`users/${uid}/survey`).once('value');
+    const val = snap && snap.val ? snap.val() : null;
+    return !!val;
+  }catch(e){
+    console.warn('[map] fetch survey failed:', e?.message||e);
+    // ローカルにフラグがあれば尊重（post-survey 側で set している場合）
+    const ls = lsGet(`survey_submitted_${uid}`);
+    return ls === 'true';
+  }
+}
+
 /* ====== スタンプ帳 UI 反映 ====== */
 function renderStampUI(stamps){
   // 各セル（取得/未取得の文言・クラス）
@@ -104,6 +114,13 @@ function renderStampUI(stamps){
   // 完了インラインリンク（見出し直下）
   const inline = $('#completeInline');
   if (inline) inline.style.display = (cnt >= COMPLETE_TARGET) ? 'block' : 'none';
+}
+
+/* ====== スペシャルコンテンツ表示制御 ====== */
+function renderSpecialLink(visible){
+  const el = $('#specialInline');
+  if (!el) return;
+  el.style.display = visible ? 'block' : 'none';
 }
 
 /* ====== 完走モーダル ====== */
@@ -130,41 +147,38 @@ async function handleCompletionFlow(uid, stamps){
   lsSet(seenKey(uid), 'true');
 }
 
-/* ====== カメラ起動（スポット選択：写真グリッド） ====== */
+/* ====== カメラ起動（スポット選択の吹き出し） ====== */
 function buildCameraChooserItems(){
   const list = $('#cameraChooserList');
   if (!list) return;
   list.innerHTML = '';
 
-  // 2列×3行のグリッド項目
   ALL_SPOTS.forEach((id)=>{
-    const name = SPOT_LABELS[id] || id.toUpperCase();
-    const src  = photoSrc(id);
-
     const item = document.createElement('div');
     item.className = 'item';
-
-    // 画像リンク全体が押下対象（ボタンは置かない）
+    // サムネは未入稿のため枠のみ（必要なら current_photos を挿入）
     item.innerHTML = `
-      <a class="photoLink" href="#" data-spot="${id}" aria-label="${name}">
-        <div class="thumbWrap">
-          <img loading="lazy" src="${src}" alt="${name}">
-          <div class="label">${name}</div>
-        </div>
-      </a>
+      <div class="thumb" aria-hidden="true"
+           style="background:#f3f6fc;border:1px dashed #c9d6ee;border-radius:10px;height:60px;"></div>
+      <div class="meta">
+        <div class="name">${id.toUpperCase()}</div>
+        <div class="type">ARスポット</div>
+      </div>
+      <div class="go">
+        <button class="btn" data-spot="${id}">起動</button>
+      </div>
     `;
     list.appendChild(item);
   });
 
-  // 画像クリックで AR 起動
-  list.querySelectorAll('a.photoLink[data-spot]').forEach(a=>{
-    a.addEventListener('click', async (ev)=>{
-      ev.preventDefault();
-      const spot = a.getAttribute('data-spot');
+  // 起動ボタン（6箇所すべて有効）
+  list.querySelectorAll('button[data-spot]').forEach(btn=>{
+    const spot = btn.dataset.spot;
+    btn.addEventListener('click', async ()=>{
+      const uid  = await ensureAnonSafe();
       const base = EIGHTHWALL_URLS[spot];
       if (!base) { alert('このスポットのAR URLが未設定です'); return; }
-      const uid  = await ensureAnonSafe();
-      const url  = new URL(base);
+      const url = new URL(base);
       url.searchParams.set('spotId', spot);
       if (uid) url.searchParams.set('uid', uid);
       location.href = url.toString();
@@ -173,7 +187,7 @@ function buildCameraChooserItems(){
 }
 
 function showCameraChooser(){
-  buildCameraChooserItems(); // 開いた時点で初めて生成→不要な事前読込を防ぐ
+  buildCameraChooserItems();
   $('#cameraChooserOverlay')?.classList.add('is-open');
   $('#cameraChooser')?.classList.add('is-open');
 }
@@ -186,7 +200,7 @@ function hideCameraChooser(){
 async function boot(){
   bindCompleteModalButtons();
 
-  // 「カメラ起動」→ 写真グリッド
+  // 「カメラ起動」→ 吹き出し
   $('#cameraBtn')?.addEventListener('click', showCameraChooser);
   $('#cameraChooserClose')?.addEventListener('click', hideCameraChooser);
   $('#cameraChooserOverlay')?.addEventListener('click', hideCameraChooser);
@@ -197,18 +211,26 @@ async function boot(){
   renderStampUI(stamps);
   await handleCompletionFlow(uid, stamps);
 
-  // 復帰時に再反映
+  // アンケ送信済みリンク制御
+  const submitted = await fetchSurveySubmitted(uid);
+  renderSpecialLink(submitted);
+
+  // 復帰時に再反映（スタンプ／アンケ状態）
   document.addEventListener('visibilitychange', async ()=>{
     if (document.visibilityState === 'visible') {
       const s = await fetchStamps(uid);
       renderStampUI(s);
       await handleCompletionFlow(uid, s);
+      const ok = await fetchSurveySubmitted(uid);
+      renderSpecialLink(ok);
     }
   });
   window.addEventListener('pageshow', async ()=>{
     const s = await fetchStamps(uid);
     renderStampUI(s);
     await handleCompletionFlow(uid, s);
+    const ok = await fetchSurveySubmitted(uid);
+    renderSpecialLink(ok);
   });
 
   // data-ar-spot / #openAR-spotN（直接ボタンがある場合のフォールバック）
@@ -245,18 +267,3 @@ async function boot(){
 }
 
 document.addEventListener('DOMContentLoaded', boot);
-
-/* ====== カメラ選択モーダルの見た目（画像・名札）に合わせた CSS を map.html に用意してください ======
-  .camera-chooser .list{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px }
-  .camera-chooser .item{ padding:0; border:none; background:transparent }
-  .thumbWrap{ position:relative; aspect-ratio:1/1; border-radius:12px; overflow:hidden;
-              box-shadow:0 10px 26px rgba(0,0,0,.12); border:1px solid #e3eaf6 }
-  .thumbWrap img{ width:100%; height:100%; object-fit:cover; display:block }
-  .thumbWrap .label{
-    position:absolute; left:8px; bottom:8px; right:8px;
-    font-weight:900; font-size:14px; line-height:1.2; color:#fff;
-    text-shadow: -1px -1px 0 #2b3a68, 1px -1px 0 #2b3a68, -1px 1px 0 #2b3a68, 1px 1px 0 #2b3a68;
-    background:linear-gradient(to top, rgba(0,0,0,.45), rgba(0,0,0,0));
-    padding:10px 10px 12px; border-radius:0 0 10px 10px;
-  }
-*/
