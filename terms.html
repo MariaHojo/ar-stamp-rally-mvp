@@ -38,6 +38,7 @@
       padding:10px 16px;
       text-decoration:none;
       font-weight:700;
+      cursor:pointer;
     }
   </style>
 </head>
@@ -54,7 +55,21 @@
     <h2>ご利用上の注意</h2>
     <p>本アプリは、AR（拡張現実）を用いた体験型コンテンツを含み、歩行や屋外での利用を伴う場合があります。ご利用の際は、周囲の安全に十分ご注意ください。また、AR利用中の事故・ケガ・機器の破損などについて、運営は一切の責任を負いかねます。</p>
 
-    <a href="map.html" class="back">戻る</a>
+    <a id="backBtn" class="back" href="#">戻る</a>
   </div>
+
+  <script>
+    // 版数クエリ（キャッシュ回避）— 他ページと同じ仕組みに合わせます
+    if (!window.withV) {
+      window.BUILD_V = window.BUILD_V || '20251005';
+      window.withV = (url) => url + (url.includes('?') ? '&' : '?') + 'v=' + window.BUILD_V;
+    }
+
+    document.getElementById('backBtn').addEventListener('click', function (e) {
+      e.preventDefault();
+      // 直接 map.html の最新へ遷移（history.back() は使わない）
+      location.href = withV('map.html');
+    }, {passive:false});
+  </script>
 </body>
 </html>
