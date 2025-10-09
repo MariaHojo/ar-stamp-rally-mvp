@@ -41,7 +41,7 @@
   // 各スポットのデータ
   const CONTENT = {
     spot1: {
-      mainPhoto: 'assets/images/Photo_thesis/spot1_main.jpg',
+      mainPhoto: 'assets/images/Photos_thesis/spot1_main.jpg',
       quiz: {
         q: '本館は昔何に使われていたでしょうか？',
         choices: { A:'図書館', B:'畑', C:'飛行機の制作' },
@@ -50,19 +50,19 @@
       explainHTML: `
         <p>ICUがある所には昔、「中島飛行機」という名前の会社があったんだ。戦争のころには軍用機も多く作られていたんだよ。後に「富士重工業（現社名：SUBARU）」という会社になるよ。</p>
         <figure>
-          <img src="assets/images/Photo_thesis/spot1_detail_1.jpg" alt="キャンパス内部 本館風景">
+          <img src="assets/images/Photos_thesis/spot1_detail_1.jpg" alt="キャンパス内部 本館風景">
           <figcaption>キャンパス内部 本館風景</figcaption>
         </figure>
         <p>これは改装前の写真だよ。<b>本館はもともと中島飛行機が使っていたもの</b>を1953年に改築したんだ。</p>
         <figure>
-          <img src="assets/images/Photo_thesis/spot1_main.jpg" alt="本館正面 1950年代">
+          <img src="assets/images/Photos_thesis/spot1_main.jpg" alt="本館正面 1950年代">
           <figcaption>本館正面（1950年代）</figcaption>
         </figure>
         <p>この写真は1950年代のもので、改築はしてるけど<b>バカ山・アホ山がまだ無い</b>よね？ バカ山・アホ山は図書館の地下階を掘った時にできた土を盛って作られたんだよ！</p>
       `
     },
     spot2: {
-      mainPhoto: 'assets/images/Photo_thesis/spot2_main.jpg',
+      mainPhoto: 'assets/images/Photos_thesis/spot2_main.jpg',
       quiz: {
         q: 'T館がある所には、昔何があったでしょうか？',
         choices: { A:'教会', B:'道', C:'教室棟' },
@@ -71,14 +71,14 @@
       explainHTML: `
         <p>写真を見ると、横から見たら「E」みたいになっている本館と、十字の形の理学館があって、奥に三角のシーベリーチャペルがあるよね。でも、<b>T館はどこにもない</b>のはわかるかな？ これは1970年の写真だよ。本当に何もなかったんだ！</p>
         <figure>
-          <img src="assets/images/Photo_thesis/spot2_detail_1.jpg" alt="キャンパス全景 1956 航空写真">
+          <img src="assets/images/Photos_thesis/spot2_detail_1.jpg" alt="キャンパス全景 1956 航空写真">
           <figcaption>キャンパス全景（1956年・航空写真）</figcaption>
         </figure>
         <p>理学館もないけど、本館だけは変わらないね。</p>
       `
     },
     spot3: {
-      mainPhoto: 'assets/images/Photo_thesis/spot3_main.jpg',
+      mainPhoto: 'assets/images/Photos_thesis/spot3_main.jpg',
       quiz: {
         q: 'ガッキで行われていたことは何でしょう？',
         choices: { A:'結婚式', B:'オーケストラコンクール', C:'ダンスバトル' },
@@ -88,19 +88,19 @@
         <p><b>結婚式も、結婚式の披露宴も</b>行われていたよ。写真は1955年ごろのガッキ（学生キッチンの略）。昔はICUのガッキでは、中富商事の提供するフレンチ料理を食べることが出来たんだ。結婚式のときは、豪華な本格フレンチがふるまわれたとか。</p>
         <p>中富商事は今でも本格フレンチのレストランを営んでいるよ。今目の前にあるガッキの中にある暖炉は、今は使われていないけど、現役で使われていた時代もあったんだ。</p>
         <figure>
-          <img src="assets/images/Photo_thesis/spot3_detail_1.jpg" alt="ICUフェスティバルの日の食堂">
+          <img src="assets/images/Photos_thesis/spot3_detail_1.jpg" alt="ICUフェスティバルの日の食堂">
           <figcaption>ICU Festival の日の食堂</figcaption>
         </figure>
         <p>このころのガッキからさらに改築されて、2010年に今のガッキに建て替えられる前は、こんな感じだったよ。</p>
         <figure>
-          <img src="assets/images/Photo_thesis/spot3_detail_2.JPG" alt="食堂 外観（改築前）">
+          <img src="assets/images/Photos_thesis/spot3_detail_2.JPG" alt="食堂 外観（改築前）">
           <figcaption>食堂・外観（改築前）</figcaption>
         </figure>
         <p>今はもっと大きくなったね！</p>
       `
     },
     spot4: {
-      mainPhoto: 'assets/images/Photo_thesis/礼拝堂_1955_左手から.jpg',
+      mainPhoto: 'assets/images/Photos_thesis/spot4_main.jpg',
       quiz: {
         q: 'この写真と今のチャペルの形が違うのはなぜでしょうか？',
         choices: { A:'建築士が喧嘩して建て直したから', B:'すぐに壊れて建て直したから', C:'音響が悪くて建て直したから' },
@@ -109,14 +109,14 @@
       explainHTML: `
         <p>ロマネスク様式の<b>バラ窓</b>が見事なチャペルだね。これは1954年にヴォーリズ建築事務所によって建てられたけど、ヴォーリズが引退した後、<b>1959年にレーモンド</b>というモダニズム建築士によって建て替えられたんだ。</p>
         <figure>
-          <img src="assets/images/Photo_thesis/コミュニティスクール_教会学校_1970.jpg" alt="教会学校 1970">
+          <img src="assets/images/Photos_thesis/spot4_detail_1.jpg" alt="教会学校 1970">
           <figcaption>建て替え後の礼拝堂（1970）</figcaption>
         </figure>
         <p>一説にはモダニズム建築のレーモンドがロマネスク様式を嫌って建て替えた…という話もあるみたいだけど、さすがに喧嘩したぐらいで、募金を募って建てられたICUのチャペル建て直しはできないよね…。第二次世界大戦後の日米で、和解を願って集められた寄付によって購入されたのが、このICUが建つ三鷹の土地なんだ。人々の善意によって建てられた大学に居るっていうのは、キュッと身を引き締めさせてくれるね。</p>
       `
     },
     spot5: {
-      mainPhoto: 'assets/images/Photo_thesis/学生2_1950-1960年代_授業・クラブ活_体育館完成_1973.jpg',
+      mainPhoto: 'assets/images/Photos_thesis/spot5_main.jpg',
       quiz: {
         q: '体育館にはA館とB館がありますが、B館はいつごろ建てられたでしょうか？',
         choices: { A:'1990年代', B:'1970年代', C:'1950年代' },
@@ -125,7 +125,7 @@
       explainHTML: `
         <p><b>1973年の写真</b>だよ。B館に入ったことがある人は、このころから内装が変わっていないことが分かるね！50年も昔から、ここでいろんな学生が運動を楽しんでいるんだよ。もちろんジムもね！</p>
         <figure>
-          <img src="assets/images/Photo_thesis/プール_学生2_1950-1960年代_授業・クラブ活_体育館完成_1973.jpg" alt="プール棟（1973）">
+          <img src="assets/images/Photos_thesis/spot5_detail_1.jpg" alt="プール棟（1973）">
           <figcaption>当時はプール棟もありました（1973）</figcaption>
         </figure>
         <p>2018年に新しくA館が出来たよ！ 木がきれいだね。この建築には建築士の隈研吾さんが関わっているよ。その時にプール棟は無くなって、新しくなったんだ。</p>

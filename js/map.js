@@ -37,7 +37,7 @@ const SPOT_LABELS = {
 };
 const photoSrc = (spotId) => {
   const nn = String(spotId.replace('spot','')).padStart(2,'0');
-  return `assets/images/current_photos/spot${nn}.jpg`; // ←今回の差し替えポイント
+  return `assets/images/current_photos/spot${nn}.JPG`; // ←今回の差し替えポイント
 };
 
 /* ====== LocalStorage util ====== */
