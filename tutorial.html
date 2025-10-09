@@ -114,19 +114,21 @@
 
         <!-- 1ページ目：規約スクロール＋同意 -->
         <div id="termsArea" style="display:none; margin-top:10px;">
-          <div class="termsBox" id="termsBox" tabindex="0" aria-label="利用規約本文（スクロール可）">
-            <!-- ★★★ 利用規約の本文をここに貼り付けてください（長文OK、スクロール表示されます） ★★★ -->
-            <h3 style="margin:.2em 0 0;font-size:16px">利用規約（仮）</h3>
-            <p>ここに利用規約の本文が入ります。学祭来場者の皆さまに安全・安心に体験いただくための注意事項や、収集するデータ、匿名UIDの扱い、保存期間、未成年の取り扱い、免責事項などを記載してください。</p>
-            <p>例：本アプリは卒業研究の一環として実施されます。体験は歩行を伴う可能性があるため、周囲の安全に十分配慮してください。AR利用中の事故・怪我等について運営は責任を負いかねます。…（以下、正式文面に差し替えてください）</p>
-            <p>データ取り扱いの概要：匿名UIDでスタンプ取得状況やアンケート回答を保存します。個人を特定する情報は収集しません。…</p>
-            <p>同意を撤回する場合：ブラウザの設定でデータ削除や再アクセスを停止してください。…</p>
-            <p>その他：問い合わせ先、図書館・アーカイブズの案内、著作権表示など。…</p>
-            <p style="margin-bottom:0">（※この文はダミーです。確定した規約文に差し替えて公開してください）</p>
+          <div class="termsBox" id="termsBox" tabindex="0" aria-label="プライバシーポリシー・ご利用上の注意（スクロール可）">
+            <!-- ▼▼▼ 差し替え文章（ここだけ更新） ▼▼▼ -->
+            <h3 style="margin:.2em 0 0;font-size:16px">プライバシーポリシー</h3>
+            <p>本アプリケーションは大学の卒業研究の一環として実施されています。アンケート等でご記入いただいた情報は、本研究における分析目的のみに使用し、研究目的以外には一切利用いたしません。</p>
+            <p>収集したデータは、個人を特定できない形に匿名化したうえで統計的に処理・分析を行います。分析結果を公表する際にも、個人を識別出来る情報が含まれることはありません。</p>
+            <p>また、利用者の同意なく第三者に個人情報を提供することはありません。</p>
+            <p>本アプリケーションは無料でご使用いただけますが、通信にかかる費用（モバイル通信料など）は利用者のご負担となります。</p>
+
+            <h3 style="margin:.8em 0 .2em;font-size:16px">ご利用上の注意</h3>
+            <p>本アプリは、AR（拡張現実）を用いた体験型コンテンツを含み、歩行や屋外での利用を伴う場合があります。ご利用の際は、周囲の安全に十分ご注意ください。また、AR利用中の事故・ケガ・機器の破損などについて、運営は一切の責任を負いかねます。</p>
+            <!-- ▲▲▲ 差し替え文章ここまで ▲▲▲ -->
           </div>
           <label class="agreeLine">
             <input id="agreeChk" type="checkbox" />
-            <small>利用規約を読み、同意します。</small>
+            <small>プライバシーポリシー・ご利用上の注意に同意します。</small>
           </label>
         </div>
 
@@ -154,8 +156,7 @@
       window.withV = (url) => url + (url.includes('?') ? '&' : '?') + 'v=' + window.BUILD_V;
     }
 
-    // スライド定義（画像・テキスト）
-    // 画像：assets/images/tutorial_image01.png 〜 08.png（未入稿OK）
+    // スライド定義（画像・テキスト）※構成はそのまま
     const slides = [
       {
         img: 'assets/images/tutorial_image01.png',
@@ -242,14 +243,13 @@
     function goNext(){
       // カメラ・位置情報の許可（4ページ目＝index 3 で呼び出し）
       if (idx === 3){
-        requestPermissions(); // 非同期で呼ぶだけ（完了待ちはしない）
+        requestPermissions();
       }
 
       if (idx < slides.length - 1){
         idx++;
         render();
       } else {
-        // はじめる → map.html
         try { localStorage.setItem('tutorial_done','1'); } catch {}
         location.href = withV('map.html');
       }
@@ -275,7 +275,6 @@
       try {
         if (navigator.mediaDevices?.getUserMedia) {
           navigator.mediaDevices.getUserMedia({video:true}).then(s=>{
-            // すぐ止める（権限だけ取る）
             s.getTracks().forEach(t=>t.stop());
           }).catch(()=>{});
         }
