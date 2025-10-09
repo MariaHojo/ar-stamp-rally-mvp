@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
@@ -95,24 +95,57 @@
     }
     .btn-secondary{background:#e9eef6;color:#111;box-shadow:none}
 
-    /* ======= カメラのスポット選択（吹き出し） ======= */
+    /* ======= カメラのスポット選択（吹き出し・最適化） ======= */
     .camera-chooser-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);z-index:998;display:none}
     .camera-chooser-overlay.is-open{display:block}
     .camera-chooser{
       position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
-      width:min(92vw,560px);max-height:75vh;overflow:auto;background:#fff;border-radius:16px;
-      box-shadow:0 18px 48px rgba(0,0,0,.3);padding:16px;z-index:999;display:none
+      width:min(94vw,560px);max-height:78vh;overflow:auto;background:#fff;border-radius:16px;
+      box-shadow:0 18px 48px rgba(0,0,0,.3);padding:14px;z-index:999;display:none
     }
     .camera-chooser.is-open{display:block}
-    .camera-chooser h3{margin:0 0 10px;font-size:18px}
-    .camera-chooser .list{display:grid;grid-template-columns:1fr;gap:8px}
-    .camera-chooser .item{display:flex;gap:10px;align-items:center;border:1px solid #e3eaf6;border-radius:12px;padding:10px}
-    .camera-chooser .thumb{width:56px;height:56px;border-radius:10px;background:#eef5ff;flex:none;overflow:hidden}
-    .camera-chooser .thumb img{width:100%;height:100%;object-fit:cover}
-    .camera-chooser .meta{flex:1}
-    .camera-chooser .meta .name{font-weight:800}
-    .camera-chooser .meta .type{font-size:12px;color:#333}
-    .camera-chooser .go{white-space:nowrap}
+    .camera-chooser h3{margin:0 0 8px;font-size:18px}
+    .camera-chooser p{margin:0 0 10px;color:#333}
+
+    /* ★ ここが今回のポイント：正方形× 2列（スマホで3行＝計6枚） */
+    .camera-chooser .list{
+      display:grid;
+      grid-template-columns:repeat(2, 1fr);
+      gap:10px;
+    }
+    @media (min-width:520px){
+      /* 画面が広い場合は 3列にもできる（任意）。2列固定にしたい場合はこのブロックを削除 */
+      .camera-chooser .list{ grid-template-columns:repeat(3, 1fr); }
+    }
+    .camera-chooser .item{ padding:0; border:none; background:transparent }
+
+    .thumbWrap{
+      position:relative;
+      aspect-ratio:1/1;               /* 正方形 */
+      border-radius:12px;
+      overflow:hidden;
+      border:1px solid #e3eaf6;
+      box-shadow:0 10px 26px rgba(0,0,0,.12);
+      background:#f3f6fc;
+    }
+    .thumbWrap img{
+      width:100%; height:100%; object-fit:cover; display:block;
+      /* 読み込み中の見た目対策 */
+      background:linear-gradient(90deg,#f2f5fb 25%,#e8eef9 37%,#f2f5fb 63%); background-size:400% 100%;
+      animation: shimmer 1.4s ease infinite;
+    }
+    @keyframes shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
+
+    /* 名札（写真に重ねる縁取り文字） */
+    .thumbWrap .label{
+      position:absolute; left:8px; right:8px; bottom:8px;
+      font-weight:900; font-size:13px; line-height:1.2; color:#fff;
+      text-shadow:
+        -1px -1px 0 #2b3a68, 1px -1px 0 #2b3a68,
+        -1px  1px 0 #2b3a68, 1px  1px 0 #2b3a68;
+      background:linear-gradient(to top, rgba(0,0,0,.45), rgba(0,0,0,0));
+      padding:8px 10px 10px; border-radius:0 0 10px 10px;
+    }
 
     /* ======= 完走モーダル ======= */
     .complete-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);z-index:1000;display:none}
@@ -127,21 +160,9 @@
     .complete-lead{margin:0 0 14px}
     .complete-row{display:flex;gap:8px;flex-wrap:wrap}
 
-    /* 取得/未取得の見た目 */
+    /* 取得/未取得の見た目（スタンプ帳） */
     .stamp-cell .stamp-thumb img { opacity:0; filter: grayscale(0.2); transition: opacity .2s }
     .stamp-cell.is-got .stamp-thumb img { opacity:1; filter:none }
-
-    /* 写真グリッド（カメラ起動のボトムシート内で利用） */
-    .spot-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-    .spot-thumb{position:relative;aspect-ratio:1/1;border-radius:12px;overflow:hidden;background:#f3f6fc;border:1px solid #e3eaf6}
-    .spot-thumb img{width:100%;height:100%;object-fit:cover;display:block}
-    .spot-name{
-      color:#fff;
-      -webkit-text-stroke:1.2px #0a1d3a;
-      text-shadow:0 1px 0 #0a1d3a, 0 -1px 0 #0a1d3a, 1px 0 0 #0a1d3a, -1px 0 0 #0a1d3a;
-      font-weight:900; font-size:clamp(13px,4.4vw,15px);
-      position:absolute; left:10px; bottom:10px; z-index:2;
-    }
   </style>
 </head>
 <body>
@@ -170,27 +191,27 @@
               <div class="stamp-grid">
                 <div class="stamp-cell" data-spot="spot1">
                   <div class="stamp-thumb"><img src="assets/images/stamps/stamp01.png" alt="スタンプ1"></div>
-                  <div class="stamp-meta"><div class="stamp-name">スポット1</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
+                  <div class="stamp-meta"><div class="stamp-name">本館173前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
                 </div>
                 <div class="stamp-cell" data-spot="spot2">
                   <div class="stamp-thumb"><img src="assets/images/stamps/stamp02.png" alt="スタンプ2"></div>
-                  <div class="stamp-meta"><div class="stamp-name">スポット2</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
+                  <div class="stamp-meta"><div class="stamp-name">トロイヤー記念館（T館）前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
                 </div>
                 <div class="stamp-cell" data-spot="spot3">
                   <div class="stamp-thumb"><img src="assets/images/stamps/stamp03.png" alt="スタンプ3"></div>
-                  <div class="stamp-meta"><div class="stamp-name">スポット3</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
+                  <div class="stamp-meta"><div class="stamp-name">学生食堂（ガッキ）前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
                 </div>
                 <div class="stamp-cell" data-spot="spot4">
                   <div class="stamp-thumb"><img src="assets/images/stamps/stamp04.png" alt="スタンプ4"></div>
-                  <div class="stamp-meta"><div class="stamp-name">スポット4</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
+                  <div class="stamp-meta"><div class="stamp-name">チャペル前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
                 </div>
                 <div class="stamp-cell" data-spot="spot5">
                   <div class="stamp-thumb"><img src="assets/images/stamps/stamp05.png" alt="スタンプ5"></div>
-                  <div class="stamp-meta"><div class="stamp-name">スポット5</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
+                  <div class="stamp-meta"><div class="stamp-name">体育館（Pec-A）前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
                 </div>
                 <div class="stamp-cell" data-spot="spot6">
                   <div class="stamp-thumb"><img src="assets/images/stamps/stamp06.png" alt="スタンプ6"></div>
-                  <div class="stamp-meta"><div class="stamp-name">スポット6</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
+                  <div class="stamp-meta"><div class="stamp-name">本館307前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
                 </div>
               </div>
             </div>
@@ -228,12 +249,9 @@
   <div id="cameraChooserOverlay" class="camera-chooser-overlay" aria-hidden="true"></div>
   <div id="cameraChooser" class="camera-chooser" role="dialog" aria-modal="true" aria-labelledby="cameraChooserTitle" aria-describedby="cameraChooserDesc">
     <h3 id="cameraChooserTitle">スポットを選んでください</h3>
-    <p id="cameraChooserDesc" style="margin:0 0 10px;color:#333">全6スポットでカメラを起動できます。</p>
-    <div id="cameraChooserList" class="list">
-      <!-- JS が 2列×3 の写真グリッドを生成します（画像は遅延ロード） -->
-      <div id="cameraGrid" class="spot-grid"></div>
-    </div>
-    <div style="margin-top:8px;text-align:right">
+    <p id="cameraChooserDesc" style="margin:0 0 10px;color:#333">写真をタップするとARが起動します。</p>
+    <div id="cameraChooserList" class="list"></div>
+    <div style="margin-top:10px;text-align:right">
       <button id="cameraChooserClose" class="btn btn-secondary" type="button">閉じる</button>
     </div>
   </div>
@@ -254,15 +272,13 @@
     document.addEventListener('DOMContentLoaded', () => {
       const btn = document.getElementById('stampToggle');
       const body = document.getElementById('stampBody');
-      const arrow = btn ? btn.querySelector('.arrow') : null;
-      if (btn && body) {
-        btn.addEventListener('click', () => {
-          const open = body.style.display === 'block';
-          body.style.display = open ? 'none' : 'block';
-          btn.setAttribute('aria-expanded', open ? 'false' : 'true');
-          if (arrow) arrow.textContent = open ? '▼' : '▲';
-        });
-      }
+      const arrow = btn?.querySelector('.arrow');
+      btn?.addEventListener('click', () => {
+        const open = body.style.display === 'block';
+        body.style.display = open ? 'none' : 'block';
+        btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+        if (arrow) arrow.textContent = open ? '▼' : '▲';
+      });
     });
   </script>
 
