@@ -59,6 +59,11 @@
           <figcaption>本館正面（1950年代）</figcaption>
         </figure>
         <p>この写真は1950年代のもので、改築はしてるけど<b>バカ山・アホ山がまだ無い</b>よね？ バカ山・アホ山は図書館の地下階を掘った時にできた土を盛って作られたんだよ！</p>
+        <figure>
+          <img src="assets/images/Photos_thesis/spot1_detail_2.jpg" alt="本館正面 1950年代">
+          <figcaption>本館正面（1950年代）</figcaption>
+        </figure>
+        <p>この写真は一期生の卒業式のときに撮られたものだよ。見慣れた玄関が昔の写真にも出てくるなんて不思議な気持ちだね。</p>
       `
     },
     spot2: {
