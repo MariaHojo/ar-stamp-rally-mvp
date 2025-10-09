@@ -1,17 +1,18 @@
-/* map.js（差し替え版：iOS表示 & アンケ反映修正）
+/* map.js（差し替え版）
  * 目的：
  *  - スタンプ帳（6箇所）を Firebase v8 + localStorage で正しく反映
  *  - 6/6 達成で初回のみ完走モーダル表示＆インラインリンク表示
- *  - 「カメラ起動」→ スポット選択吹き出し（写真グリッド 2×3）
- *  - 8th Wall 各プロジェクトURLへ遷移（spotId/uid をクエリ付与）
- *  - アンケ送信者だけ “スペシャルコンテンツを見る” を表示（複数パスを走査）
- *  - モバイル(iOS Safari含む)で写真が出ない問題対応：.list→.grid-chooserへ置換、lazy無効、確実に読み込み
+ *  - 「カメラ起動」→ スポット選択の写真グリッド（6箇所すべて AR 起動）
+ *  - 写真ソースを assets/images/current_photos/spotXX.jpg に統一（XX=01..06）
+ *  - 画像はモーダルを開いた時にだけ生成（負荷低減）＋ <img loading="lazy">
  */
 
 const $  = (s)=>document.querySelector(s);
 const $$ = (s)=>Array.from(document.querySelectorAll(s));
 
-/* ====== 8th Wall 側 URL（要置換） ====== */
+/* ====== 8th Wall 側 URL（要置換） ======
+ * 例: 'https://yourname.8thwall.app/icu-spot1/'
+ */
 const EIGHTHWALL_URLS = {
   spot1: 'https://maria261081.8thwall.app/spot1/', // ←実URLに置換
   spot2: 'https://maria261081.8thwall.app/spot2/',
@@ -22,24 +23,36 @@ const EIGHTHWALL_URLS = {
 };
 
 const ALL_SPOTS       = ['spot1','spot2','spot3','spot4','spot5','spot6'];
+const AR_SPOTS        = ALL_SPOTS.slice();   // 6箇所すべて AR
 const COMPLETE_TARGET = 6;
+
+/* ====== 表示名・写真パス ====== */
+const SPOT_LABELS = {
+  spot1: '本館173前',
+  spot2: 'トロイヤー記念館（T館）前',
+  spot3: '学生食堂（ガッキ）前',
+  spot4: 'チャペル前',
+  spot5: '体育館（Pec-A）前',
+  spot6: '本館307前',
+};
+const photoSrc = (spotId) => {
+  const nn = String(spotId.replace('spot','')).padStart(2,'0');
+  return `assets/images/current_photos/spot${nn}.JPG`; // ←今回の差し替えポイント
+};
 
 /* ====== LocalStorage util ====== */
 function lsGet(k){ try{return localStorage.getItem(k);}catch{return null;} }
 function lsSet(k,v){ try{localStorage.setItem(k,v);}catch{} }
-function lsRemove(k){ try{localStorage.removeItem(k);}catch{} }
-
 function lsKeyStamp(uid, spot){ return `stamp_${uid}_${spot}`; }
 function seenKey(uid){ return `complete_6_seen_${uid}`; }
-function surveyKey(uid){ return `post_survey_submitted_${uid}`; }  // フォールバック
 
 /* ====== Auth（匿名） ====== */
 async function ensureAnonSafe() {
-  // 既存 ensureAnon 優先
+  // 既存の ensureAnon があればそれを優先
   if (typeof window.ensureAnon === 'function') {
     try { const uid = await window.ensureAnon(); if (uid) return uid; } catch(e){}
   }
-  // v8 フォールバック
+  // フォールバック（v8）
   try {
     if (!firebase?.apps?.length && typeof firebaseConfig !== 'undefined') {
       firebase.initializeApp(firebaseConfig);
@@ -54,11 +67,11 @@ async function ensureAnonSafe() {
   }
 }
 
-/* ====== スタンプ取得状態 ====== */
+/* ====== スタンプ取得状態の取得 ====== */
 async function fetchStamps(uid) {
   let remote = null;
   try {
-    const snap = await firebase.database().ref(`users/${uid}/stamps`).once('value');
+    const snap = await firebase.database().ref(`users/${uid}/stamps`).once('value'); // v8: once('value')
     remote = snap && snap.val ? snap.val() : null;
   } catch(e) {
     console.warn('[map] fetch stamps remote failed:', e?.message||e);
@@ -72,44 +85,9 @@ async function fetchStamps(uid) {
   return stamps;
 }
 
-/* ====== アンケ送信済みの取得（複数パス対応） ======
- * どれか true になっていればOK：
- * - users/{uid}/postSurvey/submitted
- * - users/{uid}/survey/submitted
- * - surveys/{uid}/submitted
- * さらに localStorage フォールバック（post_survey_submitted_${uid}）
- */
-async function fetchSurveySubmitted(uid){
-  const local = lsGet(surveyKey(uid)) === 'true';
-  let remote = false;
-
-  async function read(path){
-    try {
-      const snap = await firebase.database().ref(path).once('value');
-      return !!(snap && snap.val());
-    } catch(e) {
-      return false;
-    }
-  }
-
-  // 複数パスを順にチェック
-  const paths = [
-    `users/${uid}/postSurvey/submitted`,
-    `users/${uid}/survey/submitted`,
-    `surveys/${uid}/submitted`,
-  ];
-  for (const p of paths) {
-    // eslint-disable-next-line no-await-in-loop
-    const ok = await read(p);
-    if (ok) { remote = true; break; }
-  }
-
-  if (remote) lsSet(surveyKey(uid), 'true');
-  return remote || local;
-}
-
-/* ====== スタンプ帳 UI ====== */
+/* ====== スタンプ帳 UI 反映 ====== */
 function renderStampUI(stamps){
+  // 各セル（取得/未取得の文言・クラス）
   $$('.stamp-cell[data-spot]').forEach(cell=>{
     const spot = cell.dataset.spot;
     const got  = !!stamps[spot];
@@ -118,18 +96,14 @@ function renderStampUI(stamps){
     if (mark) mark.textContent = got ? '✅取得済' : '未取得';
   });
 
+  // 合計カウント
   const cnt = ALL_SPOTS.reduce((n,id)=> n + (stamps[id] ? 1 : 0), 0);
   const elCount = $('#stampCount');
   if (elCount) elCount.textContent = `${cnt}/${ALL_SPOTS.length}`;
 
+  // 完了インラインリンク（見出し直下）
   const inline = $('#completeInline');
   if (inline) inline.style.display = (cnt >= COMPLETE_TARGET) ? 'block' : 'none';
-}
-
-function showSpecialLink(visible){
-  const el = $('#specialInline');
-  if (!el) return;
-  el.style.display = visible ? 'block' : 'none';
 }
 
 /* ====== 完走モーダル ====== */
@@ -156,65 +130,42 @@ async function handleCompletionFlow(uid, stamps){
   lsSet(seenKey(uid), 'true');
 }
 
-/* ====== カメラ起動（スポット選択の吹き出し） ======
- * iOS Safari で画像が出ない主因：
- *  - コンテナに .list（1列CSS）が残っていて、.grid-chooser のレイアウトが効かない
- *  - lazy=“lazy” が古いSafariで効かず読み込まれないことがある
- * 対策：
- *  - class を完全に置換：list → grid-chooser
- *  - lazy は使わず即ロード（decoding=“async” はOK）
- *  - onerror プレースホルダ
- */
+/* ====== カメラ起動（スポット選択：写真グリッド） ====== */
 function buildCameraChooserItems(){
-  const container = $('#cameraChooserList');
-  if (!container) return;
+  const list = $('#cameraChooserList');
+  if (!list) return;
+  list.innerHTML = '';
 
-  // class を完全に置換：*.list → grid-chooser
-  container.className = 'grid-chooser';
-  container.innerHTML = '';
+  // 2列×3行のグリッド項目
+  ALL_SPOTS.forEach((id)=>{
+    const name = SPOT_LABELS[id] || id.toUpperCase();
+    const src  = photoSrc(id);
 
-  const NAMES = {
-    spot1:'本館173前', spot2:'トロイヤー記念館（T館）前', spot3:'学生食堂（ガッキ）前',
-    spot4:'チャペル前', spot5:'体育館（Pec-A）前', spot6:'本館307前'
-  };
+    const item = document.createElement('div');
+    item.className = 'item';
 
-  ALL_SPOTS.forEach((id, idx)=>{
-    const num = String(idx+1).padStart(2,'0');
-    const a = document.createElement('a');
-    a.className = 'grid-item';
-    a.href = 'javascript:void(0)';
-    a.setAttribute('data-spot', id);
+    // 画像リンク全体が押下対象（ボタンは置かない）
+    item.innerHTML = `
+      <a class="photoLink" href="#" data-spot="${id}" aria-label="${name}">
+        <div class="thumbWrap">
+          <img loading="lazy" src="${src}" alt="${name}">
+          <div class="label">${name}</div>
+        </div>
+      </a>
+    `;
+    list.appendChild(item);
+  });
 
-    // 画像要素（lazyは使わない）
-    const img = new Image();
-    img.src = `assets/images/current_photos/spot${num}.jpg`;
-    img.alt = NAMES[id] || id.toUpperCase();
-    img.decoding = 'async';
-    img.onerror = () => {
-      // 何かしらの理由で読み込めない場合は薄いプレースホルダ
-      img.removeAttribute('src');
-      img.style.background = '#eef3ff';
-    };
-
-    const thumb = document.createElement('div');
-    thumb.className = 'thumb';
-    thumb.appendChild(img);
-
-    const label = document.createElement('div');
-    label.className = 'label';
-    label.textContent = NAMES[id] || id.toUpperCase();
-    thumb.appendChild(label);
-
-    a.appendChild(thumb);
-    container.appendChild(a);
-
-    // クリックで AR 起動
-    a.addEventListener('click', async ()=>{
-      const uid  = await ensureAnonSafe();
-      const base = EIGHTHWALL_URLS[id];
+  // 画像クリックで AR 起動
+  list.querySelectorAll('a.photoLink[data-spot]').forEach(a=>{
+    a.addEventListener('click', async (ev)=>{
+      ev.preventDefault();
+      const spot = a.getAttribute('data-spot');
+      const base = EIGHTHWALL_URLS[spot];
       if (!base) { alert('このスポットのAR URLが未設定です'); return; }
-      const url = new URL(base);
-      url.searchParams.set('spotId', id);
+      const uid  = await ensureAnonSafe();
+      const url  = new URL(base);
+      url.searchParams.set('spotId', spot);
       if (uid) url.searchParams.set('uid', uid);
       location.href = url.toString();
     });
@@ -222,7 +173,7 @@ function buildCameraChooserItems(){
 }
 
 function showCameraChooser(){
-  buildCameraChooserItems();
+  buildCameraChooserItems(); // 開いた時点で初めて生成→不要な事前読込を防ぐ
   $('#cameraChooserOverlay')?.classList.add('is-open');
   $('#cameraChooser')?.classList.add('is-open');
 }
@@ -235,40 +186,77 @@ function hideCameraChooser(){
 async function boot(){
   bindCompleteModalButtons();
 
-  // 「カメラ起動」→ 吹き出し
+  // 「カメラ起動」→ 写真グリッド
   $('#cameraBtn')?.addEventListener('click', showCameraChooser);
   $('#cameraChooserClose')?.addEventListener('click', hideCameraChooser);
   $('#cameraChooserOverlay')?.addEventListener('click', hideCameraChooser);
 
-  // サインイン
+  // サインイン & スタンプ反映
   const uid = await ensureAnonSafe();
-
-  // スタンプ UI
   const stamps = await fetchStamps(uid);
   renderStampUI(stamps);
   await handleCompletionFlow(uid, stamps);
 
-  // アンケ送信済み反映（初期）
-  const submitted = await fetchSurveySubmitted(uid);
-  showSpecialLink(!!submitted);
-
-  // 復帰時の再反映（スタンプ & アンケ）
+  // 復帰時に再反映
   document.addEventListener('visibilitychange', async ()=>{
     if (document.visibilityState === 'visible') {
       const s = await fetchStamps(uid);
       renderStampUI(s);
       await handleCompletionFlow(uid, s);
-      const sub = await fetchSurveySubmitted(uid);
-      showSpecialLink(!!sub);
     }
   });
   window.addEventListener('pageshow', async ()=>{
     const s = await fetchStamps(uid);
     renderStampUI(s);
     await handleCompletionFlow(uid, s);
-    const sub = await fetchSurveySubmitted(uid);
-    showSpecialLink(!!sub);
   });
+
+  // data-ar-spot / #openAR-spotN（直接ボタンがある場合のフォールバック）
+  document.querySelectorAll('[data-ar-spot]').forEach(btn=>{
+    btn.addEventListener('click', async (ev)=>{
+      ev.preventDefault();
+      const spot = btn.getAttribute('data-ar-spot');
+      const base = EIGHTHWALL_URLS[spot];
+      if (!base) { alert('このスポットのAR URLが未設定です'); return; }
+      const uid = await ensureAnonSafe();
+      const url = new URL(base);
+      url.searchParams.set('spotId', spot);
+      if (uid) url.searchParams.set('uid', uid);
+      location.href = url.toString();
+    });
+  });
+  for (let i=1;i<=6;i++){
+    const el = document.getElementById('openAR-spot'+i);
+    if (el && !el._arBound) {
+      el._arBound = true;
+      el.addEventListener('click', async (e)=>{
+        e.preventDefault();
+        const spot = 'spot'+i;
+        const base = EIGHTHWALL_URLS[spot];
+        if (!base) { alert('このスポットのAR URLが未設定です'); return; }
+        const uid = await ensureAnonSafe();
+        const url = new URL(base);
+        url.searchParams.set('spotId', spot);
+        if (uid) url.searchParams.set('uid', uid);
+        location.href = url.toString();
+      });
+    }
+  }
 }
 
 document.addEventListener('DOMContentLoaded', boot);
+
+/* ====== カメラ選択モーダルの見た目（画像・名札）に合わせた CSS を map.html に用意してください ======
+  .camera-chooser .list{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px }
+  .camera-chooser .item{ padding:0; border:none; background:transparent }
+  .thumbWrap{ position:relative; aspect-ratio:1/1; border-radius:12px; overflow:hidden;
+              box-shadow:0 10px 26px rgba(0,0,0,.12); border:1px solid #e3eaf6 }
+  .thumbWrap img{ width:100%; height:100%; object-fit:cover; display:block }
+  .thumbWrap .label{
+    position:absolute; left:8px; bottom:8px; right:8px;
+    font-weight:900; font-size:14px; line-height:1.2; color:#fff;
+    text-shadow: -1px -1px 0 #2b3a68, 1px -1px 0 #2b3a68, -1px 1px 0 #2b3a68, 1px 1px 0 #2b3a68;
+    background:linear-gradient(to top, rgba(0,0,0,.45), rgba(0,0,0,0));
+    padding:10px 10px 12px; border-radius:0 0 10px 10px;
+  }
+*/

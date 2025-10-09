@@ -95,52 +95,56 @@
     }
     .btn-secondary{background:#e9eef6;color:#111;box-shadow:none}
 
-    /* ======= カメラのスポット選択（吹き出し） ======= */
+    /* ======= カメラのスポット選択（吹き出し・最適化） ======= */
     .camera-chooser-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);z-index:998;display:none}
     .camera-chooser-overlay.is-open{display:block}
     .camera-chooser{
       position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
-      width:min(92vw,560px);max-height:75vh;overflow:auto;background:#fff;border-radius:16px;
-      box-shadow:0 18px 48px rgba(0,0,0,.3);padding:16px;z-index:999;display:none
+      width:min(94vw,560px);max-height:78vh;overflow:auto;background:#fff;border-radius:16px;
+      box-shadow:0 18px 48px rgba(0,0,0,.3);padding:14px;z-index:999;display:none
     }
     .camera-chooser.is-open{display:block}
-    .camera-chooser h3{margin:0 0 10px;font-size:18px}
-    /* ここは display だけに留め、列数は grid-chooser 側で指定（競合回避） */
-    .camera-chooser .list{display:grid;gap:8px}
+    .camera-chooser h3{margin:0 0 8px;font-size:18px}
+    .camera-chooser p{margin:0 0 10px;color:#333}
 
-    /* === スポット選択の写真グリッド（2列×3段／正方形） === */
-    .grid-chooser{
+    /* ★ ここが今回のポイント：正方形× 2列（スマホで3行＝計6枚） */
+    .camera-chooser .list{
       display:grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns:repeat(2, 1fr);
       gap:10px;
     }
-    .grid-item{display:block;text-decoration:none;color:inherit}
-    .grid-item .thumb{
+    @media (min-width:520px){
+      /* 画面が広い場合は 3列にもできる（任意）。2列固定にしたい場合はこのブロックを削除 */
+      .camera-chooser .list{ grid-template-columns:repeat(3, 1fr); }
+    }
+    .camera-chooser .item{ padding:0; border:none; background:transparent }
+
+    .thumbWrap{
       position:relative;
-      width:100%;
-      aspect-ratio:1/1;
+      aspect-ratio:1/1;               /* 正方形 */
       border-radius:12px;
       overflow:hidden;
       border:1px solid #e3eaf6;
-      box-shadow:0 8px 24px rgba(0,0,0,.06);
+      box-shadow:0 10px 26px rgba(0,0,0,.12);
       background:#f3f6fc;
     }
-    .grid-item .thumb img{
-      width:100%; height:100%;
-      object-fit:cover; display:block;
+    .thumbWrap img{
+      width:100%; height:100%; object-fit:cover; display:block;
+      /* 読み込み中の見た目対策 */
+      background:linear-gradient(90deg,#f2f5fb 25%,#e8eef9 37%,#f2f5fb 63%); background-size:400% 100%;
+      animation: shimmer 1.4s ease infinite;
     }
-    /* 写真上のふち有ラベル */
-    .grid-item .label{
-      position:absolute; left:8px; bottom:8px;
-      font-weight:900; font-size:14px; line-height:1.2;
-      color:#fff;
+    @keyframes shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
+
+    /* 名札（写真に重ねる縁取り文字） */
+    .thumbWrap .label{
+      position:absolute; left:8px; right:8px; bottom:8px;
+      font-weight:900; font-size:13px; line-height:1.2; color:#fff;
       text-shadow:
-        -1px -1px 0 rgba(0,0,0,.45),
-         1px -1px 0 rgba(0,0,0,.45),
-        -1px  1px 0 rgba(0,0,0,.45),
-         1px  1px 0 rgba(0,0,0,.45);
-      padding:2px 6px; border-radius:8px;
-      background: rgba(0,0,0,.18);
+        -1px -1px 0 #2b3a68, 1px -1px 0 #2b3a68,
+        -1px  1px 0 #2b3a68, 1px  1px 0 #2b3a68;
+      background:linear-gradient(to top, rgba(0,0,0,.45), rgba(0,0,0,0));
+      padding:8px 10px 10px; border-radius:0 0 10px 10px;
     }
 
     /* ======= 完走モーダル ======= */
@@ -156,7 +160,7 @@
     .complete-lead{margin:0 0 14px}
     .complete-row{display:flex;gap:8px;flex-wrap:wrap}
 
-    /* 取得/未取得の見た目 */
+    /* 取得/未取得の見た目（スタンプ帳） */
     .stamp-cell .stamp-thumb img { opacity:0; filter: grayscale(0.2); transition: opacity .2s }
     .stamp-cell.is-got .stamp-thumb img { opacity:1; filter:none }
   </style>
@@ -178,13 +182,9 @@
               <span class="stamp-count" id="stampCount" style="margin-left:8px">0/6</span>
             </button>
 
-            <!-- コンプリート時：リンク（JSで表示制御） -->
+            <!-- コンプリート時にこの下へ complete.html リンクを表示（JSで制御） -->
             <div id="completeInline" class="complete-inline">
               <a href="complete.html">🎉 コンプリートを確認する</a>
-            </div>
-            <!-- アンケート送信済みユーザーだけ：スペシャルコンテンツ -->
-            <div id="specialInline" class="complete-inline" style="display:none">
-              <a href="special.html">🌟 スペシャルコンテンツを見る</a>
             </div>
 
             <div id="stampBody" class="stampbook-body">
@@ -249,9 +249,9 @@
   <div id="cameraChooserOverlay" class="camera-chooser-overlay" aria-hidden="true"></div>
   <div id="cameraChooser" class="camera-chooser" role="dialog" aria-modal="true" aria-labelledby="cameraChooserTitle" aria-describedby="cameraChooserDesc">
     <h3 id="cameraChooserTitle">スポットを選んでください</h3>
-    <p id="cameraChooserDesc" style="margin:0 0 10px;color:#333">全6スポットでカメラを起動できます。</p>
+    <p id="cameraChooserDesc" style="margin:0 0 10px;color:#333">写真をタップするとARが起動します。</p>
     <div id="cameraChooserList" class="list"></div>
-    <div style="margin-top:8px;text-align:right">
+    <div style="margin-top:10px;text-align:right">
       <button id="cameraChooserClose" class="btn btn-secondary" type="button">閉じる</button>
     </div>
   </div>
@@ -283,6 +283,6 @@
   </script>
 
   <script src="js/firebase.js" defer></script>
-  <script src="js/map.js?v=20251009" defer></script>
+  <script src="js/map.js?v=20251003" defer></script>
 </body>
 </html>
