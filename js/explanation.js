@@ -99,8 +99,8 @@
         <p><b>結婚式も、結婚式の披露宴も</b>行われていたよ。写真は1955年ごろのガッキ（学生キッチンの略）。昔はICUのガッキでは、中富商事の提供するフレンチ料理を食べることが出来たんだ。結婚式のときは、豪華な本格フレンチがふるまわれたとか。</p>
         <p>中富商事は今でも本格フレンチのレストランを営んでいるよ。今目の前にあるガッキの中にある暖炉は、今は使われていないけど、現役で使われていた時代もあったんだ。</p>
         <figure>
-          <img src="assets/images/Photos_thesis/spot3_detail_1.jpg" alt="ICUフェスティバルの日の食堂">
-          <figcaption>ICU Festival の日の食堂</figcaption>
+          <img src="assets/images/Photos_thesis/spot3_main.jpg" alt="1955_学生食堂全景">
+          <figcaption>1955_学生食堂全景</figcaption>
         </figure>
         <p>このころのガッキからさらに改築されて、2010年に今のガッキに建て替えられる前は、こんな感じだったよ。</p>
         <figure>
