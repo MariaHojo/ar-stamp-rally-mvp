@@ -5,71 +5,75 @@
   <title>プライバシーポリシー・ご利用上の注意</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <style>
-    body{
-      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      margin:0;
-      background:#fff;
-      color:#111;
-      line-height:1.8;
-    }
-    .wrap{
-      max-width:720px;
-      margin:0 auto;
-      padding:clamp(14px,4vw,30px);
-    }
-    h1{
-      font-size:22px;
-      margin-bottom:10px;
-      font-weight:900;
-      color:#005ABB;
-    }
-    h2{
-      font-size:18px;
-      margin-top:24px;
-      color:#005ABB;
-    }
+    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;background:#fff;color:#111;line-height:1.8}
+    .wrap{max-width:720px;margin:0 auto;padding:clamp(14px,4vw,30px);position:relative}
+    h1{font-size:22px;margin-bottom:10px;font-weight:900;color:#005ABB}
+    h2{font-size:18px;margin-top:24px;color:#005ABB}
     p{margin:6px 0 10px;}
-    .back{
-      display:inline-block;
-      margin-top:20px;
-      background:#005ABB;
-      color:#fff;
-      border-radius:12px;
-      padding:10px 16px;
-      text-decoration:none;
-      font-weight:700;
-      cursor:pointer;
-    }
+    .back{display:inline-block;margin-top:20px;background:#005ABB;color:#fff;border-radius:12px;padding:10px 16px;text-decoration:none;font-weight:700}
+    [data-lang-anchor]{position:absolute;right:8px;top:8px}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>プライバシーポリシー・ご利用上の注意</h1>
+    <div data-lang-anchor></div>
+    <h1 id="title">プライバシーポリシー・ご利用上の注意</h1>
 
-    <h2>プライバシーポリシー</h2>
-    <p>本アプリケーションは大学の卒業研究の一環として実施されています。アンケート等でご記入いただいた情報は、本研究における分析目的のみに使用し、研究目的以外には一切利用いたしません。</p>
-    <p>収集したデータは、個人を特定できない形に匿名化したうえで統計的に処理・分析を行います。分析結果を公表する際にも、個人を識別出来る情報が含まれることはありません。</p>
-    <p>また、利用者の同意なく第三者に個人情報を提供することはありません。</p>
-    <p>本アプリケーションは無料でご使用いただけますが、通信にかかる費用（モバイル通信料など）は利用者のご負担となります。</p>
+    <h2 id="ppHdr">プライバシーポリシー</h2>
+    <div id="ppBody"></div>
 
-    <h2>ご利用上の注意</h2>
-    <p>本アプリは、AR（拡張現実）を用いた体験型コンテンツを含み、歩行や屋外での利用を伴う場合があります。ご利用の際は、周囲の安全に十分ご注意ください。また、AR利用中の事故・ケガ・機器の破損などについて、運営は一切の責任を負いかねます。</p>
+    <h2 id="noteHdr">ご利用上の注意</h2>
+    <div id="noteBody"></div>
 
-    <a id="backBtn" class="back" href="#">戻る</a>
+    <a id="backBtn" href="map.html" class="back">マップに戻る</a>
   </div>
 
+  <script src="js/lang.js"></script>
   <script>
-    // 版数クエリ（キャッシュ回避）— 他ページと同じ仕組みに合わせます
-    if (!window.withV) {
-      window.BUILD_V = window.BUILD_V || '20251005';
-      window.withV = (url) => url + (url.includes('?') ? '&' : '?') + 'v=' + window.BUILD_V;
-    }
+    const I18N = {
+      ja:{
+        title:'プライバシーポリシー・ご利用上の注意',
+        ppHdr:'プライバシーポリシー',
+        ppHtml:`
+          <p>本アプリケーションは大学の卒業研究の一環として実施されています。アンケート等でご記入いただいた情報は、本研究の分析目的のみに使用し、研究目的以外には一切利用いたしません。</p>
+          <p>収集したデータは匿名化のうえ統計的に処理・分析します。結果の公表時にも、個人を識別できる情報は含みません。また、利用者の同意なく第三者に個人情報を提供することはありません。</p>
+          <p>本アプリケーションは無料でご使用いただけますが、通信費（モバイル通信料等）は利用者のご負担となります。</p>
+        `,
+        noteHdr:'ご利用上の注意',
+        noteHtml:`
+          <p>本アプリはAR（拡張現実）を用いた体験型コンテンツを含み、歩行や屋外での利用を伴う場合があります。ご利用の際は周囲の安全に十分ご注意ください。AR利用中の事故・ケガ・機器の破損などについて、運営は一切の責任を負いかねます。</p>
+        `,
+        back:'マップに戻る'
+      },
+      en:{
+        title:'Privacy Policy & Safety Notes',
+        ppHdr:'Privacy Policy',
+        ppHtml:`
+          <p>This application is conducted as part of a university graduation project. Information you provide (e.g., in surveys) will be used only for research analysis and never for other purposes.</p>
+          <p>Collected data will be anonymized and analyzed statistically. Publications will not include any personally identifiable information. We will not provide personal information to third parties without your consent.</p>
+          <p>The application is free to use. Any communication fees (e.g., mobile data) are borne by the user.</p>
+        `,
+        noteHdr:'Safety Notes',
+        noteHtml:`
+          <p>This app includes AR experiences and may involve walking or outdoor use. Please pay close attention to your surroundings. The organizers cannot accept responsibility for accidents, injuries, or device damage during AR use.</p>
+        `,
+        back:'Back to Map'
+      }
+    };
 
-    document.getElementById('backBtn').addEventListener('click', function (e) {
-      e.preventDefault();
-      // 直接 map.html の最新へ遷移（history.back() は使わない）
-      location.href = withV('map.html');
-    }, {passive:false});
+    window.applyI18n = function(){
+      const t = I18N[window.getLang()];
+      document.documentElement.setAttribute('lang', window.getLang());
+      document.title = t.title;
+      document.getElementById('title').textContent = t.title;
+      document.getElementById('ppHdr').textContent = t.ppHdr;
+      document.getElementById('ppBody').innerHTML = t.ppHtml;
+      document.getElementById('noteHdr').textContent = t.noteHdr;
+      document.getElementById('noteBody').innerHTML = t.noteHtml;
+      document.getElementById('backBtn').textContent = t.back;
+    };
+
+    document.addEventListener('DOMContentLoaded', ()=>{ window.injectLangUI(); window.applyI18n(); });
   </script>
 </body>
 </html>

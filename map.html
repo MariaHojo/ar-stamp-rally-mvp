@@ -20,7 +20,7 @@
     .wrap{max-width:var(--container);margin:0 auto;padding:clamp(10px,3vw,14px)}
     a.link{color:var(--accent);text-decoration:none;font-weight:800}
 
-    /* ======= 上部 1/6 のエリア（利用規約 / スタンプ帳 / チュートリアル） ======= */
+    /* ======= 上部 1/6 のエリア（利用規約 / スタンプ帳 / チュートリアル / 言語） ======= */
     .top-grid{
       display:grid;
       grid-template-columns: 1fr 2fr 1fr; /* 左1/4, 中央1/2, 右1/4 */
@@ -31,9 +31,27 @@
     @media (max-width:560px){
       .top-grid{grid-template-columns: 1fr 1fr 1fr}
     }
-    .top-cell{display:flex;justify-content:center}
+    .top-cell{display:flex;justify-content:center;position:relative}
     .top-cell.left{justify-content:flex-start}
     .top-cell.right{justify-content:flex-end}
+
+    /* 言語切替アイコン＆メニュー */
+    .langWrap{position:absolute; top:-4px; right:0; display:flex; align-items:center; gap:6px}
+    .langBtn{
+      appearance:none;border:0;background:transparent;cursor:pointer;padding:6px;border-radius:8px
+    }
+    .langBtn img{width:22px;height:22px;display:block}
+    .langBtn:focus-visible{outline:2px solid rgba(0,90,187,.5)}
+    .langMenu{
+      position:absolute; right:0; top:28px; background:#fff; border:1px solid #e3eaf6; border-radius:10px;
+      box-shadow:0 8px 24px rgba(0,0,0,.12); display:none; overflow:hidden; z-index:5
+    }
+    .langMenu.is-open{display:block}
+    .langMenu button{
+      appearance:none;border:0;background:#fff;padding:10px 14px;display:block;width:100%;text-align:left;cursor:pointer
+    }
+    .langMenu button:hover{background:#f5f8ff}
+    .langMenu hr{border:0;border-top:1px solid #eef2fb;margin:0}
 
     .stampbook{
       width:100%;
@@ -107,14 +125,13 @@
     .camera-chooser h3{margin:0 0 8px;font-size:18px}
     .camera-chooser p{margin:0 0 10px;color:#333}
 
-    /* ★ ここが今回のポイント：正方形× 2列（スマホで3行＝計6枚） */
+    /* 正方形× 2列（スマホで3行＝計6枚） */
     .camera-chooser .list{
       display:grid;
       grid-template-columns:repeat(2, 1fr);
       gap:10px;
     }
     @media (min-width:520px){
-      /* 画面が広い場合は 3列にもできる（任意）。2列固定にしたい場合はこのブロックを削除 */
       .camera-chooser .list{ grid-template-columns:repeat(3, 1fr); }
     }
     .camera-chooser .item{ padding:0; border:none; background:transparent }
@@ -130,7 +147,6 @@
     }
     .thumbWrap img{
       width:100%; height:100%; object-fit:cover; display:block;
-      /* 読み込み中の見た目対策 */
       background:linear-gradient(90deg,#f2f5fb 25%,#e8eef9 37%,#f2f5fb 63%); background-size:400% 100%;
       animation: shimmer 1.4s ease infinite;
     }
@@ -171,51 +187,51 @@
       <!-- 上部 1/6 エリア -->
       <div class="top-grid" aria-label="上部メニュー">
         <div class="top-cell left">
-          <a class="link" href="terms.html">プライバシーポリシー・ご利用上の注意</a>
+          <a id="termsLink" class="link" href="terms.html">プライバシーポリシー・ご利用上の注意</a>
         </div>
 
         <div class="top-cell">
           <!-- スタンプ帳（折り畳み） -->
           <section class="stampbook" aria-label="スタンプ帳">
             <button id="stampToggle" class="stampbook-header" type="button" aria-expanded="false" aria-controls="stampBody">
-              <span class="arrow">▼</span><span>スタンプ帳</span>
+              <span class="arrow">▼</span><span id="stampbookTitle">スタンプ帳</span>
               <span class="stamp-count" id="stampCount" style="margin-left:8px">0/6</span>
             </button>
 
             <!-- コンプリート時リンク（JS制御で表示） -->
             <div id="completeInline" class="complete-inline">
-              <a href="complete.html">🎉 コンプリートを確認する</a>
+              <a id="completeLink" href="complete.html">🎉 コンプリートを確認する</a>
             </div>
-            <!-- ★追加：コンプリート時のみ表示するスペシャルコンテンツへのリンク -->
+            <!-- コンプリート時のみ表示するスペシャルコンテンツへのリンク -->
             <div id="specialInline" class="complete-inline" style="display:none">
-              <a href="special.html">🌟 スペシャルコンテンツを見る</a>
+              <a id="specialLink" href="special.html">🌟 スペシャルコンテンツを見る</a>
             </div>
 
             <div id="stampBody" class="stampbook-body">
               <div class="stamp-grid">
                 <div class="stamp-cell" data-spot="spot1">
-                  <div class="stamp-thumb"><img src="assets/images/stamps/stamp01.png" alt="スタンプ1"></div>
-                  <div class="stamp-meta"><div class="stamp-name">本館173前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
+                  <div class="stamp-thumb"><img src="assets/images/stamps/stamp01.png" alt=""></div>
+                  <div class="stamp-meta"><div class="stamp-name" data-spot-name="spot1">本館173前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
                 </div>
                 <div class="stamp-cell" data-spot="spot2">
-                  <div class="stamp-thumb"><img src="assets/images/stamps/stamp02.png" alt="スタンプ2"></div>
-                  <div class="stamp-meta"><div class="stamp-name">トロイヤー記念館（T館）前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
+                  <div class="stamp-thumb"><img src="assets/images/stamps/stamp02.png" alt=""></div>
+                  <div class="stamp-meta"><div class="stamp-name" data-spot-name="spot2">トロイヤー記念館（T館）前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
                 </div>
                 <div class="stamp-cell" data-spot="spot3">
-                  <div class="stamp-thumb"><img src="assets/images/stamps/stamp03.png" alt="スタンプ3"></div>
-                  <div class="stamp-meta"><div class="stamp-name">学生食堂（ガッキ）前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
+                  <div class="stamp-thumb"><img src="assets/images/stamps/stamp03.png" alt=""></div>
+                  <div class="stamp-meta"><div class="stamp-name" data-spot-name="spot3">学生食堂（ガッキ）前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
                 </div>
                 <div class="stamp-cell" data-spot="spot4">
-                  <div class="stamp-thumb"><img src="assets/images/stamps/stamp04.png" alt="スタンプ4"></div>
-                  <div class="stamp-meta"><div class="stamp-name">チャペル前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
+                  <div class="stamp-thumb"><img src="assets/images/stamps/stamp04.png" alt=""></div>
+                  <div class="stamp-meta"><div class="stamp-name" data-spot-name="spot4">チャペル前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
                 </div>
                 <div class="stamp-cell" data-spot="spot5">
-                  <div class="stamp-thumb"><img src="assets/images/stamps/stamp05.png" alt="スタンプ5"></div>
-                  <div class="stamp-meta"><div class="stamp-name">体育館（Pec-A）前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
+                  <div class="stamp-thumb"><img src="assets/images/stamps/stamp05.png" alt=""></div>
+                  <div class="stamp-meta"><div class="stamp-name" data-spot-name="spot5">体育館（Pec-A）前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
                 </div>
                 <div class="stamp-cell" data-spot="spot6">
-                  <div class="stamp-thumb"><img src="assets/images/stamps/stamp06.png" alt="スタンプ6"></div>
-                  <div class="stamp-meta"><div class="stamp-name">本館307前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
+                  <div class="stamp-thumb"><img src="assets/images/stamps/stamp06.png" alt=""></div>
+                  <div class="stamp-meta"><div class="stamp-name" data-spot-name="spot6">本館307前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
                 </div>
               </div>
             </div>
@@ -223,7 +239,19 @@
         </div>
 
         <div class="top-cell right">
-          <a class="link" href="tutorial.html">チュートリアル</a>
+          <a id="tutorialLink" class="link" href="tutorial.html">チュートリアル</a>
+
+          <!-- 言語切替 -->
+          <div class="langWrap">
+            <button id="langBtn" class="langBtn" aria-haspopup="true" aria-expanded="false" aria-controls="langMenu">
+              <img src="assets/images/ui/lang.png" alt="Language" />
+            </button>
+            <div id="langMenu" class="langMenu" role="menu" aria-label="Language">
+              <button type="button" data-lang="ja" role="menuitem">日本語</button>
+              <hr />
+              <button type="button" data-lang="en" role="menuitem">English</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -231,7 +259,16 @@
       <div class="map-wrap" aria-label="キャンパスマップ">
         <img class="map-img" src="assets/images/campasMap.png" alt="キャンパス地図" />
         <!-- ピン（リンク先は空でOK。後で地図アプリURLを埋めてください） -->
+        <a href="" class="pin" data-spot="spot1" style="left:22%;top:38%;" aria-label="スポット1"><img src="assets/images/map_pin.png" alt=""></a>
+        <a href="" class="pin" data-spot="spot2" style="left:48%;top:28%;" aria-label="スポット2"><img src="assets/images/map_pin.png" alt=""></a>
+        <a href="" class="pin" data-spot="spot3" style="left:72%;top:46%;" aria-label="スポット3"><img src="assets/images/map_pin.png" alt=""></a>
+        <a href="" class="pin" data-spot="spot4" style="left:30%;top:62%;" aria-label="スポット4"><img src="assets/images/map_pin.png" alt=""></a>
+        <a href="" class="pin" data-spot="spot5" style="left:55%;top:68%;" aria-label="スポット5"><img src="assets/images/map_pin.png" alt=""></a>
+        <a href="" class="pin" data-spot="spot6" style="left:80%;top:60%;" aria-label="スポット6"><img src="assets/images/map_pin.png" alt=""></a>
       </div>
+
+      <!-- 下から1/4：説明テキスト -->
+      <p id="mapHint" class="hint">地図のピンをタップするとスタンプ配置場所までの案内が出ます！（別アプリへ移動）</p>
 
       <!-- 画面最下部：カメラ起動 -->
       <div class="footer-cta">

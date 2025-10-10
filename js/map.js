@@ -1,20 +1,77 @@
-/* map.js（差し替え版）
+/* map.js（言語切替対応・差し替え版）
  * 目的：
- *  - スタンプ帳（6箇所）を Firebase v8 + localStorage で正しく反映
- *  - 6/6 達成で初回のみ完走モーダル表示＆インラインリンク表示
- *  - 「カメラ起動」→ スポット選択の写真グリッド（6箇所すべて AR 起動）
- *  - 写真ソースを assets/images/current_photos/spotXX.jpg に統一（XX=01..06）
- *  - 画像はモーダルを開いた時にだけ生成（負荷低減）＋ <img loading="lazy">
+ *  - 既存機能維持：スタンプ帳、コンプリート表示、カメラ起動の写真グリッド、8th Wall 起動
+ *  - 言語切替（日本語/English）：テキストのみ動的置換（localStorage に保存）
  */
 
 const $  = (s)=>document.querySelector(s);
 const $$ = (s)=>Array.from(document.querySelectorAll(s));
 
-/* ====== 8th Wall 側 URL（要置換） ======
- * 例: 'https://yourname.8thwall.app/icu-spot1/'
- */
+/* ====== 言語設定 ====== */
+const LANG_KEY = 'lang';
+function getLang(){ try{ return localStorage.getItem(LANG_KEY) || 'ja'; } catch{ return 'ja'; } }
+function setLang(lang){ try{ localStorage.setItem(LANG_KEY, lang); } catch{} }
+
+const I18N = {
+  ja: {
+    docTitle: 'マップ | ARスタンプラリー',
+    termsLink: 'プライバシーポリシー・ご利用上の注意',
+    tutorialLink: 'チュートリアル',
+    stampbookTitle: 'スタンプ帳',
+    notCollected: '未取得',
+    collectedMark: '✅取得済',
+    completeLink: '🎉 コンプリートを確認する',
+    specialLink: '🌟 スペシャルコンテンツを見る',
+    mapHint: '地図のピンをタップするとスタンプ配置場所までの案内が出ます！（別アプリへ移動）',
+    camChooserTitle: 'スポットを選んでください',
+    camChooserDesc: '写真をタップするとARが起動します。',
+    close: '閉じる',
+    cameraStart: 'カメラ起動',
+    completeTitle: '🎉 コンプリート！',
+    completeLead: '全てのスタンプを集めました。ご参加ありがとうございます！',
+    backToMap: 'マップに戻る',
+    toSurvey: 'アンケートへ（お答えいただいた方にはスペシャルコンテンツがあります！）',
+    spots: {
+      spot1: '本館173前',
+      spot2: 'トロイヤー記念館（T館）前',
+      spot3: '学生食堂（ガッキ）前',
+      spot4: 'チャペル前',
+      spot5: '体育館（Pec-A）前',
+      spot6: '本館307前',
+    }
+  },
+  en: {
+    docTitle: 'Map | AR Stamp Rally',
+    termsLink: 'Privacy Policy & Notes',
+    tutorialLink: 'Tutorial',
+    stampbookTitle: 'Stamp Book',
+    notCollected: 'Not collected',
+    collectedMark: 'Collected',
+    completeLink: '🎉 View “Complete”',
+    specialLink: '🌟 View Special Contents',
+    mapHint: 'Tap a map pin to open directions to the stamp location (opens external app).',
+    camChooserTitle: 'Choose a Spot',
+    camChooserDesc: 'Tap a photo to launch AR.',
+    close: 'Close',
+    cameraStart: 'Open Camera',
+    completeTitle: '🎉 Complete!',
+    completeLead: 'You collected all stamps. Thank you for participating!',
+    backToMap: 'Back to Map',
+    toSurvey: 'Go to Survey (Special contents after answering!)',
+    spots: {
+      spot1: 'In Front of Main Hall 173',
+      spot2: 'In Front of Troyer Memorial (T Bldg.)',
+      spot3: 'In Front of Student Cafeteria',
+      spot4: 'In Front of Chapel',
+      spot5: 'In Front of Gymnasium (Pec-A)',
+      spot6: 'In Front of Main Hall 307',
+    }
+  }
+};
+
+/* ====== 8th Wall 側 URL（要置換） ====== */
 const EIGHTHWALL_URLS = {
-  spot1: 'https://maria261081.8thwall.app/spot1/', // ←実URLに置換
+  spot1: 'https://maria261081.8thwall.app/spot1/',
   spot2: 'https://maria261081.8thwall.app/spot2/',
   spot3: 'https://maria261081.8thwall.app/spot3/',
   spot4: 'https://maria261081.8thwall.app/spot4/',
@@ -23,20 +80,17 @@ const EIGHTHWALL_URLS = {
 };
 
 const ALL_SPOTS       = ['spot1','spot2','spot3','spot4','spot5','spot6'];
-const AR_SPOTS        = ALL_SPOTS.slice();   // 6箇所すべて AR
+const AR_SPOTS        = ALL_SPOTS.slice();
 const COMPLETE_TARGET = 6;
 
-/* ====== 表示名・写真パス ====== */
-const SPOT_LABELS = {
-  spot1: '本館173前',
-  spot2: 'トロイヤー記念館（T館）前',
-  spot3: '学生食堂（ガッキ）前',
-  spot4: 'チャペル前',
-  spot5: '体育館（Pec-A）前',
-  spot6: '本館307前',
-};
+/* ====== 表示名（言語連動）・写真パス ====== */
+function spotLabel(spotId){
+  const lang = getLang();
+  return I18N[lang].spots[spotId] || spotId.toUpperCase();
+}
 const photoSrc = (spotId) => {
   const nn = String(spotId.replace('spot','')).padStart(2,'0');
+  // 拡張子は JPG 想定（必要なら .jpg に合わせる）
   return `assets/images/current_photos/spot${nn}.JPG`;
 };
 
@@ -83,27 +137,70 @@ async function fetchStamps(uid) {
   return stamps;
 }
 
+/* ====== i18n を画面に適用 ====== */
+function applyI18n(){
+  const lang = getLang();
+  const t = I18N[lang];
+
+  // <html lang="">
+  try { document.documentElement.setAttribute('lang', lang); } catch {}
+
+  // タイトル
+  document.title = t.docTitle;
+
+  // 上部リンク／ラベル
+  $('#termsLink') && ($('#termsLink').textContent = t.termsLink);
+  $('#tutorialLink') && ($('#tutorialLink').textContent = t.tutorialLink);
+  $('#stampbookTitle') && ($('#stampbookTitle').textContent = t.stampbookTitle);
+
+  // 地図ヒント
+  $('#mapHint') && ($('#mapHint').textContent = t.mapHint);
+
+  // カメラ選択モーダル
+  $('#cameraChooserTitle') && ($('#cameraChooserTitle').textContent = t.camChooserTitle);
+  $('#cameraChooserDesc') && ($('#cameraChooserDesc').textContent = t.camChooserDesc);
+  $('#cameraChooserClose') && ($('#cameraChooserClose').textContent = t.close);
+  $('#cameraBtn') && ($('#cameraBtn').textContent = t.cameraStart);
+
+  // 完走モーダル
+  $('#completeTitle') && ($('#completeTitle').textContent = t.completeTitle);
+  $('#completeLead') && ($('#completeLead').textContent = t.completeLead);
+  $('#closeComplete') && ($('#closeComplete').textContent = t.backToMap);
+  $('#toSurvey') && ($('#toSurvey').textContent = t.toSurvey);
+
+  // インラインリンク（見出し直下）
+  $('#completeLink') && ($('#completeLink').textContent = t.completeLink);
+  $('#specialLink') && ($('#specialLink').textContent = t.specialLink);
+
+  // スタンプ帳のスポット名
+  $$('[data-spot-name]').forEach(el=>{
+    const id = el.getAttribute('data-spot-name');
+    el.textContent = spotLabel(id);
+  });
+
+  // 取得/未取得表示は renderStampUI 内で（言語連動）
+}
+
 /* ====== スタンプ帳 UI 反映 ====== */
 function renderStampUI(stamps){
-  // 各セル（取得/未取得の文言・クラス）
+  const lang = getLang();
+  const t = I18N[lang];
+
   $$('.stamp-cell[data-spot]').forEach(cell=>{
     const spot = cell.dataset.spot;
     const got  = !!stamps[spot];
     cell.classList.toggle('is-got', got);
     const mark = cell.querySelector('.mark');
-    if (mark) mark.textContent = got ? '✅取得済' : '未取得';
+    if (mark) mark.textContent = got ? t.collectedMark : t.notCollected;
   });
 
-  // 合計カウント
   const cnt = ALL_SPOTS.reduce((n,id)=> n + (stamps[id] ? 1 : 0), 0);
   const elCount = $('#stampCount');
   if (elCount) elCount.textContent = `${cnt}/${ALL_SPOTS.length}`;
 
-  // 完了インラインリンク（見出し直下）
   const inline = $('#completeInline');
   if (inline) inline.style.display = (cnt >= COMPLETE_TARGET) ? 'block' : 'none';
 
-  // ★追加：コンプリート達成時だけスペシャルリンクも表示
   const special = $('#specialInline');
   if (special) special.style.display = (cnt >= COMPLETE_TARGET) ? 'block' : 'none';
 }
@@ -139,7 +236,7 @@ function buildCameraChooserItems(){
   list.innerHTML = '';
 
   ALL_SPOTS.forEach((id)=>{
-    const name = SPOT_LABELS[id] || id.toUpperCase();
+    const name = spotLabel(id);
     const src  = photoSrc(id);
 
     const item = document.createElement('div');
@@ -172,7 +269,7 @@ function buildCameraChooserItems(){
 }
 
 function showCameraChooser(){
-  buildCameraChooserItems(); // 開いた時点で初めて生成→不要な事前読込を防ぐ
+  buildCameraChooserItems(); // 開いた時点で生成
   $('#cameraChooserOverlay')?.classList.add('is-open');
   $('#cameraChooser')?.classList.add('is-open');
 }
@@ -181,8 +278,43 @@ function hideCameraChooser(){
   $('#cameraChooser')?.classList.remove('is-open');
 }
 
+/* ====== 言語 UI バインド ====== */
+function bindLanguageUI(){
+  const btn  = $('#langBtn');
+  const menu = $('#langMenu');
+  if (!btn || !menu) return;
+
+  const toggle = ()=>{
+    const open = menu.classList.toggle('is-open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  };
+  btn.addEventListener('click', (e)=>{ e.stopPropagation(); toggle(); });
+  document.addEventListener('click', (e)=>{
+    if (!menu.contains(e.target) && e.target !== btn) {
+      menu.classList.remove('is-open');
+      btn.setAttribute('aria-expanded','false');
+    }
+  });
+  menu.querySelectorAll('button[data-lang]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const lang = b.getAttribute('data-lang');
+      setLang(lang);
+      menu.classList.remove('is-open');
+      btn.setAttribute('aria-expanded','false');
+      applyI18n();            // ラベル等差し替え
+      // カメラ選択モーダルを開いていた場合の名札を再生成
+      if ($('#cameraChooser')?.classList.contains('is-open')) {
+        buildCameraChooserItems();
+      }
+    });
+  });
+}
+
 /* ====== 起動 ====== */
 async function boot(){
+  bindLanguageUI();
+  applyI18n();
+
   bindCompleteModalButtons();
 
   // 「カメラ起動」→ 写真グリッド
@@ -202,15 +334,17 @@ async function boot(){
       const s = await fetchStamps(uid);
       renderStampUI(s);
       await handleCompletionFlow(uid, s);
+      applyI18n(); // ついでにラベルも同期
     }
   });
   window.addEventListener('pageshow', async ()=>{
     const s = await fetchStamps(uid);
     renderStampUI(s);
     await handleCompletionFlow(uid, s);
+    applyI18n();
   });
 
-  // data-ar-spot / #openAR-spotN（直接ボタンがある場合のフォールバック）
+  // data-ar-spot / #openAR-spotN（フォールバック）
   document.querySelectorAll('[data-ar-spot]').forEach(btn=>{
     btn.addEventListener('click', async (ev)=>{
       ev.preventDefault();
@@ -244,18 +378,3 @@ async function boot(){
 }
 
 document.addEventListener('DOMContentLoaded', boot);
-
-/* ====== カメラ選択モーダルの見た目（画像・名札）に合わせた CSS を map.html に用意してください ======
-  .camera-chooser .list{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px }
-  .camera-chooser .item{ padding:0; border:none; background:transparent }
-  .thumbWrap{ position:relative; aspect-ratio:1/1; border-radius:12px; overflow:hidden;
-              box-shadow:0 10px 26px rgba(0,0,0,.12); border:1px solid #e3eaf6 }
-  .thumbWrap img{ width:100%; height:100%; object-fit:cover; display:block }
-  .thumbWrap .label{
-    position:absolute; left:8px; bottom:8px; right:8px;
-    font-weight:900; font-size:14px; line-height:1.2; color:#fff;
-    text-shadow: -1px -1px 0 #2b3a68, 1px -1px 0 #2b3a68, -1px 1px 0 #2b3a68, 1px 1px 0 #2b3a68;
-    background:linear-gradient(to top, rgba(0,0,0,.45), rgba(0,0,0,0));
-    padding:10px 10px 12px; border-radius:0 0 10px 10px;
-  }
-*/
