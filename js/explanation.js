@@ -109,7 +109,7 @@
         </figure>
         <p>今はもっと大きくなったね！</p>
         <figure>
-          <img src="assets/images/Photos_thesis/spot3_detail_3.JPG" alt="ICUフェスティバルの日の食堂">
+          <img src="assets/images/Photos_thesis/spot3_detail_1.JPG" alt="ICUフェスティバルの日の食堂">
           <figcaption>ICUフェスティバルの日の食堂</figcaption>
         </figure>
         <p>これは何の日のガッキかわかるかな？いろんな人がいて楽しそうだね！1950-1960年代の写真だよ。</p>
