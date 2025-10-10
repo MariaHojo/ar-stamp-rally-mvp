@@ -144,24 +144,24 @@
         </div>
       </section>
 
-      <!-- ICU 在学生・教職員の方へ（任意） -->
+      <!-- ICU在学生・教職員の方へ（任意・統合セクション） -->
       <section class="section" aria-labelledby="forICU">
         <h2 class="sec-title" id="forICU">ICU在学生・教職員の方へ（任意回答）</h2>
         <p class="note">該当しない方・回答を希望しない方は、このセクションは空欄で構いません。</p>
 
-        <!-- パネル展示の認知（任意：5段階ラベル） -->
+        <!-- パネル展示の認知 -->
         <div class="field">
-          <div class="label-row"><label>ICU本館やD館などのパネル展示（例：本館173教室前）を知っていたか</label></div>
+          <div class="label-row"><label>ICU内の歴史関係の組織・展示について：パネル展示（例：本館173教室前）を知っていたか</label></div>
           <div class="likert" data-name="panel_awareness">
             <label class="radio-pill"><input type="radio" name="panel_awareness" value="1"><span>知らない</span></label>
-            <label class="radio-pill"><input type="radio" name="panel_awareness" value="2"><span>見かけたことはある</span></label>
-            <label class="radio-pill"><input type="radio" name="panel_awareness" value="3"><span>軽く見たことはある</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_awareness" value="2"><span>見かけたことがある</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_awareness" value="3"><span>軽く見たことがある</span></label>
             <label class="radio-pill"><input type="radio" name="panel_awareness" value="4"><span>読んだことがある</span></label>
             <label class="radio-pill"><input type="radio" name="panel_awareness" value="5"><span>じっくり読んだことがある</span></label>
           </div>
         </div>
 
-        <!-- パネル展示への関心（任意） -->
+        <!-- パネル展示への関心 -->
         <div class="field">
           <div class="label-row"><label>本アプリを通して、パネル展示への関心が高まったか</label></div>
           <div class="likert" data-name="panel_interest">
@@ -172,13 +172,11 @@
             <label class="radio-pill"><input type="radio" name="panel_interest" value="5"><span>5</span></label>
           </div>
         </div>
-      </section>
 
-      <!-- ICUアーカイブズについて（任意） -->
-        <h2>ICUアーカイブズについて（任意回答）</h2>
-        <p class="note">ICUアーカイブズは、ICUの歴史に関する資料・記録の保存・収集・提供を行う組織です（図書館1階に展示室、2階に分室）。</p>
+        <!-- アーカイブズの説明 -->
+        <p class="note">本アプリの写真や解説は、ICUアーカイブズ（ICUの歴史に関する資料や記録の保存・収集・提供を行う組織。図書館1階に展示室、2階に分室）にご協力いただき提供されています。</p>
 
-        <!-- 認知（任意：5段階ラベル） -->
+        <!-- アーカイブズ認知 -->
         <div class="field">
           <div class="label-row"><label>ICUアーカイブズのことを知っていたか</label></div>
           <div class="likert" data-name="archives_awareness">
@@ -190,7 +188,7 @@
           </div>
         </div>
 
-        <!-- 訪問経験（任意：はい・いいえ） -->
+        <!-- アーカイブズ訪問 -->
         <div class="field">
           <div class="label-row"><label>ICUアーカイブズを訪問したことがあるか</label></div>
           <div class="yn" data-name="archives_visited">
@@ -199,7 +197,7 @@
           </div>
         </div>
 
-        <!-- 関心の高まり（任意） -->
+        <!-- アーカイブズへの関心 -->
         <div class="field">
           <div class="label-row"><label>本アプリにより、ICUアーカイブズへの関心が高まったか</label></div>
           <div class="likert" data-name="archives_interest">
@@ -259,6 +257,6 @@
   </div>
 
   <script src="js/firebase.js" defer></script>
-  <script src="js/post-survey.js?v=20251010" defer></script>
+  <script src="js/post-survey.js?v=20251010-merge" defer></script>
 </body>
 </html>
