@@ -1,8 +1,8 @@
-/* js/explanation.js（差し替え）
+/* js/explanation.js（差し替え版）
  * - ?spotId=spot1..spot6 を判定し、写真・クイズ・解説を表示
  * - 表示時に users/{uid}/stamps/{spotId} = true を保存（匿名UID）
  * - スタンプ画像: assets/images/stamps/stampXX.png（XX=01..06）
- * - 写真: assets/images/Photo_thesis/…（ご提供ファイル名）
+ * - 写真: assets/images/Photos_thesis/…（ご提供ファイル名）
  */
 
 (function () {
@@ -55,7 +55,7 @@
         </figure>
         <p>これは改装前の写真だよ。<b>本館はもともと中島飛行機が使っていたもの</b>を1953年に改築したんだ。</p>
         <figure>
-          <img src="assets/images/Photos_thesis/spot1_main.jpg" alt="本館正面 1950年代">
+          <img src="assets/images/Photos_thesis/spot1_main.jpg" alt="本館正面（1950年代）">
           <figcaption>本館正面（1950年代）</figcaption>
         </figure>
         <p>この写真は1950年代のもので、改築はしてるけど<b>バカ山・アホ山がまだ無い</b>よね？ バカ山・アホ山は図書館の地下階を掘った時にできた土を盛って作られたんだよ！</p>
@@ -69,7 +69,13 @@
           <figcaption>1952 献学時 - 小田急バスでの通学</figcaption>
           <p>この写真は小田急バスで通学する、1952年の学生の写真だ。なんと、本館東側（今は駐輪場になっている方）の入り口近くまでバスが来ていたんだよ！</p>
         </figure>
-        
+        <!-- ▼▼ ここから追記分 ▼▼ -->
+        <figure>
+          <img src="assets/images/Photos_thesis/spot1_detail_4.jpg" alt="1949年 本館前の集合写真">
+          <figcaption>1949年 本館前</figcaption>
+        </figure>
+        <p>これは1949年の写真だよ。本館の前に立つのは、右からハロルド・W・ハケット氏（業務・財務担当副学長）モーリス・E・トロイヤー博士（カリキュラム・教育担当副学長）湯浅八郎博士（学長）阿由沢岩男博士（教職員）。湯浅八郎先生は初代学長だね。湯浅八郎記念館が大学にはあるけど、そこは湯浅先生が蒐集した民芸品が展示されている、博物館になっているんだ。また、トロイヤー先生を記念して建てられたのがトロイヤー記念アーツ・サイエンス館、つまりT館だね！</p>
+        <!-- ▲▲ 追記ここまで ▲▲ -->
       `
     },
     spot2: {
@@ -82,7 +88,7 @@
       explainHTML: `
         <p>写真を見ると、横から見たら「E」みたいになっている本館と、十字の形の理学館があって、奥に三角のシーベリーチャペルがあるよね。でも、<b>T館はどこにもない</b>のはわかるかな？ これは1970年の写真だよ。本当に何もなかったんだ！</p>
         <figure>
-          <img src="assets/images/Photos_thesis/spot2_detail_1.jpg" alt="キャンパス全景 1956 航空写真">
+          <img src="assets/images/Photos_thesis/spot2_detail_1.jpg" alt="キャンパス全景（1956年・航空写真）">
           <figcaption>キャンパス全景（1956年・航空写真）</figcaption>
         </figure>
         <p>理学館もないけど、本館だけは変わらないね。他には何が見えるか、探してみてね！</p>
@@ -98,18 +104,29 @@
       explainHTML: `
         <p><b>結婚式も、結婚式の披露宴も</b>行われていたよ。写真は1955年ごろのガッキ（学生キッチンの略）。昔はICUのガッキでは、中富商事の提供するフレンチ料理を食べることが出来たんだ。結婚式のときは、豪華な本格フレンチがふるまわれたとか。</p>
         <p>中富商事は今でも本格フレンチのレストランを営んでいるよ。今目の前にあるガッキの中にある暖炉は、今は使われていないけど、現役で使われていた時代もあったんだ。</p>
+        <figure>
+          <img src="assets/images/Photos_thesis/spot3_main.jpg" alt="1955_学生食堂全景">
+          <figcaption>1955_学生食堂全景</figcaption>
+        </figure>
         <p>このころのガッキからさらに改築されて、2010年に今のガッキに建て替えられる前は、こんな感じだったよ。</p>
         <figure>
-          <img src="assets/images/Photos_thesis/spot3_detail_2.jpg" alt="食堂 外観（改築前）">
+          <img src="assets/images/Photos_thesis/spot3_detail_2.JPG" alt="食堂・外観（改築前）">
           <figcaption>食堂・外観（改築前）</figcaption>
         </figure>
         <p>今はもっと大きくなったね！</p>
         <figure>
-          <img src="assets/images/Photos_thesis/spot3_detail_1.jpg" alt="ICUフェスティバルの日の食堂">
+          <img src="assets/images/Photos_thesis/spot3_detail_1.JPG" alt="ICUフェスティバルの日の食堂">
           <figcaption>ICUフェスティバルの日の食堂</figcaption>
         </figure>
         <p>これは何の日のガッキかわかるかな？いろんな人がいて楽しそうだね！1950-1960年代の写真だよ。</p>
         <p>答えは、<b>ICUフェスティバルの日！</b>学祭の日ってことだね。</p>
+        <!-- ▼▼ ここから追記分 ▼▼ -->
+        <figure>
+          <img src="assets/images/Photos_thesis/spot3_detail_3.jpg" alt="アメリカン・ナイト（1961年4月29日）">
+          <figcaption>アメリカン・ナイト（1961年4月29日）</figcaption>
+        </figure>
+        <p>これはガッキの写真だ。アメリカン・ナイトという、1961年4月29日に行われた催しの写真。ICUに所属するアメリカの学生が大学のために主催し、夕食と、その後にダンスが行われた。日本人に馴染みがあるようにと、西部劇スタイルで学生たちが学食に上がろうとするところを撮っている。昔はこんな風に楽しそうなイベントを行っていたんだね！そして、何気なく書かれているけど、そう、昔はガッキは朝食と夕食も提供していたんだ！今は昼のみ営業しているけど、そんな時代もあったんだね。</p>
+        <!-- ▲▲ 追記ここまで ▲▲ -->
       `
     },
     spot4: {
@@ -122,7 +139,7 @@
       explainHTML: `
         <p>ロマネスク様式の<b>バラ窓</b>が見事なチャペルだね。これは1954年にヴォーリズ建築事務所によって建てられたけど、ヴォーリズが引退した後、<b>1959年にレーモンド</b>というモダニズム建築士によって建て替えられたんだ。</p>
         <figure>
-          <img src="assets/images/Photos_thesis/spot4_detail_1.jpg" alt="教会学校 1970">
+          <img src="assets/images/Photos_thesis/spot4_detail_1.jpg" alt="建て替え後の礼拝堂（1970）">
           <figcaption>建て替え後の礼拝堂（1970）</figcaption>
         </figure>
         <p>一説にはモダニズム建築のレーモンドがロマネスク様式を嫌って建て替えた…という話もあるみたいだけど、さすがに喧嘩したぐらいで、募金を募って建てられたICUのチャペル建て直しはできないよね…。</p>
@@ -133,7 +150,13 @@
         </figure>
         <p>これは何の日の礼拝堂かな？皆きれいな格好だね！答えは結婚式の日だよ！ICUに勤められていた都留春夫（つる はるお）先生の結婚祝いに作られたアルバムに入っていた写真なんだ。</p>
         <p>都留先生は1955年にICUチャペルでヘルスセンター勤務の篠原氏と挙式されたんだよ。カウンセリングの父と呼ばれる先生で、ICUに初期からカウンセリングセンターがあるのもこの先生のおかげなんだ。この写真には写っていないけど...。</p>
-
+        <!-- ▼▼ ここから追記分 ▼▼ -->
+        <figure>
+          <img src="assets/images/Photos_thesis/spot4_detail_3.jpg" alt="1957年 一期生卒業式（礼拝堂）">
+          <figcaption>1957年 一期生卒業式（礼拝堂）</figcaption>
+        </figure>
+        <p>これはチャペル、礼拝堂の写真。一期生の卒業式、1957年のものだよ。玄関から一期生達が退場しているね。1957年ということは、昔の姿のチャペルの時代だね！昔チャペルの前を今人たちが通っていったんだと思うと不思議だよね。</p>
+        <!-- ▲▲ 追記ここまで ▲▲ -->
       `
     },
     spot5: {
@@ -146,14 +169,14 @@
       explainHTML: `
         <p><b>1973年の写真</b>だよ。B館に入ったことがある人は、このころから内装が変わっていないことが分かるね！50年も昔から、ここでいろんな学生が運動を楽しんでいるんだよ。もちろんジムで体を鍛える学生もね！</p>
         <figure>
-          <img src="assets/images/Photos_thesis/spot5_detail_1.jpg" alt="プール棟（1973）">
+          <img src="assets/images/Photos_thesis/spot5_detail_1.jpg" alt="当時はプール棟もありました（1973）">
           <figcaption>当時はプール棟もありました（1973）</figcaption>
         </figure>
         <p>2018年に新しくA館が出来たよ！ 木がきれいだね。この建築には建築士の隈研吾さんが関わっているよ。その時にプール棟は無くなって、新しくなったんだ。</p>
       `
     },
     spot6: {
-      mainPhoto: 'assets/images/Photos_thesis/spot6_main.jpg', // 未定なら空のまま
+      mainPhoto: 'assets/images/Photos_thesis/spot6_main.jpg',
       quiz: null,    // クイズなし
       explainHTML: `
         <p>ここまで見てくれてありがとう！最後はクイズ無しでごほうびを楽しんでね！</p>
