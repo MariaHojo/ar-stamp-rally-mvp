@@ -15,7 +15,7 @@
       --error:#c1121f;
       --gap:18px;
       --radius:14px;
-      --container: 540px;
+      --container: 600px;
     }
     html,body{background:var(--bg); color:var(--text); margin:0; padding:0}
     body{font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%;line-height:1.6;}
@@ -30,14 +30,16 @@
     .label-row label{ font-weight:700 }
     .req{ color:#c1121f; font-size:12px; font-weight:700; }
     .hint{ color:#666; font-size:12px; margin-bottom:8px }
+    .note{ color:#444; font-size:13px; background:#f7f9fe; border:1px solid #e9eef6; border-radius:10px; padding:10px; }
     .age-row{ display:flex; align-items:center; gap:10px; }
-    .age-input{ width:120px; max-width:40vw; appearance:textfield; font-size:18px; padding:12px 12px; border-radius:12px; border:1px solid #d7deea; background:#fff; }
+    .age-input{ width:140px; max-width:42vw; appearance:textfield; font-size:18px; padding:12px 12px; border-radius:12px; border:1px solid #d7deea; background:#fff; }
     .age-suffix{ font-size:16px }
     .likert{ display:grid; grid-template-columns: repeat(5,1fr); gap:8px; }
-    .radio-pill{ display:flex; align-items:center; justify-content:center; border:1.5px solid #d7deea; border-radius:12px; padding:10px 0; font-weight:700; user-select:none; cursor:pointer; transition: border-color .15s, background .15s; font-size:16px; }
+    .radio-pill{ display:flex; align-items:center; justify-content:center; border:1.5px solid #d7deea; border-radius:12px; padding:10px 6px; font-weight:700; user-select:none; cursor:pointer; transition: border-color .15s, background .15s; font-size:14px; text-align:center; }
     .radio-pill input{ display:none }
     .radio-pill.is-active{ border-color:var(--accent); background:#eef5ff }
     .likert-scale{ display:flex; justify-content:space-between; color:#333; font-size:12px; margin-top:6px }
+    .yn{ display:grid; grid-template-columns: repeat(2,1fr); gap:8px }
     .text-input, .textarea{ width:100%; border:1px solid #d7deea; border-radius:12px; background:#fff; padding:12px 12px; font-size:16px; }
     .textarea{ min-height:120px; resize:vertical }
     .err{ color:#c1121f; font-size:12px; margin-top:6px; display:none }
@@ -58,142 +60,196 @@
       <section class="section" aria-labelledby="aboutYou">
         <h2 class="sec-title" id="aboutYou">あなたについて</h2>
 
-        <!-- 1. 年代 -->
+        <!-- 年代（必須） -->
         <div class="field" id="f-age">
           <div class="label-row">
             <label for="age">年代</label><span class="req">*必須</span>
           </div>
           <div class="hint">半角数字で入力</div>
           <div class="age-row">
-            <input id="age" name="age" class="age-input" type="tel" inputmode="numeric" pattern="[0-9]*" placeholder="00" aria-describedby="ageErr" />
+            <input id="age" name="age" class="age-input" type="tel" inputmode="numeric" pattern="[0-9]*" placeholder="18" aria-describedby="ageErr" />
             <span class="age-suffix">歳</span>
           </div>
           <div class="err" id="ageErr">年代（年齢）を半角数字で入力してください。</div>
         </div>
 
-        <!-- 2 -->
-        <div class="field" id="f-q2">
+        <!-- 歴史に興味（必須） -->
+        <div class="field" id="f-histInterest">
           <div class="label-row"><label>歴史に興味があるか</label><span class="req">*必須</span></div>
-          <div class="likert" data-name="q2" role="radiogroup" aria-describedby="q2Scale q2Err">
-            <label class="radio-pill"><input type="radio" name="q2" value="1"><span>1</span></label>
-            <label class="radio-pill"><input type="radio" name="q2" value="2"><span>2</span></label>
-            <label class="radio-pill"><input type="radio" name="q2" value="3"><span>3</span></label>
-            <label class="radio-pill"><input type="radio" name="q2" value="4"><span>4</span></label>
-            <label class="radio-pill"><input type="radio" name="q2" value="5"><span>5</span></label>
+          <div class="likert" data-name="hist_interest" role="radiogroup" aria-describedby="histInterestScale histInterestErr">
+            <label class="radio-pill"><input type="radio" name="hist_interest" value="1"><span>1</span></label>
+            <label class="radio-pill"><input type="radio" name="hist_interest" value="2"><span>2</span></label>
+            <label class="radio-pill"><input type="radio" name="hist_interest" value="3"><span>3</span></label>
+            <label class="radio-pill"><input type="radio" name="hist_interest" value="4"><span>4</span></label>
+            <label class="radio-pill"><input type="radio" name="hist_interest" value="5"><span>5</span></label>
           </div>
-          <div class="likert-scale" id="q2Scale"><span>全くない</span><span>大いにある</span></div>
-          <div class="err" id="q2Err">1〜5のいずれかを選択してください。</div>
+          <div class="likert-scale" id="histInterestScale"><span>そう思わない</span><span>そう思う</span></div>
+          <div class="err" id="histInterestErr">1〜5のいずれかを選択してください。</div>
         </div>
 
-        <!-- 3 -->
-        <div class="field" id="f-q3">
-          <div class="label-row"><label>興味を持った歴史のことがらについて、自分で調べたことがあるか</label><span class="req">*必須</span></div>
-          <div class="likert" data-name="q3" role="radiogroup" aria-describedby="q3Scale q3Err">
-            <label class="radio-pill"><input type="radio" name="q3" value="1"><span>1</span></label>
-            <label class="radio-pill"><input type="radio" name="q3" value="2"><span>2</span></label>
-            <label class="radio-pill"><input type="radio" name="q3" value="3"><span>3</span></label>
-            <label class="radio-pill"><input type="radio" name="q3" value="4"><span>4</span></label>
-            <label class="radio-pill"><input type="radio" name="q3" value="5"><span>5</span></label>
+        <!-- 歴史資料の保存への関心（必須） -->
+        <div class="field" id="f-presInterest">
+          <div class="label-row"><label>歴史資料の保存に関心があるか</label><span class="req">*必須</span></div>
+          <div class="likert" data-name="preservation_interest" role="radiogroup" aria-describedby="presInterestScale presInterestErr">
+            <label class="radio-pill"><input type="radio" name="preservation_interest" value="1"><span>1</span></label>
+            <label class="radio-pill"><input type="radio" name="preservation_interest" value="2"><span>2</span></label>
+            <label class="radio-pill"><input type="radio" name="preservation_interest" value="3"><span>3</span></label>
+            <label class="radio-pill"><input type="radio" name="preservation_interest" value="4"><span>4</span></label>
+            <label class="radio-pill"><input type="radio" name="preservation_interest" value="5"><span>5</span></label>
           </div>
-          <div class="likert-scale" id="q3Scale"><span>全くない</span><span>大いにある</span></div>
-          <div class="err" id="q3Err">1〜5のいずれかを選択してください。</div>
+          <div class="likert-scale" id="presInterestScale"><span>そう思わない</span><span>そう思う</span></div>
+          <div class="err" id="presInterestErr">1〜5のいずれかを選択してください。</div>
         </div>
 
-        <!-- 4 任意 -->
-        <div class="field">
-          <div class="label-row"><label for="q4">どうして3の様に回答したか</label></div>
-          <input id="q4" name="q4" class="text-input" type="text" placeholder="（任意）理由をお書きください" />
-        </div>
-
-        <!-- 5 -->
-        <div class="field" id="f-q5">
-          <div class="label-row"><label>ICUの歴史に興味をもったか</label><span class="req">*必須</span></div>
-          <div class="likert" data-name="q5" role="radiogroup" aria-describedby="q5Scale q5Err">
-            <label class="radio-pill"><input type="radio" name="q5" value="1"><span>1</span></label>
-            <label class="radio-pill"><input type="radio" name="q5" value="2"><span>2</span></label>
-            <label class="radio-pill"><input type="radio" name="q5" value="3"><span>3</span></label>
-            <label class="radio-pill"><input type="radio" name="q5" value="4"><span>4</span></label>
-            <label class="radio-pill"><input type="radio" name="q5" value="5"><span>5</span></label>
+        <!-- 自主的に調べた経験（必須） -->
+        <div class="field" id="f-selfResearch">
+          <div class="label-row"><label>興味を持った歴史の事柄について、自主的に調べたことがあるか</label><span class="req">*必須</span></div>
+          <div class="likert" data-name="self_research" role="radiogroup" aria-describedby="selfResearchScale selfResearchErr">
+            <label class="radio-pill"><input type="radio" name="self_research" value="1"><span>1</span></label>
+            <label class="radio-pill"><input type="radio" name="self_research" value="2"><span>2</span></label>
+            <label class="radio-pill"><input type="radio" name="self_research" value="3"><span>3</span></label>
+            <label class="radio-pill"><input type="radio" name="self_research" value="4"><span>4</span></label>
+            <label class="radio-pill"><input type="radio" name="self_research" value="5"><span>5</span></label>
           </div>
-          <div class="likert-scale" id="q5Scale"><span>そう思わない</span><span>そう思う</span></div>
-          <div class="err" id="q5Err">1〜5のいずれかを選択してください。</div>
+          <div class="likert-scale" id="selfResearchScale"><span>そう思わない</span><span>そう思う</span></div>
+          <div class="err" id="selfResearchErr">1〜5のいずれかを選択してください。</div>
         </div>
 
-        <!-- 6 任意 -->
-        <div class="field">
-          <div class="label-row"><label for="q6">どうして5の様に回答したか</label></div>
-          <input id="q6" name="q6" class="text-input" type="text" placeholder="（任意）理由をお書きください" />
-        </div>
-
-        <!-- 7 -->
-        <div class="field" id="f-q7">
-          <div class="label-row"><label>歴史を保存する事に関心が湧いたか</label><span class="req">*必須</span></div>
-          <div class="likert" data-name="q7" role="radiogroup" aria-describedby="q7Scale q7Err">
-            <label class="radio-pill"><input type="radio" name="q7" value="1"><span>1</span></label>
-            <label class="radio-pill"><input type="radio" name="q7" value="2"><span>2</span></label>
-            <label class="radio-pill"><input type="radio" name="q7" value="3"><span>3</span></label>
-            <label class="radio-pill"><input type="radio" name="q7" value="4"><span>4</span></label>
-            <label class="radio-pill"><input type="radio" name="q7" value="5"><span>5</span></label>
+        <!-- アプリで歴史への興味の変化（必須） -->
+        <div class="field" id="f-histChange">
+          <div class="label-row"><label>本アプリを通して、歴史への興味に変化はあったか</label><span class="req">*必須</span></div>
+          <div class="likert" data-name="hist_change" role="radiogroup" aria-describedby="histChangeScale histChangeErr">
+            <label class="radio-pill"><input type="radio" name="hist_change" value="1"><span>1</span></label>
+            <label class="radio-pill"><input type="radio" name="hist_change" value="2"><span>2</span></label>
+            <label class="radio-pill"><input type="radio" name="hist_change" value="3"><span>3</span></label>
+            <label class="radio-pill"><input type="radio" name="hist_change" value="4"><span>4</span></label>
+            <label class="radio-pill"><input type="radio" name="hist_change" value="5"><span>5</span></label>
           </div>
-          <div class="likert-scale" id="q7Scale"><span>そう思わない</span><span>そう思う</span></div>
-          <div class="err" id="q7Err">1〜5のいずれかを選択してください。</div>
+          <div class="likert-scale" id="histChangeScale"><span>そう思わない</span><span>そう思う</span></div>
+          <div class="err" id="histChangeErr">1〜5のいずれかを選択してください。</div>
         </div>
 
-        <!-- 8 任意 -->
-        <div class="field">
-          <div class="label-row"><label for="q8">どうして7の様に回答したか</label></div>
-          <input id="q8" name="q8" class="text-input" type="text" placeholder="（任意）理由をお書きください" />
+        <!-- アプリで保存への関心の変化（必須） -->
+        <div class="field" id="f-presChange">
+          <div class="label-row"><label>本アプリを通して、歴史資料の保存の関心に変化はあったか</label><span class="req">*必須</span></div>
+          <div class="likert" data-name="preservation_change" role="radiogroup" aria-describedby="presChangeScale presChangeErr">
+            <label class="radio-pill"><input type="radio" name="preservation_change" value="1"><span>1</span></label>
+            <label class="radio-pill"><input type="radio" name="preservation_change" value="2"><span>2</span></label>
+            <label class="radio-pill"><input type="radio" name="preservation_change" value="3"><span>3</span></label>
+            <label class="radio-pill"><input type="radio" name="preservation_change" value="4"><span>4</span></label>
+            <label class="radio-pill"><input type="radio" name="preservation_change" value="5"><span>5</span></label>
+          </div>
+          <div class="likert-scale" id="presChangeScale"><span>そう思わない</span><span>そう思う</span></div>
+          <div class="err" id="presChangeErr">1〜5のいずれかを選択してください。</div>
         </div>
       </section>
 
-      <!-- ARアプリについて -->
+      <!-- ICU 在学生・教職員の方へ（任意） -->
+      <section class="section" aria-labelledby="forICU">
+        <h2 class="sec-title" id="forICU">ICU在学生・教職員の方へ（任意回答）</h2>
+        <p class="note">該当しない方・回答を希望しない方は、このセクションは空欄で構いません。</p>
+
+        <!-- パネル展示の認知（任意：5段階ラベル） -->
+        <div class="field">
+          <div class="label-row"><label>ICU本館やD館などのパネル展示（例：本館173教室前）を知っていたか</label></div>
+          <div class="likert" data-name="panel_awareness">
+            <label class="radio-pill"><input type="radio" name="panel_awareness" value="1"><span>知らない</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_awareness" value="2"><span>見かけたことはある</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_awareness" value="3"><span>軽く見たことはある</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_awareness" value="4"><span>読んだことがある</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_awareness" value="5"><span>じっくり読んだことがある</span></label>
+          </div>
+        </div>
+
+        <!-- パネル展示への関心（任意） -->
+        <div class="field">
+          <div class="label-row"><label>本アプリを通して、パネル展示への関心が高まったか</label></div>
+          <div class="likert" data-name="panel_interest">
+            <label class="radio-pill"><input type="radio" name="panel_interest" value="1"><span>1</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_interest" value="2"><span>2</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_interest" value="3"><span>3</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_interest" value="4"><span>4</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_interest" value="5"><span>5</span></label>
+          </div>
+        </div>
+      </section>
+
+      <!-- ICUアーカイブズについて（任意） -->
+      <section class="section" aria-labelledby="archives">
+        <h2 class="sec-title" id="archives">ICUアーカイブズについて（任意回答）</h2>
+        <p class="note">ICUアーカイブズは、ICUの歴史に関する資料・記録の保存・収集・提供を行う組織です（図書館1階に展示室、2階に分室）。</p>
+
+        <!-- 認知（任意：5段階ラベル） -->
+        <div class="field">
+          <div class="label-row"><label>ICUアーカイブズのことを知っていたか</label></div>
+          <div class="likert" data-name="archives_awareness">
+            <label class="radio-pill"><input type="radio" name="archives_awareness" value="1"><span>知らない</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_awareness" value="2"><span>見かけたことがある</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_awareness" value="3"><span>存在を知っている</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_awareness" value="4"><span>どういう組織か軽く知っている</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_awareness" value="5"><span>どういう組織か詳しく知っている</span></label>
+          </div>
+        </div>
+
+        <!-- 訪問経験（任意：はい・いいえ） -->
+        <div class="field">
+          <div class="label-row"><label>ICUアーカイブズを訪問したことがあるか</label></div>
+          <div class="yn" data-name="archives_visited">
+            <label class="radio-pill"><input type="radio" name="archives_visited" value="yes"><span>はい</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_visited" value="no"><span>いいえ</span></label>
+          </div>
+        </div>
+
+        <!-- 関心の高まり（任意） -->
+        <div class="field">
+          <div class="label-row"><label>本アプリにより、ICUアーカイブズへの関心が高まったか</label></div>
+          <div class="likert" data-name="archives_interest">
+            <label class="radio-pill"><input type="radio" name="archives_interest" value="1"><span>1</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_interest" value="2"><span>2</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_interest" value="3"><span>3</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_interest" value="4"><span>4</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_interest" value="5"><span>5</span></label>
+          </div>
+        </div>
+      </section>
+
+      <!-- アプリについて（必須2問） -->
       <section class="section" aria-labelledby="aboutApp">
-        <h2 class="sec-title" id="aboutApp">ARアプリについて</h2>
+        <h2 class="sec-title" id="aboutApp">アプリについて</h2>
 
-        <!-- 9 -->
-        <div class="field" id="f-q9">
+        <div class="field" id="f-fun">
           <div class="label-row"><label>面白かったか</label><span class="req">*必須</span></div>
-          <div class="likert" data-name="q9" role="radiogroup" aria-describedby="q9Scale q9Err">
-            <label class="radio-pill"><input type="radio" name="q9" value="1"><span>1</span></label>
-            <label class="radio-pill"><input type="radio" name="q9" value="2"><span>2</span></label>
-            <label class="radio-pill"><input type="radio" name="q9" value="3"><span>3</span></label>
-            <label class="radio-pill"><input type="radio" name="q9" value="4"><span>4</span></label>
-            <label class="radio-pill"><input type="radio" name="q9" value="5"><span>5</span></label>
+          <div class="likert" data-name="fun" role="radiogroup" aria-describedby="funScale funErr">
+            <label class="radio-pill"><input type="radio" name="fun" value="1"><span>1</span></label>
+            <label class="radio-pill"><input type="radio" name="fun" value="2"><span>2</span></label>
+            <label class="radio-pill"><input type="radio" name="fun" value="3"><span>3</span></label>
+            <label class="radio-pill"><input type="radio" name="fun" value="4"><span>4</span></label>
+            <label class="radio-pill"><input type="radio" name="fun" value="5"><span>5</span></label>
           </div>
-          <div class="likert-scale" id="q9Scale"><span>そう思わない</span><span>そう思う</span></div>
-          <div class="err" id="q9Err">1〜5のいずれかを選択してください。</div>
+          <div class="likert-scale" id="funScale"><span>そう思わない</span><span>そう思う</span></div>
+          <div class="err" id="funErr">1〜5のいずれかを選択してください。</div>
         </div>
 
-        <!-- 10 任意 -->
-        <div class="field">
-          <div class="label-row"><label for="q10">どうして9の様に回答したか</label></div>
-          <input id="q10" name="q10" class="text-input" type="text" placeholder="（任意）理由をお書きください" />
-        </div>
-
-        <!-- 11 -->
-        <div class="field" id="f-q11">
+        <div class="field" id="f-usability">
           <div class="label-row"><label>使いやすかったか</label><span class="req">*必須</span></div>
-          <div class="likert" data-name="q11" role="radiogroup" aria-describedby="q11Scale q11Err">
-            <label class="radio-pill"><input type="radio" name="q11" value="1"><span>1</span></label>
-            <label class="radio-pill"><input type="radio" name="q11" value="2"><span>2</span></label>
-            <label class="radio-pill"><input type="radio" name="q11" value="3"><span>3</span></label>
-            <label class="radio-pill"><input type="radio" name="q11" value="4"><span>4</span></label>
-            <label class="radio-pill"><input type="radio" name="q11" value="5"><span>5</span></label>
+          <div class="likert" data-name="usability" role="radiogroup" aria-describedby="usabilityScale usabilityErr">
+            <label class="radio-pill"><input type="radio" name="usability" value="1"><span>1</span></label>
+            <label class="radio-pill"><input type="radio" name="usability" value="2"><span>2</span></label>
+            <label class="radio-pill"><input type="radio" name="usability" value="3"><span>3</span></label>
+            <label class="radio-pill"><input type="radio" name="usability" value="4"><span>4</span></label>
+            <label class="radio-pill"><input type="radio" name="usability" value="5"><span>5</span></label>
           </div>
-          <div class="likert-scale" id="q11Scale"><span>そう思わない</span><span>そう思う</span></div>
-          <div class="err" id="q11Err">1〜5のいずれかを選択してください。</div>
+          <div class="likert-scale" id="usabilityScale"><span>そう思わない</span><span>そう思う</span></div>
+          <div class="err" id="usabilityErr">1〜5のいずれかを選択してください。</div>
         </div>
+      </section>
 
-        <!-- 12 任意 -->
+      <!-- 自由記述（任意） -->
+      <section class="section" aria-labelledby="free">
+        <h2 class="sec-title" id="free">自由記述欄（任意）</h2>
         <div class="field">
-          <div class="label-row"><label for="q12">どうして11の様に回答したか</label></div>
-          <input id="q12" name="q12" class="text-input" type="text" placeholder="（任意）理由をお書きください" />
-        </div>
-
-        <!-- 13 任意 -->
-        <div class="field">
-          <div class="label-row"><label for="q13">自由記述欄</label></div>
-          <textarea id="q13" name="q13" class="textarea" placeholder="ご意見・ご感想など自由にお書きください（任意）"></textarea>
+          <div class="label-row"><label for="free_text">ご意見・ご感想など</label></div>
+          <textarea id="free_text" name="free_text" class="textarea" placeholder="ご自由にお書きください（任意）"></textarea>
         </div>
       </section>
 
@@ -204,6 +260,6 @@
   </div>
 
   <script src="js/firebase.js" defer></script>
-  <script src="js/post-survey.js?v=20251003" defer></script>
+  <script src="js/post-survey.js?v=20251010" defer></script>
 </body>
 </html>

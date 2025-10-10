@@ -1,13 +1,14 @@
-// post-survey.js
-// バリデーション → Firebase保存。送信後は map.html に戻る。
-// オフライン/失敗時は localStorage に一時保存し、オンライン復帰で自動送信を試行。
+// post-survey.js (v3)
+// 新設計アンケート：必須/任意の範囲を更新。保存スキーマ version=3。
+// 送信後は map.html へ遷移。オフライン時は一時保存→オンライン時に自動送信を試行。
 
 (function () {
   const BTN_ID = 'submitSurveyBtn';
-  const PENDING_KEY = 'postSurvey_pending_payload_v2';
+  const PENDING_KEY = 'postSurvey_pending_payload_v3';
 
+  /* ===== UI ヘルパ ===== */
   function initLikertPills() {
-    document.querySelectorAll('.likert').forEach(group => {
+    document.querySelectorAll('.likert, .yn').forEach(group => {
       group.addEventListener('click', (ev) => {
         const label = ev.target.closest('.radio-pill');
         if (!label) return;
@@ -32,6 +33,7 @@
   function readPendingLocally(){ try{ const v=localStorage.getItem(PENDING_KEY); return v?JSON.parse(v):null; }catch{ return null; } }
   function clearPendingLocally(){ try{ localStorage.removeItem(PENDING_KEY); }catch{} }
 
+  /* ===== Firebase 匿名サインイン ===== */
   async function ensureAnonSafe() {
     if (typeof window.ensureAnon === 'function') {
       try { const uid = await window.ensureAnon(); if (uid) return uid; } catch {}
@@ -52,8 +54,12 @@
 
   function getRadioValue(name) {
     const el = document.querySelector(`input[name="${name}"]:checked`);
-    return el ? Number(el.value) : null;
+    if (!el) return null;
+    const v = el.value;
+    // 1..5 は数値で返す。yes/no はそのまま文字列で返す。
+    return /^[0-9]+$/.test(v) ? Number(v) : v;
   }
+
   function setError(id, show) {
     const el = document.getElementById(id);
     if (el) el.style.display = show ? 'block' : 'none';
@@ -63,44 +69,67 @@
     if (box) box.scrollIntoView({behavior:'smooth', block:'center'});
   }
 
+  /* ===== 収集 & バリデーション ===== */
   function collectAndValidate() {
+    // 年代（必須）
     const ageInput = document.getElementById('age');
     const ageRaw = (ageInput?.value || '').trim();
     const ageOk = /^[0-9]+$/.test(ageRaw) && ageRaw.length > 0;
     setError('ageErr', !ageOk);
 
-    const q2 = getRadioValue('q2'); setError('q2Err', !q2);
-    const q3 = getRadioValue('q3'); setError('q3Err', !q3);
-    const q5 = getRadioValue('q5'); setError('q5Err', !q5);
-    const q7 = getRadioValue('q7'); setError('q7Err', !q7);
-    const q9 = getRadioValue('q9'); setError('q9Err', !q9);
-    const q11 = getRadioValue('q11'); setError('q11Err', !q11);
+    // 必須 5段階
+    const hist_interest        = getRadioValue('hist_interest');        setError('histInterestErr', !hist_interest);
+    const preservation_interest= getRadioValue('preservation_interest');setError('presInterestErr', !preservation_interest);
+    const self_research        = getRadioValue('self_research');        setError('selfResearchErr', !self_research);
+    const hist_change          = getRadioValue('hist_change');          setError('histChangeErr', !hist_change);
+    const preservation_change  = getRadioValue('preservation_change');  setError('presChangeErr', !preservation_change);
 
+    const fun                  = getRadioValue('fun');                   setError('funErr', !fun);
+    const usability            = getRadioValue('usability');             setError('usabilityErr', !usability);
+
+    // 任意
+    const panel_awareness   = getRadioValue('panel_awareness');
+    const panel_interest    = getRadioValue('panel_interest');
+    const archives_awareness= getRadioValue('archives_awareness');
+    const archives_visited  = getRadioValue('archives_visited'); // yes/no or null
+    const archives_interest = getRadioValue('archives_interest');
+
+    // 必須のどれか未入力ならスクロール先を決定
     const firstErrorId =
       (!ageOk && 'f-age') ||
-      (!q2 && 'f-q2') || (!q3 && 'f-q3') ||
-      (!q5 && 'f-q5') || (!q7 && 'f-q7') ||
-      (!q9 && 'f-q9') || (!q11 && 'f-q11') || null;
+      (!hist_interest && 'f-histInterest') ||
+      (!preservation_interest && 'f-presInterest') ||
+      (!self_research && 'f-selfResearch') ||
+      (!hist_change && 'f-histChange') ||
+      (!preservation_change && 'f-presChange') ||
+      (!fun && 'f-fun') ||
+      (!usability && 'f-usability') || null;
 
-    const ok = ageOk && q2 && q3 && q5 && q7 && q9 && q11;
+    const ok = ageOk && hist_interest && preservation_interest && self_research &&
+               hist_change && preservation_change && fun && usability;
 
     const payload = {
-      version: 2,
+      version: 3,
       submittedAt: nowTs(),
       answers: {
+        // 基本
         age: ageRaw,
-        interest_history: q2,
-        self_research: q3,
-        why_self_research: qs('#q4')?.value || '',
-        interest_icu_history: q5,
-        why_interest_icu_history: qs('#q6')?.value || '',
-        interest_preservation: q7,
-        why_interest_preservation: qs('#q8')?.value || '',
-        fun: q9,
-        why_fun: qs('#q10')?.value || '',
-        usability: q11,
-        why_usability: qs('#q12')?.value || '',
-        free_text: qs('#q13')?.value || '',
+        hist_interest,
+        preservation_interest,
+        self_research,
+        hist_change,
+        preservation_change,
+        // ICU 在学生・教職員向け（任意）
+        panel_awareness,
+        panel_interest,
+        archives_awareness,
+        archives_visited,     // 'yes' | 'no' | null
+        archives_interest,
+        // アプリ
+        fun,
+        usability,
+        // 自由記述
+        free_text: qs('#free_text')?.value || '',
       },
       client: {
         ua: (typeof navigator !== 'undefined' ? navigator.userAgent : ''),
@@ -111,6 +140,7 @@
     return { ok, firstErrorId, payload };
   }
 
+  /* ===== 保存 ===== */
   async function writeSurvey(uid, payload) {
     const db = firebase.database();
     const updates = {};
@@ -144,6 +174,7 @@
   function toast(msg){ try{ alert(msg); }catch{} }
   function goMap(){ location.href = 'map.html'; }
 
+  /* ===== 送信 ===== */
   async function onSubmit(ev) {
     ev?.preventDefault?.();
 
@@ -154,10 +185,11 @@
       return;
     }
 
+    // オフライン時はローカル退避
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       savePendingLocally(payload);
       toast('オフラインのため、回答を一時保存しました。オンライン時に自動送信します。');
-      goMap(); // ★ 送信後は map.html へ
+      goMap();
       return;
     }
 
@@ -167,7 +199,7 @@
       savePendingLocally(payload);
       setBusy(false);
       toast('ユーザー識別に失敗したため、回答を一時保存しました。後でもう一度お試しください。');
-      goMap(); // ★
+      goMap();
       return;
     }
 
@@ -175,18 +207,19 @@
       await writeSurvey(uid, payload);
       setBusy(false);
       toast('ご協力ありがとうございます。回答を送信しました！');
-      goMap(); // ★
+      goMap();
     } catch (e) {
       console.warn('[post-survey] write failed:', e?.message || e);
       savePendingLocally(payload);
       setBusy(false);
       toast('通信に失敗したため、回答を一時保存しました。オンライン時に自動送信します。');
-      goMap(); // ★
+      goMap();
     }
   }
 
   async function boot() {
     initLikertPills();
+    // ペンディング同期を軽く試す
     for (let i=0;i<2;i++){ try{ await trySyncPending(); break; } catch { await sleep(200); } }
     document.getElementById(BTN_ID)?.addEventListener('click', onSubmit, { passive:false });
   }
