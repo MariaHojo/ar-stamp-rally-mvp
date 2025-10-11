@@ -278,15 +278,15 @@
   </div>
 
   <!-- スポット選択の吹き出し -->
-  <div id="cameraChooserOverlay" class="camera-chooser-overlay" aria-hidden="true"></div>
-  <div id="cameraChooser" class="camera-chooser" role="dialog" aria-modal="true" aria-labelledby="cameraChooserTitle" aria-describedby="cameraChooserDesc">
-    <h3 id="cameraChooserTitle" data-i18n="map.choose">スポットを選んでください</h3>
-    <p id="cameraChooserDesc" style="margin:0 0 10px;color:#333" data-i18n="map.chooseDesc">写真をタップするとARが起動します。</p>
-    <div id="cameraChooserList" class="list"></div>
-    <div style="margin-top:10px;text-align:right">
-      <button id="cameraChooserClose" class="btn btn-secondary" type="button" data-i18n="common.close">閉じる</button>
-    </div>
+<div id="cameraChooser" class="camera-chooser" role="dialog" aria-modal="true" aria-labelledby="cameraChooserTitle" aria-describedby="cameraChooserDesc">
+  <h3 id="cameraChooserTitle" data-i18n="chooser.title">スポットを選んでください</h3>
+  <p id="cameraChooserDesc" style="margin:0 0 10px;color:#333" data-i18n="chooser.desc">写真をタップするとARが起動します。</p>
+  <div id="cameraChooserList" class="list"></div>
+  <div style="margin-top:10px;text-align:right">
+    <button id="cameraChooserClose" class="btn btn-secondary" type="button" data-i18n="chooser.close">閉じる</button>
   </div>
+</div>
+
 
   <!-- 完走モーダル -->
   <div id="completeOverlay" class="complete-overlay" aria-hidden="true"></div>
@@ -423,5 +423,38 @@
 
   <script src="js/firebase.js" defer></script>
   <script src="js/map.js?v=20251003" defer></script>
+  <script>
+  // map.html 簡易 i18n（スポット選択モーダルのみ）
+  (function(){
+    const DICT = {
+      ja: {
+        'chooser.title': 'スポットを選んでください',
+        'chooser.desc':  '写真をタップするとARが起動します。',
+        'chooser.close': '閉じる'
+      },
+      en: {
+        'chooser.title': 'Choose a spot',
+        'chooser.desc':  'Tap a photo to launch AR.',
+        'chooser.close': 'Close'
+      }
+    };
+    function getLang(){ try { return localStorage.getItem('app_lang') || 'ja'; } catch { return 'ja'; } }
+    function applyI18n(){
+      const lang = getLang();
+      const dict = DICT[lang] || DICT.ja;
+      document.querySelectorAll('[data-i18n]').forEach(el=>{
+        const k = el.getAttribute('data-i18n');
+        if (dict[k] != null) el.textContent = dict[k];
+      });
+      // ページのlang属性
+      document.documentElement.setAttribute('lang', lang==='en'?'en':'ja');
+    }
+    document.addEventListener('DOMContentLoaded', applyI18n);
+
+    // もし言語メニューから切り替えたら反映（他スクリプトからこのイベントを投げる想定）
+    window.addEventListener('app_lang_changed', applyI18n);
+  })();
+</script>
+
 </body>
 </html>
