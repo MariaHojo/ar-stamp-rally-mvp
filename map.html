@@ -21,7 +21,7 @@
     .wrap{max-width:var(--container);margin:0 auto;padding:clamp(10px,3vw,14px)}
     a.link{color:var(--accent);text-decoration:none;font-weight:800}
 
-    /* ======= 上部 1/6 ======= */
+    /* ======= 上部 ======= */
     .top-grid{
       display:grid;
       grid-template-columns: 1fr 2fr 1fr;
@@ -73,7 +73,7 @@
       padding:6px; cursor:pointer; box-shadow:var(--menuShadow)
     }
     .lang-btn:focus-visible{outline:3px solid rgba(0,90,187,.35)}
-    .lang-icon{width:28px;height:28px;display:block} /* 28px四角 */
+    .lang-icon{width:28px;height:28px;display:block} /* 正方形で小さめ */
     .lang-menu{
       position:absolute; right:0; margin-top:8px; background:#fff; border:1px solid #e3eaf6; border-radius:12px;
       box-shadow:var(--menuShadow); display:none; min-width:160px; overflow:hidden; z-index:20;
@@ -81,7 +81,7 @@
     .lang-menu.is-open{display:block}
     .lang-item{
       display:block; width:100%; text-align:left; background:#fff; border:0; padding:10px 12px;
-      cursor:pointer; font-weight:800; color:#000; /* ←黒文字 */
+      cursor:pointer; font-weight:800; color:#000; /* 黒文字 */
     }
     .lang-item:hover{background:#f2f6ff}
 
@@ -91,18 +91,11 @@
       border-radius:var(--radius);box-shadow:0 10px 30px rgba(0,0,0,.05);overflow:hidden;
     }
     .map-img{display:block;width:100%;height:auto;object-fit:contain;background:#fff}
-    .pin{
-      position:absolute;width:40px;height:40px;transform:translate(-50%,-100%);
-      display:inline-block;
-    }
+    .pin{position:absolute;width:40px;height:40px;transform:translate(-50%,-100%);display:inline-block}
     .pin img{width:100%;height:100%;display:block}
     .pin:focus-visible{outline:3px solid rgba(0,90,187,.35);border-radius:50%}
 
-    /* ======= ヒント ======= */
-    .hint{
-      max-width:920px;margin:10px auto;color:#333;background:#f6f7fb;border:1px solid #e9eef6;
-      border-radius:12px;padding:10px 12px;font-size:14px
-    }
+    .hint{max-width:920px;margin:10px auto;color:#333;background:#f6f7fb;border:1px solid #e9eef6;border-radius:12px;padding:10px 12px;font-size:14px}
 
     /* ======= 最下部 CTA ======= */
     .footer-cta{
@@ -115,7 +108,7 @@
     }
     .btn-secondary{background:#e9eef6;color:#111;box-shadow:none}
 
-    /* ======= カメラのスポット選択 ======= */
+    /* ======= スポット選択モーダル ======= */
     .camera-chooser-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);z-index:998;display:none}
     .camera-chooser-overlay.is-open{display:block}
     .camera-chooser{
@@ -305,7 +298,7 @@
     });
   </script>
 
-  <!-- 言語メニュー & i18n -->
+  <!-- 言語メニュー & i18n（ページ要素） -->
   <script>
     (function(){
       const DICT = {
@@ -404,7 +397,7 @@
 
   <script src="js/firebase.js" defer></script>
 
-  <!-- スポット選択モーダルのラベル i18n（map.js がDOMを生成後にも反応） -->
+  <!-- スポット選択モーダルのラベル i18n（より堅牢に） -->
   <script>
     (function(){
       const NAMES = {
@@ -427,6 +420,26 @@
       };
       function getLang(){ try { return localStorage.getItem('app_lang') || 'ja'; } catch { return 'ja'; } }
 
+      // ラベルを書き換える（.label だけでなく a, .name なども網羅）
+      function rewriteItemLabel(item, text){
+        if (!item) return;
+        const candidates = [
+          item.querySelector('.thumbWrap .label'),
+          item.querySelector('.label'),
+          item.querySelector('.name'),
+          item.querySelector('a'),
+          item
+        ];
+        for (const el of candidates){
+          if (!el) continue;
+          // aタグで下線が出ているケースにも対応
+          if (el.tagName === 'A' || el.tagName === 'SPAN' || el.tagName === 'DIV'){
+            el.textContent = text;
+            return;
+          }
+        }
+      }
+
       function applyChooserLang(){
         const lang = getLang();
         const title = document.getElementById('cameraChooserTitle');
@@ -438,9 +451,9 @@
 
         document.querySelectorAll('#cameraChooserList .item').forEach(item=>{
           const spot = item.getAttribute('data-spot') || item.dataset.spot;
-          const label = item.querySelector('.thumbWrap .label') || item.querySelector('.label');
-          if (spot && label && NAMES[lang] && NAMES[lang][spot]) {
-            label.textContent = NAMES[lang][spot];
+          const labelText = (NAMES[lang] && NAMES[lang][spot]) ? NAMES[lang][spot] : null;
+          if (spot && labelText){
+            rewriteItemLabel(item, labelText);
           }
         });
       }

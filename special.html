@@ -26,6 +26,12 @@
     figure img{width:100%;height:auto;border-radius:10px;border:1px solid #e9eef6}
     figcaption{font-size:12px;color:#333;margin-top:4px}
 
+    .ctaRow{margin:16px 0 0; display:flex; gap:10px; flex-wrap:wrap}
+    .btn{
+      appearance:none;border:0;border-radius:12px;padding:12px 14px;font-weight:900;cursor:pointer;
+      background:var(--accent);color:#fff;box-shadow:0 10px 28px rgba(0,90,187,.25); text-decoration:none; display:inline-block
+    }
+
     /* 言語スイッチ */
     .lang-switch{position:fixed; right:12px; top:12px; z-index:2147483647}
     .lang-btn{
@@ -78,19 +84,13 @@
         ICUの中で暮らせるように、ICUには昔農場があったんだ。下の3つの写真は、全部1952-1953年に撮られたものだよ。
       </p>
 
-      <figure>
-        <img src="assets/images/special_photos/special_sec2_3.jpg" alt="">
-      </figure>
+      <figure><img src="assets/images/special_photos/special_sec2_3.jpg" alt=""></figure>
       <p data-i18n="sp.sec2.p1">これは今の府中自動車運転免許試験場の近くで、トウモロコシの種をまいているところだね。</p>
 
-      <figure>
-        <img src="assets/images/special_photos/special_sec2_2.jpg" alt="">
-      </figure>
+      <figure><img src="assets/images/special_photos/special_sec2_2.jpg" alt=""></figure>
       <p data-i18n="sp.sec2.p2">これは鶏舎の近く</p>
 
-      <figure>
-        <img src="assets/images/special_photos/special_sec2_1.jpg" alt="">
-      </figure>
+      <figure><img src="assets/images/special_photos/special_sec2_1.jpg" alt=""></figure>
       <p data-i18n="sp.sec2.p3">これは牛舎の近くで撮られていると思われるよ！</p>
 
       <p data-i18n="sp.sec2.p4">
@@ -98,35 +98,28 @@
       </p>
 
       <h3 data-i18n="sp.sec2.d.h">・D館</h3>
-      <figure>
-        <img src="assets/images/special_photos/special_sec2_4.jpg" alt="">
-      </figure>
+      <figure><img src="assets/images/special_photos/special_sec2_4.jpg" alt=""></figure>
       <p data-i18n="sp.sec2.d.p1">これはディッフェンドルファー記念館、通称D館だね！これもむかーしからある建物で、東棟と西棟があるよ。東棟は1958年に完成しているから、そろそろ70歳かな？</p>
       <p data-i18n="sp.sec2.d.p2">ここにはスナックバーと呼ばれる売店があったんだ。コーヒーを出すようなカウンターもあって、今でもカウンターがあった場所は床の色が違うんだよ！</p>
-      <figure>
-        <img src="assets/images/special_photos/special_sec2_5.jpg" alt="">
-      </figure>
+      <figure><img src="assets/images/special_photos/special_sec2_5.jpg" alt=""></figure>
       <p data-i18n="sp.sec2.d.p3">郵便局もここに入っていたし、地下には美容室があったんだ。</p>
       <p data-i18n="sp.sec2.d.p4">そして、D館4階のガラスは古くて、歪んでいるのが分かるよ。この窓のアルミサッシは日本で最も古いものなんだよ！</p>
       <p data-i18n="sp.sec2.d.p5">解説パネルがあるので、ぜひ地下から4階まで行って、読んでみてね。</p>
 
       <h3 data-i18n="sp.sec2.s.h">・三軒家</h3>
       <p data-i18n="sp.sec2.s.p1">ICUを上から見ると、A駐車場の横からILC館(8番)までまっすぐななめに道があるのが分かるかな？</p>
-      <figure>
-        <img src="assets/images/special_photos/special_sec2_9.jpg" alt="">
-      </figure>
+      <figure><img src="assets/images/special_photos/special_sec2_9.jpg" alt=""></figure>
       <p data-i18n="sp.sec2.s.p2">ここには「三軒家」と呼ばれていたところがあったんだよ。</p>
-      <figure>
-        <img src="assets/images/special_photos/special_sec2_6.jpg" alt="">
-      </figure>
-      <figure>
-        <img src="assets/images/special_photos/special_sec2_7.jpg" alt="">
-      </figure>
+      <figure><img src="assets/images/special_photos/special_sec2_6.jpg" alt=""></figure>
+      <figure><img src="assets/images/special_photos/special_sec2_7.jpg" alt=""></figure>
       <p data-i18n="sp.sec2.s.p3">下の拡大写真を見ると、三軒家という文字が見て取れるね。鎌倉時代にはこのあたりに幹線街道があったとされるよ。</p>
-      <figure>
-        <img src="assets/images/special_photos/special_sec2_8.jpg" alt="">
-      </figure>
+      <figure><img src="assets/images/special_photos/special_sec2_8.jpg" alt=""></figure>
       <p data-i18n="sp.sec2.s.p4">これは現代の写真だけど、この横の木々も武蔵野の原生林なんだ。</p>
+
+      <!-- 最下部：戻る -->
+      <div class="ctaRow">
+        <a href="map.html" class="btn" id="spBackBtn" data-i18n="sp.back">マップへ戻る</a>
+      </div>
     </section>
 
     <!-- 3. 協力者 -->
@@ -146,7 +139,6 @@
   </div>
 
   <script>
-    // i18n辞書
     (function(){
       const DICT = {
         ja: {
@@ -174,7 +166,8 @@
           'sp.sec3.b':'ICUアーカイブズ様',
           'sp.sec3.p1':'今回、ほとんどの写真資料や、その解説文を書くにあたっての情報などを提供していただきました。この場を借りて心より感謝申し上げます。',
           'sp.sec3.p2':'ICUアーカイブズ様の活動内容は以下の通りです。<br>「ICUアーカイブズは大学歴史資料室の後継組織として2020年9月に発足しました。ICUアーカイブズは国際基督教大学の歴史に関する資料および大学の行政記録の収集・整理・保存・提供を行っています。（”ICUアーカイブズについて” ICU アーカイブズ　https://www-lib.icu.ac.jp/Archives/index.htm ）」',
-          'sp.sec3.p3':'図書館の一階に展示室、二階に分室があります。ICUの歴史が詰まった大変興味深い場所ですので、ご訪問なさってください。<br>HPリンクはこちらです。<a href="https://www-lib.icu.ac.jp/Archives/index.htm" target="_blank" rel="noopener">https://www-lib.icu.ac.jp/Archives/index.htm</a>'
+          'sp.sec3.p3':'図書館の一階に展示室、二階に分室があります。ICUの歴史が詰まった大変興味深い場所ですので、ご訪問なさってください。<br>HPリンクはこちらです。<a href="https://www-lib.icu.ac.jp/Archives/index.htm" target="_blank" rel="noopener">https://www-lib.icu.ac.jp/Archives/index.htm</a>',
+          'sp.back':'マップへ戻る'
         },
         en: {
           'sp.title':'Special Content',
@@ -201,7 +194,8 @@
           'sp.sec3.b':'ICU Archives',
           'sp.sec3.p1':'Most photos and background information were provided by ICU Archives. We express our sincere gratitude for their support.',
           'sp.sec3.p2':'About ICU Archives:<br>“ICU Archives was established in September 2020 as the successor to the University Historical Materials Room. ICU Archives collects, organizes, preserves, and provides access to materials related to the history of ICU and administrative records of the university.”',
-          'sp.sec3.p3':'There is an exhibition room on the first floor of the Library and an annex on the second floor. It’s a fascinating place full of ICU history—please visit!<br>Website: <a href="https://www-lib.icu.ac.jp/Archives/index.htm" target="_blank" rel="noopener">https://www-lib.icu.ac.jp/Archives/index.htm</a>'
+          'sp.sec3.p3':'There is an exhibition room on the first floor of the Library and an annex on the second floor. It’s a fascinating place full of ICU history—please visit!<br>Website: <a href="https://www-lib.icu.ac.jp/Archives/index.htm" target="_blank" rel="noopener">https://www-lib.icu.ac.jp/Archives/index.htm</a>',
+          'sp.back':'Back to Map'
         }
       };
 
@@ -213,7 +207,7 @@
         const dict = DICT[lang] || DICT.ja;
         document.querySelectorAll('[data-i18n]').forEach(el=>{
           const k = el.getAttribute('data-i18n');
-          if (dict[k] != null) el.innerHTML = dict[k]; // aタグなど含むため innerHTML
+          if (dict[k] != null) el.innerHTML = dict[k]; // aタグ等が含まれるため
         });
         document.documentElement.setAttribute('lang', lang==='en'?'en':'ja');
         document.title = (lang==='en') ? 'Special Content | AR Stamp Rally' : 'スペシャルコンテンツ | ARスタンプラリー';
