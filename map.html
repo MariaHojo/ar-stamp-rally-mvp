@@ -5,7 +5,7 @@
   <title>マップ | ARスタンプラリー</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <link rel="stylesheet" href="css/style.css" />
-  <style> 
+  <style>
   :root{
     --accent:#005ABB;
     --bg:#fff;
@@ -21,10 +21,10 @@
   .wrap{max-width:var(--container);margin:0 auto;padding:clamp(10px,3vw,14px)}
   a.link{color:var(--accent);text-decoration:none;font-weight:800}
 
-  /* ======= 上部 1/6 のエリア（利用規約 / スタンプ帳 / チュートリアル・言語） ======= */
+  /* ======= 上部：リンク(1/4) / スタンプ帳(2/4〜3/4) / アイコン(4/4) ======= */
   .top-grid{
     display:grid;
-    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-columns: 1fr minmax(320px, 2.5fr) auto; /* 中央を可変で広く */
     gap:8px;
     align-items:center;
     margin-bottom:clamp(10px,3vw,14px);
@@ -36,59 +36,52 @@
   .top-cell.left{justify-content:flex-start; gap:12px; flex-wrap:wrap}
   .top-cell.right{justify-content:flex-end}
 
+  /* 左のリンク文字を少し小さく */
+  .top-cell.left .link{
+    font-size: clamp(12px, 1.6vw, 14px);
+  }
+
+  /* ======= スタンプ帳（中央カラムいっぱいに） ======= */
   .stampbook{
-    position:relative;             /* ← 追加（ドロップダウン基準） */
     width:100%;
-    max-width:520px;
+    max-width:none; /* ← 520pxの上限を撤廃して中央カラムをフルに使う */
     background:#fff;border:1px solid #e9eef6;border-radius:14px;
-    box-shadow:0 6px 24px rgba(0,0,0,.05);
-    overflow:visible;              /* ← 重要！ hidden を visible に変更 */
+    box-shadow:0 6px 24px rgba(0,0,0,.05);overflow:hidden;
   }
   .stampbook-header{
     width:100%; text-align:center; background:#fff; color:#111;
     appearance:none;border:0; padding:12px 14px; font-weight:900; letter-spacing:.02em;
     display:flex;align-items:center;justify-content:center; gap:10px; cursor:pointer;
+    font-size: clamp(14px, 2vw, 16px);
   }
   .stampbook-header .arrow{color:#333}
+  .stampbook-body{display:none;padding:10px 12px 12px;background:#fff}
+  .stamp-count{font-size:12px;color:#333}
 
-  /* ドロップダウン本体：ヘッダー直下に重ねて表示 */
-  .stampbook-body{
-    position:absolute;
-    left:0; right:0; top:100%;
-    display:none;                 /* JSで .is-open の時だけ表示 */
-    background:#fff;
-    border:1px solid #e3eaf6;
-    border-top:0;                 /* 見た目をヘッダーと一体化 */
-    border-radius:0 0 14px 14px;
-    box-shadow:0 14px 32px rgba(0,0,0,.12);
-    z-index:50;
-    max-height:min(68vh, 520px);  /* 画面に収まる高さでスクロール */
-    overflow:auto;
-    padding:10px 12px 12px;
-  }
-  .stampbook.is-open .stampbook-body{ display:block; }
-  .stampbook.is-open .stampbook-header{
-    border-bottom:1px solid #e3eaf6;
-    border-radius:14px 14px 0 0;
-  }
-
-  .stamp-count{font-size:13px;color:#333}
-
+  /* ======= スタンプ帳：グリッド ======= */
   .stamp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-
-  /* === Stampbook: 縦配置（画像上・テキスト下） === */
-  .stamp-grid .stamp-cell{
-    border:1px solid #e3eaf6;border-radius:12px;
-    padding:12px;min-height:auto;background:#fff;
-    display:flex;flex-direction:column;align-items:center;gap:8px;
-    text-align:center;
+  /* 縦並びレイアウトは現行のまま（画像上・文字下） */
+  .stamp-cell{
+    border:1px solid #e3eaf6;border-radius:12px;background:#fff;
+    display:flex;flex-direction:column;align-items:center;text-align:center;
+    gap:8px; padding:12px; min-height:auto;
   }
   .stamp-thumb{width:84px;height:84px;border-radius:12px;background:#eef5ff;flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center}
   .stamp-thumb img{width:100%;height:100%;object-fit:cover}
-  .stamp-meta{flex:1;width:100%}
-  .stamp-name{font-weight:800;line-height:1.3;margin-top:2px}
-  .stamp-name h2{margin:0 0 4px;font-size:14px;line-height:1.2} /* Goal の見出しを小さく */
-  .stamp-status{font-size:12px;color:#333}
+
+  /* ←ここがリクエストの「テキストを小さく」 */
+  .stamp-meta{width:100%}
+  .stamp-name{
+    font-weight:800;
+    line-height:1.25;
+    margin-top:2px;
+    font-size: clamp(11px, 1.4vw, 13px); /* 小さめに */
+  }
+  .stamp-name h2{margin:0 0 4px;font-size:12px;line-height:1.2} /* Goal の見出しも控えめに */
+  .stamp-status{
+    font-size: clamp(10px, 1.2vw, 12px); /* 小さめに */
+    color:#333
+  }
   .stamp-cell.is-got{background:#f3fbf5;border-color:#b7e4c7}
   .stamp-cell.is-got .stamp-status{color:#2b8a3e;font-weight:800}
   .mark{font-weight:700}
@@ -114,7 +107,7 @@
   }
   .lang-item:hover{background:#f2f6ff}
 
-  /* ======= 中央：地図 ======= */
+  /* ======= 地図 ======= */
   .map-wrap{
     position:relative;width:100%;max-width:920px;margin:0 auto 14px;background:#fff;
     border-radius:var(--radius);box-shadow:0 10px 30px rgba(0,0,0,.05);overflow:hidden;
@@ -124,7 +117,7 @@
   .pin img{width:100%;height:100%;display:block}
   .pin:focus-visible{outline:3px solid rgba(0,90,187,.35);border-radius:50%}
 
-  /* ======= 下から1/4：説明テキスト ======= */
+  /* ======= 説明テキスト ======= */
   .hint{
     max-width:920px;margin:10px auto;color:#333;background:#f6f7fb;border:1px solid #e9eef6;
     border-radius:12px;padding:10px 12px;font-size:14px
@@ -141,7 +134,7 @@
   }
   .btn-secondary{background:#e9eef6;color:#111;box-shadow:none}
 
-  /* ======= カメラのスポット選択（吹き出し・最適化） ======= */
+  /* ======= スポット選択モーダル ======= */
   .camera-chooser-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);z-index:998;display:none}
   .camera-chooser-overlay.is-open{display:block}
   .camera-chooser{
@@ -168,7 +161,6 @@
   }
   @keyframes shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
 
-  /* 名札（写真に重ねる縁取り文字） */
   .thumbWrap .label{
     position:absolute; left:8px; right:8px; bottom:8px;
     font-weight:900; font-size:13px; line-height:1.2; color:#fff;
@@ -196,6 +188,7 @@
   .stamp-cell .stamp-thumb img { opacity:0; filter: grayscale(0.2); transition: opacity .2s }
   .stamp-cell.is-got .stamp-thumb img { opacity:1; filter:none }
 </style>
+
 
 </head>
 <body>
