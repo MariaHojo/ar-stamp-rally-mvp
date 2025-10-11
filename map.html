@@ -5,169 +5,198 @@
   <title>マップ | ARスタンプラリー</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <link rel="stylesheet" href="css/style.css" />
-  <style>
-    :root{
-      --accent:#005ABB;
-      --bg:#fff;
-      --text:#111;
-      --muted:#666;
-      --container: 980px;
-      --radius: 16px;
-      --menuShadow:0 10px 28px rgba(0,0,0,.15);
-    }
-    html,body{background:var(--bg);color:var(--text);margin:0}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.6}
+  <style> 
+  :root{
+    --accent:#005ABB;
+    --bg:#fff;
+    --text:#111;
+    --muted:#666;
+    --container: 980px;
+    --radius: 16px;
+    --menuShadow:0 10px 28px rgba(0,0,0,.15);
+  }
+  html,body{background:var(--bg);color:var(--text);margin:0}
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.6}
 
-    .wrap{max-width:var(--container);margin:0 auto;padding:clamp(10px,3vw,14px)}
-    a.link{color:var(--accent);text-decoration:none;font-weight:800}
+  .wrap{max-width:var(--container);margin:0 auto;padding:clamp(10px,3vw,14px)}
+  a.link{color:var(--accent);text-decoration:none;font-weight:800}
 
-    /* ======= 上部 1/6 のエリア（利用規約 / スタンプ帳 / チュートリアル・言語） ======= */
-    .top-grid{
-      display:grid;
-      grid-template-columns: 1fr 2fr 1fr;
-      gap:8px;
-      align-items:center;
-      margin-bottom:clamp(10px,3vw,14px);
-    }
-    @media (max-width:560px){
-      .top-grid{grid-template-columns: 1fr 1fr 1fr}
-    }
-    .top-cell{display:flex;justify-content:center}
-    .top-cell.left{justify-content:flex-start; gap:12px; flex-wrap:wrap}
-    .top-cell.right{justify-content:flex-end}
+  /* ======= 上部 1/6 のエリア（利用規約 / スタンプ帳 / チュートリアル・言語） ======= */
+  .top-grid{
+    display:grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap:8px;
+    align-items:center;
+    margin-bottom:clamp(10px,3vw,14px);
+  }
+  @media (max-width:560px){
+    .top-grid{grid-template-columns: 1fr 1fr 1fr}
+  }
+  .top-cell{display:flex;justify-content:center}
+  .top-cell.left{justify-content:flex-start; gap:12px; flex-wrap:wrap}
+  .top-cell.right{justify-content:flex-end}
 
-    .stampbook{
-      width:100%;
-      max-width:520px;
-      background:#fff;border:1px solid #e9eef6;border-radius:14px;
-      box-shadow:0 6px 24px rgba(0,0,0,.05);overflow:hidden;
-    }
-    .stampbook-header{
-      width:100%; text-align:center; background:#fff; color:#111;
-      appearance:none;border:0; padding:12px 14px; font-weight:900; letter-spacing:.02em;
-      display:flex;align-items:center;justify-content:center; gap:10px; cursor:pointer;
-    }
-    .stampbook-header .arrow{color:#333}
-    .stampbook-body{display:none;padding:10px 12px 12px;background:#fff}
-    .stamp-count{font-size:13px;color:#333}
+  .stampbook{
+    position:relative;             /* ← 追加（ドロップダウン基準） */
+    width:100%;
+    max-width:520px;
+    background:#fff;border:1px solid #e9eef6;border-radius:14px;
+    box-shadow:0 6px 24px rgba(0,0,0,.05);
+    overflow:visible;              /* ← 重要！ hidden を visible に変更 */
+  }
+  .stampbook-header{
+    width:100%; text-align:center; background:#fff; color:#111;
+    appearance:none;border:0; padding:12px 14px; font-weight:900; letter-spacing:.02em;
+    display:flex;align-items:center;justify-content:center; gap:10px; cursor:pointer;
+  }
+  .stampbook-header .arrow{color:#333}
 
-    .stamp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-    .stamp-cell{
-      border:1px solid #e3eaf6;border-radius:12px;padding:10px;min-height:72px;background:#fff;display:flex;align-items:center;gap:10px
-    }
-    .stamp-thumb{width:52px;height:52px;border-radius:10px;background:#eef5ff;flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center}
-    .stamp-thumb img{width:100%;height:100%;object-fit:cover}
-    .stamp-meta{flex:1}
-    .stamp-name{font-weight:800}
-    .stamp-name h2{margin:0 0 2px;font-size:14px;line-height:1.2} /* Goal の見出しを小さく */
-    .stamp-status{font-size:12px;color:#333}
-    .stamp-cell.is-got{background:#f3fbf5;border-color:#b7e4c7}
-    .stamp-cell.is-got .stamp-status{color:#2b8a3e;font-weight:800}
-    .mark{font-weight:700}
-    .complete-inline{margin:8px 0 0;text-align:center;display:none}
-    .complete-inline a{color:var(--accent);text-decoration:none;font-weight:900}
+  /* ドロップダウン本体：ヘッダー直下に重ねて表示 */
+  .stampbook-body{
+    position:absolute;
+    left:0; right:0; top:100%;
+    display:none;                 /* JSで .is-open の時だけ表示 */
+    background:#fff;
+    border:1px solid #e3eaf6;
+    border-top:0;                 /* 見た目をヘッダーと一体化 */
+    border-radius:0 0 14px 14px;
+    box-shadow:0 14px 32px rgba(0,0,0,.12);
+    z-index:50;
+    max-height:min(68vh, 520px);  /* 画面に収まる高さでスクロール */
+    overflow:auto;
+    padding:10px 12px 12px;
+  }
+  .stampbook.is-open .stampbook-body{ display:block; }
+  .stampbook.is-open .stampbook-header{
+    border-bottom:1px solid #e3eaf6;
+    border-radius:14px 14px 0 0;
+  }
 
-    /* ======= 言語スイッチ（右上アイコン） ======= */
-    .lang-switch{position:relative}
-    .lang-btn{
-      appearance:none;border:0;background:#fff;border:1px solid #e3eaf6;border-radius:12px;
-      padding:6px; cursor:pointer; box-shadow:var(--menuShadow)
-    }
-    .lang-btn:focus-visible{outline:3px solid rgba(0,90,187,.35)}
-    .lang-icon{width:28px;height:28px;display:block}
-    .lang-menu{
-      position:absolute; right:0; margin-top:8px; background:#fff; border:1px solid #e3eaf6; border-radius:12px;
-      box-shadow:var(--menuShadow); display:none; min-width:160px; overflow:hidden; z-index:20;
-    }
-    .lang-menu.is-open{display:block}
-    .lang-item{
-      display:block; width:100%; text-align:left; background:#fff; border:0; padding:10px 12px;
-      cursor:pointer; font-weight:800; color:#000;
-    }
-    .lang-item:hover{background:#f2f6ff}
+  .stamp-count{font-size:13px;color:#333}
 
-    /* ======= 中央：地図 ======= */
-    .map-wrap{
-      position:relative;width:100%;max-width:920px;margin:0 auto 14px;background:#fff;
-      border-radius:var(--radius);box-shadow:0 10px 30px rgba(0,0,0,.05);overflow:hidden;
-    }
-    .map-img{display:block;width:100%;height:auto;object-fit:contain;background:#fff}
-    .pin{position:absolute;width:40px;height:40px;transform:translate(-50%,-100%);display:inline-block}
-    .pin img{width:100%;height:100%;display:block}
-    .pin:focus-visible{outline:3px solid rgba(0,90,187,.35);border-radius:50%}
+  .stamp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 
-    /* ======= 下から1/4：説明テキスト ======= */
-    .hint{
-      max-width:920px;margin:10px auto;color:#333;background:#f6f7fb;border:1px solid #e9eef6;
-      border-radius:12px;padding:10px 12px;font-size:14px
-    }
+  /* === Stampbook: 縦配置（画像上・テキスト下） === */
+  .stamp-grid .stamp-cell{
+    border:1px solid #e3eaf6;border-radius:12px;
+    padding:12px;min-height:auto;background:#fff;
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    text-align:center;
+  }
+  .stamp-thumb{width:84px;height:84px;border-radius:12px;background:#eef5ff;flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .stamp-thumb img{width:100%;height:100%;object-fit:cover}
+  .stamp-meta{flex:1;width:100%}
+  .stamp-name{font-weight:800;line-height:1.3;margin-top:2px}
+  .stamp-name h2{margin:0 0 4px;font-size:14px;line-height:1.2} /* Goal の見出しを小さく */
+  .stamp-status{font-size:12px;color:#333}
+  .stamp-cell.is-got{background:#f3fbf5;border-color:#b7e4c7}
+  .stamp-cell.is-got .stamp-status{color:#2b8a3e;font-weight:800}
+  .mark{font-weight:700}
+  .complete-inline{margin:8px 0 0;text-align:center;display:none}
+  .complete-inline a{color:var(--accent);text-decoration:none;font-weight:900}
 
-    /* ======= 画面最下部：カメラ起動 ======= */
-    .footer-cta{
-      position:sticky;bottom:0;left:0;right:0;z-index:5;background:linear-gradient(to top,#fff,#fff 70%,rgba(255,255,255,0));
-      padding:10px 0 max(12px, env(safe-area-inset-bottom));
-    }
-    .btn{
-      appearance:none;border:0;border-radius:12px;padding:14px 16px;font-weight:900;
-      background:var(--accent);color:#fff;cursor:pointer;width:100%;box-shadow:0 10px 30px rgba(0,90,187,.25)
-    }
-    .btn-secondary{background:#e9eef6;color:#111;box-shadow:none}
+  /* ======= 言語スイッチ（右上アイコン） ======= */
+  .lang-switch{position:relative}
+  .lang-btn{
+    appearance:none;border:0;background:#fff;border:1px solid #e3eaf6;border-radius:12px;
+    padding:6px; cursor:pointer; box-shadow:var(--menuShadow)
+  }
+  .lang-btn:focus-visible{outline:3px solid rgba(0,90,187,.35)}
+  .lang-icon{width:28px;height:28px;display:block}
+  .lang-menu{
+    position:absolute; right:0; margin-top:8px; background:#fff; border:1px solid #e3eaf6; border-radius:12px;
+    box-shadow:var(--menuShadow); display:none; min-width:160px; overflow:hidden; z-index:20;
+  }
+  .lang-menu.is-open{display:block}
+  .lang-item{
+    display:block; width:100%; text-align:left; background:#fff; border:0; padding:10px 12px;
+    cursor:pointer; font-weight:800; color:#000;
+  }
+  .lang-item:hover{background:#f2f6ff}
 
-    /* ======= カメラのスポット選択（吹き出し・最適化） ======= */
-    .camera-chooser-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);z-index:998;display:none}
-    .camera-chooser-overlay.is-open{display:block}
-    .camera-chooser{
-      position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
-      width:min(94vw,560px);max-height:78vh;overflow:auto;background:#fff;border-radius:16px;
-      box-shadow:0 18px 48px rgba(0,0,0,.3);padding:14px;z-index:999;display:none
-    }
-    .camera-chooser.is-open{display:block}
-    .camera-chooser h3{margin:0 0 8px;font-size:18px}
-    .camera-chooser p{margin:0 0 10px;color:#333}
+  /* ======= 中央：地図 ======= */
+  .map-wrap{
+    position:relative;width:100%;max-width:920px;margin:0 auto 14px;background:#fff;
+    border-radius:var(--radius);box-shadow:0 10px 30px rgba(0,0,0,.05);overflow:hidden;
+  }
+  .map-img{display:block;width:100%;height:auto;object-fit:contain;background:#fff}
+  .pin{position:absolute;width:40px;height:40px;transform:translate(-50%,-100%);display:inline-block}
+  .pin img{width:100%;height:100%;display:block}
+  .pin:focus-visible{outline:3px solid rgba(0,90,187,.35);border-radius:50%}
 
-    .camera-chooser .list{ display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; }
-    @media (min-width:520px){ .camera-chooser .list{ grid-template-columns:repeat(3, 1fr); } }
-    .camera-chooser .item{ padding:0; border:none; background:transparent }
+  /* ======= 下から1/4：説明テキスト ======= */
+  .hint{
+    max-width:920px;margin:10px auto;color:#333;background:#f6f7fb;border:1px solid #e9eef6;
+    border-radius:12px;padding:10px 12px;font-size:14px
+  }
 
-    .thumbWrap{
-      position:relative; aspect-ratio:1/1; border-radius:12px; overflow:hidden;
-      border:1px solid #e3eaf6; box-shadow:0 10px 26px rgba(0,0,0,.12); background:#f3f6fc;
-    }
-    .thumbWrap img{
-      width:100%; height:100%; object-fit:cover; display:block;
-      background:linear-gradient(90deg,#f2f5fb 25%,#e8eef9 37%,#f2f5fb 63%); background-size:400% 100%;
-      animation: shimmer 1.4s ease infinite;
-    }
-    @keyframes shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
+  /* ======= 画面最下部：カメラ起動 ======= */
+  .footer-cta{
+    position:sticky;bottom:0;left:0;right:0;z-index:5;background:linear-gradient(to top,#fff,#fff 70%,rgba(255,255,255,0));
+    padding:10px 0 max(12px, env(safe-area-inset-bottom));
+  }
+  .btn{
+    appearance:none;border:0;border-radius:12px;padding:14px 16px;font-weight:900;
+    background:var(--accent);color:#fff;cursor:pointer;width:100%;box-shadow:0 10px 30px rgba(0,90,187,.25)
+  }
+  .btn-secondary{background:#e9eef6;color:#111;box-shadow:none}
 
-    /* 名札（写真に重ねる縁取り文字） */
-    .thumbWrap .label{
-      position:absolute; left:8px; right:8px; bottom:8px;
-      font-weight:900; font-size:13px; line-height:1.2; color:#fff;
-      text-shadow:
-        -1px -1px 0 #2b3a68, 1px -1px 0 #2b3a68,
-        -1px  1px 0 #2b3a68, 1px  1px 0 #2b3a68;
-      background:linear-gradient(to top, rgba(0,0,0,.45), rgba(0,0,0,0));
-      padding:8px 10px 10px; border-radius:0 0 10px 10px;
-    }
+  /* ======= カメラのスポット選択（吹き出し・最適化） ======= */
+  .camera-chooser-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);z-index:998;display:none}
+  .camera-chooser-overlay.is-open{display:block}
+  .camera-chooser{
+    position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:min(94vw,560px);max-height:78vh;overflow:auto;background:#fff;border-radius:16px;
+    box-shadow:0 18px 48px rgba(0,0,0,.3);padding:14px;z-index:999;display:none
+  }
+  .camera-chooser.is-open{display:block}
+  .camera-chooser h3{margin:0 0 8px;font-size:18px}
+  .camera-chooser p{margin:0 0 10px;color:#333}
 
-    /* ======= 完走モーダル ======= */
-    .complete-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);z-index:1000;display:none}
-    .complete-overlay.is-open{display:block}
-    .complete-modal{
-      position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
-      width:min(92vw,560px);max-height:80vh;overflow:auto;background:#fff;border-radius:18px;
-      box-shadow:0 20px 60px rgba(0,0,0,.35);padding:20px;z-index:1001;display:none
-    }
-    .complete-modal.is-open{display:block}
-    .complete-title{margin:0 0 6px;font-size:20px}
-    .complete-lead{margin:0 0 14px}
-    .complete-row{display:flex;gap:8px;flex-wrap:wrap}
+  .camera-chooser .list{ display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; }
+  @media (min-width:520px){ .camera-chooser .list{ grid-template-columns:repeat(3, 1fr); } }
+  .camera-chooser .item{ padding:0; border:none; background:transparent }
 
-    /* 取得/未取得の見た目（スタンプ帳） */
-    .stamp-cell .stamp-thumb img { opacity:0; filter: grayscale(0.2); transition: opacity .2s }
-    .stamp-cell.is-got .stamp-thumb img { opacity:1; filter:none }
-  </style>
+  .thumbWrap{
+    position:relative; aspect-ratio:1/1; border-radius:12px; overflow:hidden;
+    border:1px solid #e3eaf6; box-shadow:0 10px 26px rgba(0,0,0,.12); background:#f3f6fc;
+  }
+  .thumbWrap img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    background:linear-gradient(90deg,#f2f5fb 25%,#e8eef9 37%,#f2f5fb 63%); background-size:400% 100%;
+    animation: shimmer 1.4s ease infinite;
+  }
+  @keyframes shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
+
+  /* 名札（写真に重ねる縁取り文字） */
+  .thumbWrap .label{
+    position:absolute; left:8px; right:8px; bottom:8px;
+    font-weight:900; font-size:13px; line-height:1.2; color:#fff;
+    text-shadow:
+      -1px -1px 0 #2b3a68, 1px -1px 0 #2b3a68,
+      -1px  1px 0 #2b3a68, 1px  1px 0 #2b3a68;
+    background:linear-gradient(to top, rgba(0,0,0,.45), rgba(0,0,0,0));
+    padding:8px 10px 10px; border-radius:0 0 10px 10px;
+  }
+
+  /* ======= 完走モーダル ======= */
+  .complete-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);z-index:1000;display:none}
+  .complete-overlay.is-open{display:block}
+  .complete-modal{
+    position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:min(92vw,560px);max-height:80vh;overflow:auto;background:#fff;border-radius:18px;
+    box-shadow:0 20px 60px rgba(0,0,0,.35);padding:20px;z-index:1001;display:none
+  }
+  .complete-modal.is-open{display:block}
+  .complete-title{margin:0 0 6px;font-size:20px}
+  .complete-lead{margin:0 0 14px}
+  .complete-row{display:flex;gap:8px;flex-wrap:wrap}
+
+  /* 取得/未取得の見た目（スタンプ帳） */
+  .stamp-cell .stamp-thumb img { opacity:0; filter: grayscale(0.2); transition: opacity .2s }
+  .stamp-cell.is-got .stamp-thumb img { opacity:1; filter:none }
+</style>
+
 </head>
 <body>
   <div id="pageRoot">
