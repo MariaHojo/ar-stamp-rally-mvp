@@ -1,242 +1,325 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
   <title>マップ | ARスタンプラリー</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css" />
   <style>
-    /* ---- 上部バーの3分割レイアウト ---- */
-    #menuBar {
-      position: sticky; /* 上部固定 */
-      top: 0;
-      z-index: 1000;
-      background: #f9f9f9;
-      border-bottom: 1px solid #ddd;
-      padding: 8px 12px;
+    :root{
+      --accent:#005ABB;
+      --bg:#fff;
+      --text:#111;
+      --muted:#666;
+      --container: 980px;
+      --radius: 16px;
     }
-    .menubar-inner {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr; /* 左：リンク群 / 中央：スタンプ帳 / 右：言語 */
-      align-items: center;
-      gap: 8px;
-      max-width: 980px;
-      margin: 0 auto;
-    }
-    .mb-left, .mb-center, .mb-right { display: flex; align-items: center; }
-    .mb-left { gap: 10px; justify-content: flex-start; }
-    .mb-center { justify-content: center; position: relative; } /* ← ドロップダウンの基準 */
-    .mb-right { justify-content: flex-end; gap: 8px; }
+    html,body{background:var(--bg);color:var(--text);margin:0}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.6}
 
-    .mb-link, .mb-btn {
-      color: #005ABB;
-      font-weight: 600;
-      text-decoration: none;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-      padding: 6px 8px;
-      border-radius: 8px;
-    }
-    .mb-link:hover, .mb-btn:hover { background: #eef4ff; }
+    .wrap{max-width:var(--container);margin:0 auto;padding:clamp(10px,3vw,14px)}
+    a.link{color:var(--accent);text-decoration:none;font-weight:800}
 
-    /* ---- スタンプ帳（ドロップダウン化） ---- */
-    #stampToggleBtn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #005ABB;
-      color: #fff;
-      border: 0;
-      border-radius: 10px;
-      padding: 8px 12px;
-      font-weight: 800;
-      box-shadow: 0 6px 16px rgba(0,90,187,.2);
+    /* ======= 上部 1/6 のエリア（利用規約 / スタンプ帳 / チュートリアル / 言語） ======= */
+    .top-grid{
+      display:grid;
+      grid-template-columns: 1fr 2fr 1fr; /* 左1/4, 中央1/2, 右1/4 */
+      gap:8px;
+      align-items:center;
+      margin-bottom:clamp(10px,3vw,14px);
     }
-    #stampBook {
-      position: absolute;           /* ← 他要素を押し下げない */
-      top: calc(100% + 8px);        /* トグルボタンの下に表示 */
-      left: 50%;
-      transform: translateX(-50%);
-      width: min(92vw, 520px);
-      max-height: 60vh;
-      overflow: auto;
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      box-shadow: 0 18px 40px rgba(0,0,0,.18);
-      padding: 12px;
-      display: none;                /* 既定は閉じる */
-      z-index: 1200;
+    @media (max-width:560px){
+      .top-grid{grid-template-columns: 1fr 1fr 1fr}
     }
-    #stampBook.open { display: block; }
-    .stamp-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 8px;
-    }
-    .stamp-cell {
-      width: 60px; height: 60px;
-      border: 1px dashed #cbd5e1;
-      border-radius: 10px;
-      display: grid; place-items: center;
-      background: #fafafa;
-    }
-    .stamp-cell img { width: 100%; height: 100%; object-fit: contain; }
+    .top-cell{display:flex;align-items:center}
+    .top-cell.left{justify-content:flex-start; gap:12px; flex-wrap:wrap}
+    .top-cell.center{justify-content:center}
+    .top-cell.right{justify-content:flex-end}
 
-    /* ---- 言語アイコン ---- */
-    #langBtn {
-      width: 28px; height: 28px; display: inline-block;
+    /* スタンプ帳（ドロップダウン化） */
+    .stampbook{
+      position:relative;            /* ← ドロップダウンの基準 */
+      width:100%;
+      max-width:520px;
+      background:#fff;border:1px solid #e9eef6;border-radius:14px;
+      box-shadow:0 6px 24px rgba(0,0,0,.05);
+      overflow:visible;             /* ← 本体の外にも出せるように */
+      z-index:20;
     }
-    #langBtn img { width: 28px; height: 28px; display: block; }
-
-    /* ---- コンテンツ領域 ---- */
-    .page-container { max-width: 980px; margin: 10px auto; padding: 0 12px; }
-
-    /* 完走リンク行（文言更新対応） */
-    .complete-row {
-      display: none; /* map.js 側で達成時に表示切替する想定 */
-      background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px 12px;
-      margin: 10px 0; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    .stampbook-header{
+      width:100%; text-align:center; background:#fff; color:#111;
+      appearance:none;border:0; padding:12px 14px; font-weight:900; letter-spacing:.02em;
+      display:flex;align-items:center;justify-content:center; gap:10px; cursor:pointer;
     }
-    .complete-row a {
-      text-decoration: none; font-weight: 800; color: #005ABB;
-      background: #eef4ff; padding: 8px 12px; border-radius: 10px;
+    .stampbook-header .arrow{color:#333}
+
+    /* ここを絶対配置にして、周囲を押し下げない */
+    .stampbook-body{
+      position:absolute; left:0; right:0; top:calc(100% + 6px);
+      display:none;
+      padding:10px 12px 12px;
+      background:#fff;
+      border:1px solid #e9eef6;
+      border-radius:14px;
+      box-shadow:0 18px 48px rgba(0,0,0,.18);
+      max-height:60vh;              /* スクロール可能に */
+      overflow:auto;
     }
 
-    /* モーダル（写真グリッド等）は既存の style.css を使用 */
-    @media (max-width: 480px){
-      .stamp-grid { grid-template-columns: repeat(6, 44px); }
-      .stamp-cell { width: 44px; height: 44px; }
+    .stamp-count{font-size:13px;color:#333}
+
+    .stamp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .stamp-cell{
+      border:1px solid #e3eaf6;border-radius:12px;padding:10px;min-height:72px;background:#fff;display:flex;align-items:center;gap:10px
     }
+    .stamp-thumb{width:52px;height:52px;border-radius:10px;background:#eef5ff;flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center}
+    .stamp-thumb img{width:100%;height:100%;object-fit:cover}
+    .stamp-meta{flex:1}
+    .stamp-name{font-weight:800}
+    .stamp-status{font-size:12px;color:#333}
+    .stamp-cell.is-got{background:#f3fbf5;border-color:#b7e4c7}
+    .stamp-cell.is-got .stamp-status{color:#2b8a3e;font-weight:800}
+    .mark{font-weight:700}
+    .complete-inline{margin:8px 0 0;text-align:center;display:none}
+    .complete-inline a{color:var(--accent);text-decoration:none;font-weight:900}
+
+    /* 言語アイコン */
+    .lang-btn{
+      appearance:none;border:0;background:transparent;cursor:pointer;padding:6px;border-radius:10px;
+    }
+    .lang-btn:focus-visible{outline:3px solid rgba(0,90,187,.35)}
+    .lang-icon{width:28px;height:28px;display:block}
+
+    /* ======= 中央：地図 ======= */
+    .map-wrap{
+      position:relative;width:100%;max-width:920px;margin:0 auto 14px;background:#fff;
+      border-radius:var(--radius);box-shadow:0 10px 30px rgba(0,0,0,.05);overflow:hidden;
+    }
+    .map-img{display:block;width:100%;height:auto;object-fit:contain;background:#fff}
+    .pin{
+      position:absolute;width:40px;height:40px;transform:translate(-50%,-100%);
+      display:inline-block;
+    }
+    .pin img{width:100%;height:100%;display:block}
+    .pin:focus-visible{outline:3px solid rgba(0,90,187,.35);border-radius:50%}
+
+    /* ======= 下から1/4：説明テキスト ======= */
+    .hint{
+      max-width:920px;margin:10px auto;color:#333;background:#f6f7fb;border:1px solid #e9eef6;
+      border-radius:12px;padding:10px 12px;font-size:14px
+    }
+
+    /* ======= 画面最下部：カメラ起動 ======= */
+    .footer-cta{
+      position:sticky;bottom:0;left:0;right:0;z-index:5;background:linear-gradient(to top,#fff,#fff 70%,rgba(255,255,255,0));
+      padding:10px 0 max(12px, env(safe-area-inset-bottom));
+    }
+    .btn{
+      appearance:none;border:0;border-radius:12px;padding:14px 16px;font-weight:900;
+      background:var(--accent);color:#fff;cursor:pointer;width:100%;box-shadow:0 10px 30px rgba(0,90,187,.25)
+    }
+    .btn-secondary{background:#e9eef6;color:#111;box-shadow:none}
+
+    /* ======= カメラのスポット選択（吹き出し・最適化） ======= */
+    .camera-chooser-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);z-index:998;display:none}
+    .camera-chooser-overlay.is-open{display:block}
+    .camera-chooser{
+      position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+      width:min(94vw,560px);max-height:78vh;overflow:auto;background:#fff;border-radius:16px;
+      box-shadow:0 18px 48px rgba(0,0,0,.3);padding:14px;z-index:999;display:none
+    }
+    .camera-chooser.is-open{display:block}
+    .camera-chooser h3{margin:0 0 8px;font-size:18px}
+    .camera-chooser p{margin:0 0 10px;color:#333}
+
+    .camera-chooser .list{
+      display:grid;
+      grid-template-columns:repeat(2, 1fr);
+      gap:10px;
+    }
+    @media (min-width:520px){
+      .camera-chooser .list{ grid-template-columns:repeat(3, 1fr); }
+    }
+    .camera-chooser .item{ padding:0; border:none; background:transparent }
+
+    .thumbWrap{
+      position:relative;
+      aspect-ratio:1/1;
+      border-radius:12px;
+      overflow:hidden;
+      border:1px solid #e3eaf6;
+      box-shadow:0 10px 26px rgba(0,0,0,.12);
+      background:#f3f6fc;
+    }
+    .thumbWrap img{
+      width:100%; height:100%; object-fit:cover; display:block;
+      background:linear-gradient(90deg,#f2f5fb 25%,#e8eef9 37%,#f2f5fb 63%); background-size:400% 100%;
+      animation: shimmer 1.4s ease infinite;
+    }
+    @keyframes shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
+
+    .thumbWrap .label{
+      position:absolute; left:8px; right:8px; bottom:8px;
+      font-weight:900; font-size:13px; line-height:1.2; color:#fff;
+      text-shadow:
+        -1px -1px 0 #2b3a68, 1px -1px 0 #2b3a68,
+        -1px  1px 0 #2b3a68, 1px  1px 0 #2b3a68;
+      background:linear-gradient(to top, rgba(0,0,0,.45), rgba(0,0,0,0));
+      padding:8px 10px 10px; border-radius:0 0 10px 10px;
+    }
+
+    /* ======= 完走モーダル ======= */
+    .complete-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);z-index:1000;display:none}
+    .complete-overlay.is-open{display:block}
+    .complete-modal{
+      position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+      width:min(92vw,560px);max-height:80vh;overflow:auto;background:#fff;border-radius:18px;
+      box-shadow:0 20px 60px rgba(0,0,0,.35);padding:20px;z-index:1001;display:none
+    }
+    .complete-modal.is-open{display:block}
+    .complete-title{margin:0 0 6px;font-size:20px}
+    .complete-lead{margin:0 0 14px}
+    .complete-row{display:flex;gap:8px;flex-wrap:wrap}
+
+    /* 取得/未取得の見た目（スタンプ帳） */
+    .stamp-cell .stamp-thumb img { opacity:0; filter: grayscale(0.2); transition: opacity .2s }
+    .stamp-cell.is-got .stamp-thumb img { opacity:1; filter:none }
   </style>
 </head>
 <body>
-  <!-- 上部メニューバー -->
-  <div id="menuBar" role="navigation" aria-label="画面上部メニュー">
-    <div class="menubar-inner">
-      <!-- 左：各種リンク -->
-      <div class="mb-left">
-        <a class="mb-link" href="terms.html">プライバシーポリシー・ご利用上の注意</a>
-        <a class="mb-link" href="tutorial.html">チュートリアル</a>
-      </div>
+  <div id="pageRoot">
+    <div class="wrap">
+      <!-- 上部 1/6 エリア -->
+      <div class="top-grid" aria-label="上部メニュー">
+        <!-- 左：規約リンク＋チュートリアル -->
+        <div class="top-cell left">
+          <a class="link" href="terms.html">プライバシーポリシー・ご利用上の注意</a>
+          <a class="link" href="tutorial.html">チュートリアル</a>
+        </div>
 
-      <!-- 中央：スタンプ帳（ドロップダウン） -->
-      <div class="mb-center">
-        <button id="stampToggleBtn" class="mb-btn" type="button">スタンプ帳</button>
-        <div id="stampBook" class="stamp-book" aria-label="スタンプ帳">
-          <div class="stamp-grid" id="stampGrid">
-            <!-- map.js でスタンプ状態に応じて差し替え／ここはプレース -->
-            <div class="stamp-cell"><img alt="stamp1" src="assets/images/stamps/stamp01.png"></div>
-            <div class="stamp-cell"><img alt="stamp2" src="assets/images/stamps/stamp02.png"></div>
-            <div class="stamp-cell"><img alt="stamp3" src="assets/images/stamps/stamp03.png"></div>
-            <div class="stamp-cell"><img alt="stamp4" src="assets/images/stamps/stamp04.png"></div>
-            <div class="stamp-cell"><img alt="stamp5" src="assets/images/stamps/stamp05.png"></div>
-            <div class="stamp-cell"><img alt="stamp6" src="assets/images/stamps/stamp06.png"></div>
-          </div>
+        <!-- 中央：スタンプ帳（ドロップダウン） -->
+        <div class="top-cell center">
+          <section class="stampbook" aria-label="スタンプ帳">
+            <button id="stampToggle" class="stampbook-header" type="button" aria-expanded="false" aria-controls="stampBody">
+              <span class="arrow">▼</span><span>スタンプ帳</span>
+              <span class="stamp-count" id="stampCount" style="margin-left:8px">0/6</span>
+            </button>
+
+            <!-- コンプリート時リンク（JS制御で表示） -->
+            <div id="completeInline" class="complete-inline">
+              <a href="post-survey.html">📝 アンケートに答える</a>
+            </div>
+            <!-- コンプリート時のみ表示するスペシャルコンテンツへのリンク -->
+            <div id="specialInline" class="complete-inline" style="display:none">
+              <a href="special.html">🌟 スペシャルコンテンツ</a>
+            </div>
+
+            <div id="stampBody" class="stampbook-body" role="region" aria-label="スタンプ一覧">
+              <div class="stamp-grid">
+                <div class="stamp-cell" data-spot="spot1">
+                  <div class="stamp-thumb"><img src="assets/images/stamps/stamp01.png" alt="スタンプ1"></div>
+                  <div class="stamp-meta"><div class="stamp-name">本館173前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
+                </div>
+                <div class="stamp-cell" data-spot="spot2">
+                  <div class="stamp-thumb"><img src="assets/images/stamps/stamp02.png" alt="スタンプ2"></div>
+                  <div class="stamp-meta"><div class="stamp-name">トロイヤー記念館（T館）前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
+                </div>
+                <div class="stamp-cell" data-spot="spot3">
+                  <div class="stamp-thumb"><img src="assets/images/stamps/stamp03.png" alt="スタンプ3"></div>
+                  <div class="stamp-meta"><div class="stamp-name">学生食堂（ガッキ）前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
+                </div>
+                <div class="stamp-cell" data-spot="spot4">
+                  <div class="stamp-thumb"><img src="assets/images/stamps/stamp04.png" alt="スタンプ4"></div>
+                  <div class="stamp-meta"><div class="stamp-name">チャペル前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
+                </div>
+                <div class="stamp-cell" data-spot="spot5">
+                  <div class="stamp-thumb"><img src="assets/images/stamps/stamp05.png" alt="スタンプ5"></div>
+                  <div class="stamp-meta"><div class="stamp-name">体育館（Pec-A）前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
+                </div>
+                <div class="stamp-cell" data-spot="spot6">
+                  <div class="stamp-thumb"><img src="assets/images/stamps/stamp06.png" alt="スタンプ6"></div>
+                  <div class="stamp-meta"><div class="stamp-name">本館307前</div><div class="stamp-status"><span class="mark">未取得</span></div></div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- 右：言語アイコン -->
+        <div class="top-cell right">
+          <button id="langBtn" class="lang-btn" type="button" title="言語 / Language">
+            <img class="lang-icon" src="assets/images/ui/lang.png" alt="言語切替">
+          </button>
         </div>
       </div>
 
-      <!-- 右：言語切替 -->
-      <div class="mb-right">
-        <a id="langBtn" href="#" aria-label="言語切替">
-          <img src="assets/images/ui/lang.png" alt="Lang">
-        </a>
+      <!-- 中央：地図 -->
+      <div class="map-wrap" aria-label="キャンパスマップ">
+        <img class="map-img" src="assets/images/campasMap.png" alt="キャンパス地図" />
+        <!-- ピン（リンク先は空でOK。後で地図アプリURLを埋めてください） -->
+      </div>
+
+      <!-- 画面最下部：カメラ起動 -->
+      <div class="footer-cta">
+        <button id="cameraBtn" class="btn">AR起動</button>
       </div>
     </div>
   </div>
 
-  <!-- ページ本体 -->
-  <div class="page-container">
-    <!-- 達成時の行（文言変更：アンケート・スペシャル） -->
-    <div id="completeRow" class="complete-row" style="display:none">
-      <div>🎉 6/6達成おめでとう！</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <a id="completeLink" href="post-survey.html">アンケートに答える</a>
-        <a id="specialLink" href="special.html">スペシャルコンテンツ</a>
-      </div>
+  <!-- スポット選択の吹き出し -->
+  <div id="cameraChooserOverlay" class="camera-chooser-overlay" aria-hidden="true"></div>
+  <div id="cameraChooser" class="camera-chooser" role="dialog" aria-modal="true" aria-labelledby="cameraChooserTitle" aria-describedby="cameraChooserDesc">
+    <h3 id="cameraChooserTitle">スポットを選んでください</h3>
+    <p id="cameraChooserDesc" style="margin:0 0 10px;color:#333">写真をタップするとARが起動します。</p>
+    <div id="cameraChooserList" class="list"></div>
+    <div style="margin-top:10px;text-align:right">
+      <button id="cameraChooserClose" class="btn btn-secondary" type="button">閉じる</button>
     </div>
-
-    <!-- 地図や起動ボタン、写真モーダルなどは既存の map.js が制御 -->
-    <section id="mapRoot">
-      <!-- map.js が DOM を構築・制御します -->
-      <div id="cameraLaunchArea">
-        <button id="openCamera" class="btn-primary" type="button">カメラを起動</button>
-      </div>
-      <div id="spotModalHost"><!-- map.js が写真グリッドモーダルを挿入 --></div>
-    </section>
   </div>
 
-  <!-- 既存スクリプト -->
-  <script src="js/firebase.js"></script>
-  <script src="js/lang.js"></script>
-  <script src="js/map.js"></script>
+  <!-- 完走モーダル -->
+  <div id="completeOverlay" class="complete-overlay" aria-hidden="true"></div>
+  <div id="completeModal" class="complete-modal" role="dialog" aria-modal="true" aria-labelledby="completeTitle" aria-describedby="completeLead">
+    <h2 id="completeTitle" class="complete-title">🎉 コンプリート！</h2>
+    <p id="completeLead" class="complete-lead">全てのスタンプを集めました。ご参加ありがとうございます！</p>
+    <div class="complete-row">
+      <button id="closeComplete" class="btn btn-secondary" type="button">マップに戻る</button>
+      <a id="toSurvey" class="btn" href="post-survey.html">アンケートへ</a>
+    </div>
+  </div>
 
+  <!-- 折り畳み（最小） -->
   <script>
-    // キャッシュバスター（フォールバック）
-    if (!window.withV) {
-      window.BUILD_V = window.BUILD_V || '20251005';
-      window.withV = (url) => url + (url.includes('?') ? '&' : '?') + 'v=' + window.BUILD_V;
-    }
-
-    // ---- スタンプ帳ドロップダウンの独立開閉（他要素を押し下げない） ----
-    (function(){
-      const toggleBtn = document.getElementById('stampToggleBtn');
-      const book = document.getElementById('stampBook');
-
-      function closeBook(){ book.classList.remove('open'); }
-      function toggleBook(ev){
-        ev?.preventDefault();
-        book.classList.toggle('open');
-      }
-      toggleBtn.addEventListener('click', toggleBook, { passive: false });
-
-      // 外側クリックで閉じる
-      document.addEventListener('click', (e) => {
-        if (!book.classList.contains('open')) return;
-        const inCenter = e.target.closest('.mb-center');
-        if (!inCenter) closeBook();
+    document.addEventListener('DOMContentLoaded', () => {
+      // スタンプ帳の開閉（ドロップダウン）
+      const btn = document.getElementById('stampToggle');
+      const body = document.getElementById('stampBody');
+      const arrow = btn?.querySelector('.arrow');
+      btn?.addEventListener('click', () => {
+        const open = body.style.display === 'block';
+        body.style.display = open ? 'none' : 'block';
+        btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+        if (arrow) arrow.textContent = open ? '▼' : '▲';
       });
 
-      // エスケープで閉じる
-      document.addEventListener('keydown', (e)=>{
-        if (e.key === 'Escape') closeBook();
-      });
-
-      // 画面回転やリサイズ時の位置ズレ対策（特にiOS）
-      window.addEventListener('resize', ()=>{ /* 位置はCSSで相対配置のため特別な処理は不要 */ });
-    })();
-
-    // ---- 文言の既定値を上書き（map.js が setText しても問題ない） ----
-    (function(){
-      try {
-        const comp = document.getElementById('completeLink');
-        const spec = document.getElementById('specialLink');
-        if (comp) comp.textContent = 'アンケートに答える';
-        if (spec) spec.textContent = 'スペシャルコンテンツ';
-      } catch {}
-    })();
-
-    // 言語切替（lang.js の仕様に合わせて必要なら書き換え）
-    (function(){
+      // 言語トグル（既存 lang.js があればそれを優先）
       const langBtn = document.getElementById('langBtn');
-      langBtn?.addEventListener('click', (e)=>{
-        e.preventDefault();
+      langBtn?.addEventListener('click', () => {
+        if (typeof window.toggleLang === 'function') {
+          window.toggleLang();
+          return;
+        }
         try {
-          // lang.js に切替APIがある場合は呼ぶ。無ければ簡易トグル。
           const cur = localStorage.getItem('app_lang') || 'ja';
           const next = cur === 'ja' ? 'en' : 'ja';
           localStorage.setItem('app_lang', next);
-          location.reload();
-        } catch {
-          location.href = withV('map.html?lang=en');
-        }
+        } catch(e){}
+        location.reload();
       });
-    })();
+    });
   </script>
+
+  <script src="js/firebase.js" defer></script>
+  <script src="js/map.js?v=20251003" defer></script>
 </body>
 </html>
