@@ -187,7 +187,7 @@
         </figure>
         <p>このころのガッキからさらに改築されて、2010年に今のガッキに建て替えられる前は、こんな感じだったよ。</p>
         <figure>
-          <img src="assets/images/Photos_thesis/spot3_detail_2.jpg" alt="食堂・外観（改築前）">
+          <img src="assets/images/Photos_thesis/spot3.jpg" alt="食堂・外観（改築前）">
           <figcaption>出典：『a.食堂・外観080415-04.JPG』 ICUアーカイブス 三鷹 東京</figcaption>
         </figure>
         <p>今はもっと大きくなったね！</p>
@@ -221,7 +221,7 @@
         </figure>
         <p>After further renovations from this era, the building was replaced with the current cafeteria in 2010. Before that, it looked like this:</p>
         <figure>
-          <img src="assets/images/Photos_thesis/spot3_detail_2.jpg" alt="Cafeteria exterior before rebuilding">
+          <img src="assets/images/Photos_thesis/spot3.jpg" alt="Cafeteria exterior before rebuilding">
           <figcaption>Source: “a. Cafeteria / Exterior 080415-04.JPG,” ICU Archives, Mitaka, Tokyo</figcaption>
         </figure>
         <p>It’s much larger now!</p>
