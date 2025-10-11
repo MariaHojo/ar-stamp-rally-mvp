@@ -4,52 +4,37 @@
   <meta charset="UTF-8" />
   <title>アンケート | ARスタンプラリー</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="color-scheme" content="light" />
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    :root{
-      --accent:#005ABB;
-      --bg:#ffffff;
-      --text:#111111;
-      --muted:#666;
-      --error:#c1121f;
-      --gap:18px;
-      --radius:14px;
-      --container: 600px;
+    .lang-switch{position:fixed; right:12px; top:12px; z-index:2147483647}
+    .lang-btn{
+      appearance:none;border:0;background:#fff;border:1px solid #e3eaf6;border-radius:12px;
+      padding:6px; cursor:pointer; box-shadow:0 10px 28px rgba(0,0,0,.15)
     }
-    html,body{background:var(--bg); color:var(--text); margin:0; padding:0}
-    body{font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%;line-height:1.6;}
-    .wrap{max-width:var(--container);margin:0 auto;padding: clamp(16px, 4vw, 24px);padding-bottom: max(24px, env(safe-area-inset-bottom));}
-    header{ position:sticky; top:0; z-index:5; background:var(--bg); padding-bottom:12px; }
-    h1{ font-size: clamp(20px, 4.8vw, 22px); margin:0 0 6px; color:var(--accent); font-weight:800; letter-spacing:.01em; }
-    .section{margin-top: clamp(14px, 3.5vw, 18px);border:1px solid #e9eef6; border-radius: var(--radius);padding: clamp(14px, 3.6vw, 18px);box-shadow: 0 6px 24px rgba(0,0,0,.04);background:#fff;}
-    .section + .section{ margin-top: clamp(24px, 6vw, 36px); }
-    .sec-title{ margin:0 0 8px; font-size: clamp(16px, 4.4vw, 18px); font-weight:800; }
-    .field{ margin-top: var(--gap) }
-    .label-row{ display:flex; align-items: baseline; gap:8px; flex-wrap:wrap; margin-bottom:6px; }
-    .label-row label{ font-weight:700 }
-    .req{ color:#c1121f; font-size:12px; font-weight:700; }
-    .hint{ color:#666; font-size:12px; margin-bottom:8px }
-    .note{ color:#444; font-size:13px; background:#f7f9fe; border:1px solid #e9eef6; border-radius:10px; padding:10px; }
-    .age-row{ display:flex; align-items:center; gap:10px; }
-    .age-input{ width:140px; max-width:42vw; appearance:textfield; font-size:18px; padding:12px 12px; border-radius:12px; border:1px solid #d7deea; background:#fff; }
-    .age-suffix{ font-size:16px }
-    .likert{ display:grid; grid-template-columns: repeat(5,1fr); gap:8px; }
-    .radio-pill{ display:flex; align-items:center; justify-content:center; border:1.5px solid #d7deea; border-radius:12px; padding:10px 6px; font-weight:700; user-select:none; cursor:pointer; transition: border-color .15s, background .15s; font-size:14px; text-align:center; }
-    .radio-pill input{ display:none }
-    .radio-pill.is-active{ border-color:var(--accent); background:#eef5ff }
-    .likert-scale{ display:flex; justify-content:space-between; color:#333; font-size:12px; margin-top:6px }
-    .yn{ display:grid; grid-template-columns: repeat(2,1fr); gap:8px }
-    .text-input, .textarea{ width:100%; border:1px solid #d7deea; border-radius:12px; background:#fff; padding:12px 12px; font-size:16px; }
-    .textarea{ min-height:120px; resize:vertical }
-    .err{ color:#c1121f; font-size:12px; margin-top:6px; display:none }
-    .footer{ position:sticky; bottom:0; z-index:10; margin-top: clamp(18px, 4.5vw, 24px); background: linear-gradient(to top, #fff, #fff 60%, rgba(255,255,255,0)); padding-top: 12px; }
-    .btn{ appearance:none; border:0; width:100%; border-radius:14px; padding:16px 20px; font-weight:900; letter-spacing:.02em; background:var(--accent); color:#fff; font-size:18px; box-shadow:0 10px 30px rgba(0,90,187,.25); cursor:pointer; }
-    .btn[aria-busy="true"]{ opacity:.7; pointer-events:none }
-    button, label{ -webkit-tap-highlight-color: rgba(0,0,0,0) }
+    .lang-btn:focus-visible{outline:3px solid rgba(0,90,187,.35)}
+    .lang-icon{width:28px;height:28px;display:block}
+    .lang-menu{
+      position:absolute; right:0; margin-top:8px; background:#fff; border:1px solid #e3eaf6; border-radius:12px;
+      box-shadow:0 10px 28px rgba(0,0,0,.15); display:none; min-width:160px; overflow:hidden
+    }
+    .lang-menu.is-open{display:block}
+    .lang-item{display:block; width:100%; text-align:left; background:#fff; border:0; padding:10px 12px; cursor:pointer; font-weight:800}
+    .lang-item:hover{background:#f2f6ff}
   </style>
 </head>
 <body>
+  <!-- 言語スイッチ（共通） -->
+  <div class="lang-switch" id="langSwitch">
+    <button id="langBtn" class="lang-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="langMenu">
+      <img class="lang-icon" src="assets/images/ui/lang.png" alt="言語 / Language">
+    </button>
+    <div id="langMenu" class="lang-menu" role="menu" aria-label="Language">
+      <button class="lang-item" data-lang="ja" role="menuitem">日本語</button>
+      <button class="lang-item" data-lang="en" role="menuitem">English</button>
+    </div>
+  </div>
+
+  <!-- ここから既存のアンケート本文（単一の <body> 内に統合） -->
   <div class="wrap">
     <header>
       <h1>アンケート</h1>
@@ -192,8 +177,9 @@
         <div class="field">
           <div class="label-row"><label>ICUアーカイブズを訪問したことがあるか</label></div>
           <div class="yn" data-name="archives_visited">
-            <label class="radio-pill"><input type="radio" name="archives_visited" value="yes"><span>いいえ</span></label>
-            <label class="radio-pill"><input type="radio" name="archives_visited" value="no"><span>はい</span></label>
+            <!-- 値と表示の整合：yes=はい / no=いいえ に直すなら以下を入れ替えてください -->
+            <label class="radio-pill"><input type="radio" name="archives_visited" value="no"><span>いいえ</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_visited" value="yes"><span>はい</span></label>
           </div>
         </div>
 
@@ -255,8 +241,36 @@
       </div>
     </form>
   </div>
+  <!-- 既存本文ここまで -->
+
+  <script>
+    // 言語メニュー（共通）
+    (function initLangMenu(){
+      const btn  = document.getElementById('langBtn');
+      const menu = document.getElementById('langMenu');
+      const items= menu?.querySelectorAll('.lang-item');
+      const open = (v)=>{
+        if (!menu || !btn) return;
+        menu.classList.toggle('is-open', v);
+        btn.setAttribute('aria-expanded', v ? 'true':'false');
+      };
+      btn?.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        open(!menu.classList.contains('is-open'));
+      });
+      document.addEventListener('click', ()=> open(false));
+      items?.forEach(it=>{
+        it.addEventListener('click', ()=>{
+          const lang = it.dataset.lang || 'ja';
+          try { localStorage.setItem('app_lang', lang); } catch(e){}
+          if (typeof window.applyLang === 'function') { window.applyLang(lang); }
+          else { location.reload(); }
+        });
+      });
+    })();
+  </script>
 
   <script src="js/firebase.js" defer></script>
-  <script src="js/post-survey.js?v=20251010-merge" defer></script>
+  <script src="js/post-survey.js" defer></script>
 </body>
 </html>

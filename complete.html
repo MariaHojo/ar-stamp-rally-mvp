@@ -3,39 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <title>コンプリート | ARスタンプラリー</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#f6f7fb}
-    .wrap{max-width:900px;margin:20px auto;padding:20px}
-    .card{background:#fff;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.08);padding:24px}
-    h1{margin:0 0 8px;font-size:22px}
-    p.lead{color:#333;margin:0 0 16px}
-    .row{display:flex;gap:12px;flex-wrap:wrap}
-    .btn{appearance:none;border:0;border-radius:10px;padding:12px 16px;cursor:pointer;font-weight:800}
-    .btn-primary{background:#0a58ca;color:#fff}
-    .btn-secondary{background:#e9ecef;color:#111}
-    #notComplete{display:none;background:#fff;border-radius:12px;padding:16px;box-shadow:0 6px 24px rgba(0,0,0,.06)}
+    .lang-switch{position:fixed; right:12px; top:12px; z-index:2147483647}
+    .lang-btn{
+      appearance:none;border:0;background:#fff;border:1px solid #e3eaf6;border-radius:12px;
+      padding:6px; cursor:pointer; box-shadow:0 10px 28px rgba(0,0,0,.15)
+    }
+    .lang-btn:focus-visible{outline:3px solid rgba(0,90,187,.35)}
+    .lang-icon{width:28px;height:28px;display:block}
+    .lang-menu{
+      position:absolute; right:0; margin-top:8px; background:#fff; border:1px solid #e3eaf6; border-radius:12px;
+      box-shadow:0 10px 28px rgba(0,0,0,.15); display:none; min-width:160px; overflow:hidden
+    }
+    .lang-menu.is-open{display:block}
+    .lang-item{display:block; width:100%; text-align:left; background:#fff; border:0; padding:10px 12px; cursor:pointer; font-weight:800}
+    .lang-item:hover{background:#f2f6ff}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div id="notComplete">
-      <p>まだ全てのスタンプが集まっていません。マップに戻って続きをお楽しみください。</p>
-      <p><a class="btn btn-secondary" href="map.html?v=20251003">マップに戻る</a></p>
-    </div>
-
-    <div id="completeCard" class="card" style="display:none">
-      <h1>🎉 コンプリート！</h1>
-      <p class="lead">全てのスタンプを集めました。ご参加ありがとうございます！</p>
-      <div class="row">
-        <a class="btn btn-secondary" href="map.html?v=20251003">マップに戻る</a>
-        <a class="btn btn-primary" href="post-survey.html?v=20251003" id="toSurvey">
-          アンケートへ
-        </a>
-      </div>
+  <!-- 言語スイッチ（共通） -->
+  <div class="lang-switch" id="langSwitch">
+    <button id="langBtn" class="lang-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="langMenu">
+      <img class="lang-icon" src="assets/images/ui/lang.png" alt="言語 / Language">
+    </button>
+    <div id="langMenu" class="lang-menu" role="menu" aria-label="Language">
+      <button class="lang-item" data-lang="ja" role="menuitem">日本語</button>
+      <button class="lang-item" data-lang="en" role="menuitem">English</button>
     </div>
   </div>
+
+  <!-- ↓↓↓ ここから既存の complete.html の本文をそのまま ↓↓↓ -->
+  <!-- あなたの現行 complete.html のメインUIを丸ごとここに置く -->
+  <!-- 例：<main> ... 完走メッセージやボタン ... </main> -->
+  <!-- ↑↑↑ 既存内容そのまま ↑↑↑ -->
+
+  <script>
+    // 言語メニュー（共通）
+    (function initLangMenu(){
+      const btn  = document.getElementById('langBtn');
+      const menu = document.getElementById('langMenu');
+      const items= menu?.querySelectorAll('.lang-item');
+      const open = (v)=>{ menu.classList.toggle('is-open', v); btn.setAttribute('aria-expanded', v ? 'true':'false'); };
+      btn?.addEventListener('click', (e)=>{ e.stopPropagation(); open(!menu.classList.contains('is-open')); });
+      document.addEventListener('click', ()=> open(false));
+      items?.forEach(it=>{
+        it.addEventListener('click', ()=>{
+          const lang = it.dataset.lang || 'ja';
+          try { localStorage.setItem('app_lang', lang); } catch(e){}
+          if (typeof window.applyLang === 'function') { window.applyLang(lang); }
+          else { location.reload(); }
+        });
+      });
+    }());
+  </script>
 
   <script src="js/firebase.js" defer></script>
   <script src="js/complete.js" defer></script>
