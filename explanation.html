@@ -107,6 +107,20 @@
     <div class="footerSpace"></div>
   </div>
 
+  <!-- 言語に応じて「スタンプをゲットしました！」を切替 -->
+  <script>
+    (function(){
+      function getLang(){ try { return localStorage.getItem('app_lang') || 'ja'; } catch { return 'ja'; } }
+      document.addEventListener('DOMContentLoaded', function () {
+        var lang = getLang();
+        var stampNote = document.getElementById('stampNote');
+        if (stampNote){
+          stampNote.textContent = (lang === 'en') ? 'You got a stamp!' : 'スタンプをゲットしました！';
+        }
+      });
+    }());
+  </script>
+
   <script src="js/firebase.js" defer></script>
   <script src="js/explanation.js?v=20251008" defer></script>
 </body>
