@@ -7,177 +7,154 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
+  <link rel="stylesheet" href="css/style.css" />
   <style>
     :root{
       --accent:#005ABB;
       --text:#111;
-      --muted:#444;
       --bg:#fff;
       --card:#ffffff;
-      --radius:16px;
       --shadow:0 12px 32px rgba(0,0,0,.08);
+      --radius:16px;
     }
-    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.6}
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.65}
     .wrap{max-width:960px;margin:0 auto;padding:clamp(10px,3vw,16px)}
-    header{display:flex;align-items:center;gap:10px;padding:4px 0 10px}
-    h1{font-size:22px;margin:0;font-weight:900}
-    .back{margin-left:auto}
-    .back a{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:10px 14px;border-radius:12px;font-weight:800}
-    nav.toc{background:#f7f9fe;border:1px solid #e3eaf6;border-radius:12px;padding:12px;box-shadow:var(--shadow);margin:8px 0 18px}
-    nav.toc a{color:var(--accent);text-decoration:none}
-    nav.toc ul{margin:6px 0 0 1.2em;padding:0}
-    nav.toc li{margin:6px 0}
-    section.card{background:var(--card);border:1px solid #e9eef6;border-radius:var(--radius);box-shadow:var(--shadow);padding:clamp(12px,2.4vw,18px);margin:14px 0}
-    section.card h2{margin:.2em 0 .4em;font-size:20px}
-    section.card h3{margin:1.0em 0 .4em;font-size:18px}
-    p{margin:.5em 0}
-    figure{margin:10px 0; background:#fff; border:1px solid #e9eef6; border-radius:12px; overflow:hidden}
-    .ph{width:100%; aspect-ratio:1/1; object-fit:cover; display:block} /* 1:1の写真表示 */
-    figcaption{font-size:13px;color:#333;padding:8px 10px;background:#f9fbff;border-top:1px solid #e9eef6}
-    .note{font-size:13px;color:#555}
-    footer{margin:18px 0 6px;color:#555;font-size:13px}
+    header{padding:6px 0 10px; position:relative}
+    h1{margin:0;font-size:20px;font-weight:900}
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:clamp(12px,3vw,18px);margin-bottom:14px}
+    figure{margin:10px 0}
+    figure img{width:100%;height:auto;border-radius:10px;border:1px solid #e9eef6}
+    figcaption{font-size:12px;color:#333;margin-top:4px}
+
+    /* 言語スイッチ（共通スタイル） */
+    .lang-switch{position:fixed; right:12px; top:12px; z-index:2147483647}
+    .lang-btn{
+      appearance:none;border:0;background:#fff;border:1px solid #e3eaf6;border-radius:12px;
+      padding:6px; cursor:pointer; box-shadow:0 10px 28px rgba(0,0,0,.15)
+    }
+    .lang-btn:focus-visible{outline:3px solid rgba(0,90,187,.35)}
+    .lang-icon{width:28px;height:28px;display:block}
+    .lang-menu{
+      position:absolute; right:0; margin-top:8px; background:#fff; border:1px solid #e3eaf6; border-radius:12px;
+      box-shadow:0 10px 28px rgba(0,0,0,.15); display:none; min-width:160px; overflow:hidden
+    }
+    .lang-menu.is-open{display:block}
+    .lang-item{
+      display:block; width:100%; text-align:left; background:#fff; border:0; padding:10px 12px;
+      cursor:pointer; font-weight:800; color:#000; /* ← 黒文字 */
+    }
+    .lang-item:hover{background:#f2f6ff}
   </style>
 </head>
 <body>
+  <!-- 言語スイッチ -->
+  <div class="lang-switch" id="langSwitch">
+    <button id="langBtn" class="lang-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="langMenu">
+      <img class="lang-icon" src="assets/images/ui/lang.png" alt="言語 / Language">
+    </button>
+    <div id="langMenu" class="lang-menu" role="menu" aria-label="Language">
+      <button class="lang-item" data-lang="ja" role="menuitem">日本語</button>
+      <button class="lang-item" data-lang="en" role="menuitem">English</button>
+    </div>
+  </div>
+
   <div class="wrap">
     <header>
       <h1>スペシャルコンテンツ</h1>
-      <div class="back"><a href="map.html">マップへ戻る</a></div>
     </header>
 
-    <!-- 目次 -->
-    <nav class="toc" aria-label="目次">
-      <strong>目次</strong>
-      <ul>
-        <li><a href="#about-page">ページの説明</a></li>
-        <li><a href="#more-spots">ARスタンプラリーで紹介できなかったスポットの写真</a></li>
-        <li><a href="#about-archives">ICUアーカイブズについて</a></li>
-      </ul>
-    </nav>
-
     <!-- 1. このページの説明 -->
-    <section id="about-page" class="card">
-      <h2>1. このページの説明</h2>
-      <p>
-        アンケートにご回答いただきありがとうございます。このページでは今回のスタンプラリーでは紹介できなかったICUの
-        面白い歴史を持つスポットの写真と、その解説が書かれています。次に、今回このアプリを作成するにあたりご協力いただいた
-        ICUアーカイブズについてやその活動・アクセス情報を載せております。
-      </p>
+    <section class="card">
+      <h2>このページの説明</h2>
+      <p>アンケートにご回答いただきありがとうございます。このページでは今回のスタンプラリーでは紹介できなかったICUの面白い歴史を持つスポットの写真と、その解説が書かれています。次に、今回このアプリを作成するにあたりご協力いただいたICUアーカイブズについてやその活動・アクセス情報を載せております。</p>
     </section>
 
     <!-- 2. まだ紹介していないスポットについて -->
-    <section id="more-spots" class="card">
-      <h2>2. まだ紹介していないスポットについて</h2>
-
-      <h3>・ICUの農場（1952–1953年ごろ）</h3>
-      <p>ICUの中で暮らせるように、ICUには昔農場があったんだ。下の3つの写真は、全部1952–1953年に撮られたものだよ。</p>
+    <section class="card">
+      <h2>まだ紹介していないスポットについて</h2>
+      <p>ICUの中で暮らせるように、ICUには昔農場があったんだ。下の3つの写真は、全部1952-1953年に撮られたものだよ。</p>
 
       <figure>
-        <img class="ph" src="assets/images/special_photos/special_sec2_3.jpg" alt="トウモロコシの種まきの様子（1952–1953）">
-        <figcaption>出典：『ICU 農場 (1951-1970)』P-03_42_014, ICUアーカイブス 三鷹 東京</figcaption>
+        <img src="assets/images/special_photos/special_sec2_3.jpg" alt="トウモロコシの種まき（1952-1953）">
       </figure>
-      <p>今の府中自動車運転免許試験場の近くで、トウモロコシの種をまいているところだね。</p>
+      <p>これは今の府中自動車運転免許試験場の近くで、トウモロコシの種をまいているところだね。</p>
+
       <figure>
-        <img class="ph" src="assets/images/special_photos/special_sec2_2.jpg" alt="鶏舎の近く（1952–1953）">
-        <figcaption>出典：『ICU農場 ②』P-03_43_01_024, ICUアーカイブス 三鷹 東京</figcaption>
+        <img src="assets/images/special_photos/special_sec2_2.jpg" alt="鶏舎の近く（1952-1953）">
       </figure>
-      <p>これは鶏舎の近く。</p>
+      <p>これは鶏舎の近く</p>
+
       <figure>
-        <img class="ph" src="assets/images/special_photos/special_sec2_1.jpg" alt="牛舎の近く（1952–1953）">
-        <figcaption>出典：『ICU農場 ②』P-03_43_01_016, ICUアーカイブス 三鷹 東京</figcaption>
+        <img src="assets/images/special_photos/special_sec2_1.jpg" alt="牛舎の近く（1952-1953）">
       </figure>
       <p>これは牛舎の近くで撮られていると思われるよ！</p>
-      <p>
-        ICUではかつて、”ICU牛乳”の名前で牛乳が（学外にも！）市販されてたんだ。1956年には食堂裏手への移設が承認されているから、
-        その前からあったんだね。1970年に製造を中止してしまったよ。ジャージー種乳牛から生産された高品質ミルクとして知られ、
-        表面に浮いた固形脂肪分で、ふたを取ってひっくり返してもこぼれなかったとの話が伝わっているよ。この時に使っていた牛乳瓶を、
-        図書館1階のアーカイブズ展示室で展示しているから、興味がある人はぜひ見ていってね！
-      </p>
 
-      <h3>・D館（ディッフェンドルファー記念館）</h3>
+      <p>ICUではかつて、”ICU牛乳”の名前で牛乳が（学外にも！）市販されてたんだ。1956年には食堂裏手への移設が承認されているから、その前からあったんだね。1970年に製造を中止してしまったよ。ジャージー種乳牛から生産された高品質ミルクとして知られ、表面に浮いた固形脂肪分で、ふたを取ってひっくり返してもこぼれなかったとの話が伝わっているよ。この時に使っていた牛乳瓶を、図書館1階のアーカイブズ展示室で展示しているから、興味がある人はぜひ見ていってね！</p>
 
+      <h3>・D館</h3>
       <figure>
-        <img class="ph" src="assets/images/special_photos/special_sec2_4.jpg" alt="D館 外観（年代不詳）">
-        <figcaption>出典：『ICU農場 ②』P-03_43_01_016, ICUアーカイブス 三鷹 東京</figcaption>
+        <img src="assets/images/special_photos/special_sec2_4.jpg" alt="D館（ディッフェンドルファー記念館）">
       </figure>
-      <p>ディッフェンドルファー記念館、通称D館。東棟と西棟があるよ。</p>
-      <p>
-        これもむかーしからある建物で、東棟と西棟があるよ。東棟は1958年に完成しているから、そろそろ70歳かな？
-        ここにはスナックバーと呼ばれる売店があったんだ。コーヒーを出すようなカウンターもあって、今でもカウンターがあった場所は床の色が違うんだよ！
-      </p>
-
+      <p>これはディッフェンドルファー記念館、通称D館だね！これもむかーしからある建物で、東棟と西棟があるよ。東棟は1958年に完成しているから、そろそろ70歳かな？</p>
+      <p>ここにはスナックバーと呼ばれる売店があったんだ。コーヒーを出すようなカウンターもあって、今でもカウンターがあった場所は床の色が違うんだよ！</p>
       <figure>
-        <img class="ph" src="assets/images/special_photos/special_sec2_5.jpg" alt="D館 内部・施設（年代不詳）">
-        <figcaption>床の色がちょっと違うのが分かるかな？</figcaption>
+        <img src="assets/images/special_photos/special_sec2_5.jpg" alt="D館の当時の設備">
       </figure>
-
-      <p>
-        郵便局もここに入っていたし、地下には美容室があったんだ。そして、D館4階のガラスは古くて、歪んでいるのが分かるよ。この窓のアルミサッシは日本で最も古いものなんだよ！
-        解説パネルがあるので、ぜひ地下から4階まで行って、読んでみてね。
-      </p>
+      <p>郵便局もここに入っていたし、地下には美容室があったんだ。</p>
+      <p>そして、D館4階のガラスは古くて、歪んでいるのが分かるよ。この窓のアルミサッシは日本で最も古いものなんだよ！</p>
+      <p>解説パネルがあるので、ぜひ地下から4階まで行って、読んでみてね。</p>
 
       <h3>・三軒家</h3>
-      <p>
-        ICUを上から見ると、A駐車場の横からILC館(8番)までまっすぐななめに道があるのが分かるかな？ここには「三軒家」と呼ばれていたところがあったんだよ。
-      </p>
-
+      <p>ICUを上から見ると、A駐車場の横からILC館(8番)までまっすぐななめに道があるのが分かるかな？</p>
       <figure>
-        <img class="ph" src="assets/images/special_photos/special_sec2_9.jpg" alt="ICU全景（上空・現在）">
-        <figcaption>出典："キャンパス・施設紹介." ICU 国際基督教大学. https://www.icu.ac.jp/about/campus/. Accessed 2025/10/10</figcaption>
+        <img src="assets/images/special_photos/special_sec2_9.jpg" alt="航空写真（道の痕跡）">
       </figure>
-      <p>ICUホームページより。上空からの地図。斜めの道筋が見えるね。</p>
+      <p>ここには「三軒家」と呼ばれていたところがあったんだよ。</p>
       <figure>
-        <img class="ph" src="assets/images/special_photos/special_sec2_6.jpg" alt="三軒家 周辺の様子（資料写真1）">
-        <figcaption>出典：『ICU敷地周辺地図 - ヴォーリズ建築設計 （図面：青焼）』L-243-00-001, ICUアーカイブス 三鷹 東京</figcaption>
+        <img src="assets/images/special_photos/special_sec2_6.jpg" alt="三軒家 その1">
       </figure>
-
       <figure>
-        <img class="ph" src="assets/images/special_photos/special_sec2_7.jpg" alt="三軒家 周辺の様子（資料写真2）">
-        <figcaption>出典：『ICU敷地周辺地図 - ヴォーリズ建築設計 （図面：青焼）』L-243-00-001, ICUアーカイブス 三鷹 東京</figcaption>
+        <img src="assets/images/special_photos/special_sec2_7.jpg" alt="三軒家 その2">
       </figure>
-
-      <p>下の拡大写真を見ると、「三軒家」という文字が見て取れるね。この文字の下にある、斜めの道が、さっき現在の地図で見た道だよ。鎌倉時代にはこのあたりに幹線街道があったとされるよ。</p>
-
+      <p>下の拡大写真を見ると、三軒家という文字が見て取れるね。鎌倉時代にはこのあたりに幹線街道があったとされるよ。</p>
       <figure>
-        <img class="ph" src="assets/images/special_photos/special_sec2_8.jpg" alt="三軒家 表記の拡大">
-        <figcaption>長～い道だね！</figcaption>
+        <img src="assets/images/special_photos/special_sec2_8.jpg" alt="三軒家拡大">
       </figure>
-
       <p>これは現代の写真だけど、この横の木々も武蔵野の原生林なんだ。</p>
     </section>
 
-    <!-- 3. 協力者（ICUアーカイブズ） -->
-    <section id="about-archives" class="card">
-      <h2>3. 協力者</h2>
-      <h3>ICUアーカイブズ様</h3>
-      <p>
-        今回、ほとんどの写真資料や、その解説文を書くにあたっての情報などを提供していただきました。
-        この場を借りて心より感謝申し上げます。
-      </p>
-      <p>
-        ICUアーカイブズ様の活動内容は以下の通りです。<br>
-        「ICUアーカイブズは大学歴史資料室の後継組織として2020年9月に発足しました。ICUアーカイブズは国際基督教大学の歴史に関する資料および大学の行政記録の収集・整理・保存・提供を行っています。」<br>
-        （「ICUアーカイブズについて」ICUアーカイブズ）
-      </p>
-      <p>
-        図書館の一階に展示室、二階に分室があります。ICUの歴史が詰まった大変興味深い場所ですので、ぜひご興味を持たれた方は訪れてみてください。
-      </p>
-      <p class="note">
-        HPリンクはこちらです：<a href="https://www-lib.icu.ac.jp/Archives/index.htm" target="_blank" rel="noopener">https://www-lib.icu.ac.jp/Archives/index.htm</a>
-      </p>
+    <!-- 3. 協力者 -->
+    <section class="card">
+      <h2>協力者</h2>
+      <p><b>ICUアーカイブズ様</b></p>
+      <p>今回、ほとんどの写真資料や、その解説文を書くにあたっての情報などを提供していただきました。この場を借りて心より感謝申し上げます。</p>
+      <p>ICUアーカイブズ様の活動内容は以下の通りです。<br>
+        「ICUアーカイブズは大学歴史資料室の後継組織として2020年9月に発足しました。ICUアーカイブズは国際基督教大学の歴史に関する資料および大学の行政記録の収集・整理・保存・提供を行っています。（”ICUアーカイブズについて” ICU アーカイブズ　https://www-lib.icu.ac.jp/Archives/index.htm ）」</p>
+      <p>図書館の一階に展示室、二階に分室があります。ICUの歴史が詰まった大変興味深い場所ですので、ご訪問なさってください。<br>
+        HPリンクはこちらです。<a href="https://www-lib.icu.ac.jp/Archives/index.htm" target="_blank" rel="noopener">https://www-lib.icu.ac.jp/Archives/index.htm</a></p>
     </section>
-
-    <footer>
-      <a href="map.html">← マップへ戻る</a>
-    </footer>
   </div>
 
   <script>
-    // 既定のキャッシュバスター（firebase.js が未読でも動くフォールバック）
-    if (!window.withV) {
-      window.BUILD_V = window.BUILD_V || '20251005';
-      window.withV = (url) => url + (url.includes('?') ? '&' : '?') + 'v=' + window.BUILD_V;
-    }
+    // 言語メニュー（共通）
+    (function initLangMenu(){
+      const btn  = document.getElementById('langBtn');
+      const menu = document.getElementById('langMenu');
+      const items= menu?.querySelectorAll('.lang-item');
+      const open = (v)=>{ menu.classList.toggle('is-open', v); btn.setAttribute('aria-expanded', v ? 'true':'false'); };
+      btn?.addEventListener('click', (e)=>{ e.stopPropagation(); open(!menu.classList.contains('is-open')); });
+      document.addEventListener('click', ()=> open(false));
+      items?.forEach(it=>{
+        it.addEventListener('click', ()=>{
+          const lang = it.dataset.lang || 'ja';
+          try { localStorage.setItem('app_lang', lang); } catch(e){}
+          // 他ページ実装と合わせて、イベントを投げておく
+          try { window.dispatchEvent(new Event('app_lang_changed')); } catch(e){}
+          // special は本文多くが日本語のため、ひとまずリロードで反映
+          location.reload();
+        });
+      });
+    }());
   </script>
 </body>
 </html>

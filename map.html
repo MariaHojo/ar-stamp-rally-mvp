@@ -423,37 +423,61 @@
 
   <script src="js/firebase.js" defer></script>
   <script>
-  // === Stampbook status i18n (取得/未取得) ===
+  // === Camera chooser spot-name i18n ===
   (function(){
+    const NAMES = {
+      ja: {
+        spot1:'本館173前',
+        spot2:'トロイヤー記念館（T館）前',
+        spot3:'学生食堂（ガッキ）前',
+        spot4:'チャペル前',
+        spot5:'体育館（Pec-A）前',
+        spot6:'本館307前',
+      },
+      en: {
+        spot1:'In front of Main Building 173',
+        spot2:'In front of Troyer Memorial (T Bldg.)',
+        spot3:'In front of Student Cafeteria',
+        spot4:'In front of the Chapel',
+        spot5:'In front of Gym (Pec-A)',
+        spot6:'In front of Main Building 307',
+      }
+    };
     function getLang(){ try { return localStorage.getItem('app_lang') || 'ja'; } catch { return 'ja'; } }
-    function statusText(isGot, lang){
-      if (lang === 'en') return isGot ? 'Collected' : 'Not collected';
-      return isGot ? '取得済み' : '未取得';
-    }
-    function applyStampStatusLang(){
+    function applyChooserLang(){
       const lang = getLang();
-      document.querySelectorAll('.stamp-cell').forEach(cell=>{
-        const isGot = cell.classList.contains('is-got');
-        const el = cell.querySelector('.stamp-status .mark') || cell.querySelector('.stamp-status');
-        if (el) el.textContent = statusText(isGot, lang);
+      // 吹き出しのタイトル/説明/閉じる も念のため対応（既に対応済みでも上書きOK）
+      const title = document.getElementById('cameraChooserTitle');
+      const desc  = document.getElementById('cameraChooserDesc');
+      const close = document.getElementById('cameraChooserClose');
+      if (title) title.textContent = (lang === 'en') ? 'Choose a spot' : 'スポットを選んでください';
+      if (desc)  desc.textContent  = (lang === 'en') ? 'Tap a photo to launch AR.' : '写真をタップするとARが起動します。';
+      if (close) close.textContent = (lang === 'en') ? 'Close' : '閉じる';
+
+      // アイテムのラベルを書き換え（.thumbWrap .label に入っている想定）
+      document.querySelectorAll('#cameraChooserList .item').forEach(item=>{
+        const spot = item.getAttribute('data-spot') || item.dataset.spot;
+        const label = item.querySelector('.thumbWrap .label') || item.querySelector('.label');
+        if (spot && label && NAMES[lang] && NAMES[lang][spot]) {
+          label.textContent = NAMES[lang][spot];
+        }
       });
     }
 
-    // 初期反映
-    document.addEventListener('DOMContentLoaded', ()=>{
-      applyStampStatusLang();
+    // モーダル内容が生成されたタイミングを監視（map.js がDOM追加後に実行されるように）
+    const list = document.getElementById('cameraChooserList');
+    if (list) {
+      const mo = new MutationObserver(applyChooserLang);
+      mo.observe(list, {childList:true, subtree:true});
+    }
+    // 言語切替にも追従
+    window.addEventListener('storage', (e)=>{ if (e.key === 'app_lang') applyChooserLang(); });
+    window.addEventListener('app_lang_changed', applyChooserLang);
 
-      // .stamp-cell の class 変化（取得状態の更新）を監視して再反映
-      const cells = document.querySelectorAll('.stamp-cell');
-      const obs = new MutationObserver(()=>applyStampStatusLang());
-      cells.forEach(cell=>obs.observe(cell,{ attributes:true, attributeFilter:['class'] }));
-
-      // 言語切替（他ページ共通のハンドラがあればそれにも追従）
-      window.addEventListener('storage', (e)=>{ if (e.key === 'app_lang') applyStampStatusLang(); });
-      window.addEventListener('app_lang_changed', applyStampStatusLang);
-    });
+    document.addEventListener('DOMContentLoaded', applyChooserLang);
   })();
 </script>
+
 
   <script src="js/map.js?v=20251003" defer></script>
   <script>
