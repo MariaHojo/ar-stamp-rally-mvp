@@ -1,16 +1,14 @@
-/* map.js（完全差し替え）
- * - 変数の二重宣言を避けるため IIFE でスコープを閉じる
- * - 予約風記号 $/$$ は使わず q/qa を使用
- * - スポット選択/スタンプ帳の文言を i18n（app_lang）に追従
- * - 8th Wall への遷移、スタンプ状態の反映、完走モーダルは従来通り
- */
+/* map.js（凍結対策付き・完全差し替え）
+   - カメラ選択モーダル：オーバーレイ自動用意、開閉で body スクロール固定/解除、Esc で閉じる
+   - i18n と 8th Wall 遷移、スタンプ帳は従来どおり
+*/
 (function () {
   'use strict';
 
   const q  = (s)=>document.querySelector(s);
   const qa = (s)=>Array.from(document.querySelectorAll(s));
 
-  /* ====== 8th Wall 側 URL（要置換） ====== */
+  /* ====== 8th Wall URL ====== */
   const EIGHTHWALL_URLS = {
     spot1: 'https://maria261081.8thwall.app/spot1/',
     spot2: 'https://maria261081.8thwall.app/spot2/',
@@ -23,10 +21,10 @@
   const ALL_SPOTS       = ['spot1','spot2','spot3','spot4','spot5','spot6'];
   const COMPLETE_TARGET = 6;
 
-  /* ====== 言語 ====== */
+  /* ====== Lang ====== */
   function getLang(){ try { return localStorage.getItem('app_lang') || 'ja'; } catch { return 'ja'; } }
 
-  /* ====== 表示名・写真パス（i18n） ====== */
+  /* ====== Labels / Photo ====== */
   const SPOT_LABELS = {
     ja: {
       spot1: '本館173前',
@@ -53,13 +51,13 @@
     return `assets/images/current_photos/spot${nn}.JPG`;
   }
 
-  /* ====== LocalStorage util ====== */
+  /* ====== LS util ====== */
   function lsGet(k){ try{return localStorage.getItem(k);}catch{return null;} }
   function lsSet(k,v){ try{localStorage.setItem(k,v);}catch{} }
   function lsKeyStamp(uid, spot){ return `stamp_${uid}_${spot}`; }
   function seenKey(uid){ return `complete_6_seen_${uid}`; }
 
-  /* ====== Auth（匿名） ====== */
+  /* ====== Auth ====== */
   async function ensureAnonSafe() {
     if (typeof window.ensureAnon === 'function') {
       try { const uid = await window.ensureAnon(); if (uid) return uid; } catch(e){}
@@ -78,7 +76,7 @@
     }
   }
 
-  /* ====== スタンプ取得状態 ====== */
+  /* ====== Stamps ====== */
   async function fetchStamps(uid) {
     let remote = null;
     try {
@@ -95,7 +93,6 @@
     return stamps;
   }
 
-  /* ====== スタンプ帳 UI 反映（i18n） ====== */
   function renderStampUI(stamps){
     const lang = getLang();
     const txtGot = (lang==='en') ? 'Collected' : '取得済';
@@ -119,7 +116,7 @@
     if (special) special.style.display = (cnt >= COMPLETE_TARGET) ? 'block' : 'none';
   }
 
-  /* ====== 完走モーダル ====== */
+  /* ====== Complete Modal ====== */
   function openCompleteModal(){
     q('#completeOverlay')?.classList.add('is-open');
     q('#completeModal')?.classList.add('is-open');
@@ -138,12 +135,27 @@
   async function handleCompletionFlow(uid, stamps){
     const got = countCollected(stamps);
     if (got < COMPLETE_TARGET) return;
-    if (lsGet(seenKey(uid)) === 'true') return; // 初回のみ
+    if (lsGet(seenKey(uid)) === 'true') return;
     openCompleteModal();
     lsSet(seenKey(uid), 'true');
   }
 
-  /* ====== カメラ起動（スポット選択：写真グリッド） ====== */
+  /* ====== Camera chooser ====== */
+  function ensureOverlay(){
+    // map.html に #cameraChooserOverlay が無い場合は生成
+    let ov = q('#cameraChooserOverlay');
+    if (!ov) {
+      ov = document.createElement('div');
+      ov.id = 'cameraChooserOverlay';
+      ov.className = 'camera-chooser-overlay';
+      ov.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(ov);
+    }
+    // クリックで閉じる
+    ov.addEventListener('click', hideCameraChooser);
+    return ov;
+  }
+
   function buildCameraChooserItems(){
     const list = q('#cameraChooserList');
     if (!list) return;
@@ -169,6 +181,7 @@
       list.appendChild(item);
     });
 
+    // click → 8th Wall
     list.querySelectorAll('a.photoLink[data-spot]').forEach(a=>{
       a.addEventListener('click', async (ev)=>{
         ev.preventDefault();
@@ -182,27 +195,57 @@
         const url  = new URL(base);
         url.searchParams.set('spotId', spot);
         if (uid) url.searchParams.set('uid', uid);
+        // 閉じてから遷移（スクロール解除を確実に）
+        hideCameraChooser(true);
         location.href = url.toString();
       });
     });
   }
+
+  function lockScroll(lock){
+    try{
+      if (lock){
+        // 現在のスクロール位置を保持して固定
+        const scrollY = window.scrollY || document.documentElement.scrollTop;
+        document.body.dataset.scrollY = String(scrollY);
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+      }else{
+        const y = parseInt(document.body.dataset.scrollY || '0', 10);
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        window.scrollTo(0, y);
+        delete document.body.dataset.scrollY;
+      }
+    }catch{}
+  }
+
   function showCameraChooser(){
+    ensureOverlay();
     buildCameraChooserItems(); // 開いた時点の言語で生成
     q('#cameraChooserOverlay')?.classList.add('is-open');
     q('#cameraChooser')?.classList.add('is-open');
+    lockScroll(true);
   }
-  function hideCameraChooser(){
+  function hideCameraChooser(keepPos){
     q('#cameraChooserOverlay')?.classList.remove('is-open');
     q('#cameraChooser')?.classList.remove('is-open');
+    // keepPos=true ならそのまま（遷移直前用）。通常は解除。
+    lockScroll(!keepPos ? false : false);
   }
 
-  /* ====== 起動 ====== */
+  /* ====== boot ====== */
   async function boot(){
     bindCompleteModalButtons();
 
     q('#cameraBtn')?.addEventListener('click', showCameraChooser);
-    q('#cameraChooserClose')?.addEventListener('click', hideCameraChooser);
-    q('#cameraChooserOverlay')?.addEventListener('click', hideCameraChooser);
+    q('#cameraChooserClose')?.addEventListener('click', ()=> hideCameraChooser(false));
+    // Esc で閉じる
+    document.addEventListener('keydown', (e)=>{
+      if (e.key === 'Escape') hideCameraChooser(false);
+    });
 
     const uid = await ensureAnonSafe();
     const stamps = await fetchStamps(uid);
