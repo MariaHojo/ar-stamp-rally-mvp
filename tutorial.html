@@ -34,17 +34,22 @@
       min-height:60vh;
     }
 
-    /* 画像 */
+    /* 画像（正方形 1:1 で表示。トリミングしない） */
     .hero{
       width:100%;
-      aspect-ratio: 4/3; /* 正方形～横長に対応 */
+      aspect-ratio: 1 / 1;        /* ← 1:1 に固定 */
       border-radius:12px;
       overflow:hidden;
       background:#f3f6fc;
       border:1px solid #e9eef6;
       display:flex;align-items:center;justify-content:center;
     }
-    .hero img{width:100%;height:100%;object-fit:cover;display:block}
+    .hero img{
+      width:100%;
+      height:100%;
+      object-fit: contain;        /* ← 画像を切らずに収める */
+      display:block;
+    }
 
     /* テキストブロック（下1/4を想定） */
     .panel{
@@ -104,8 +109,8 @@
     <main class="card" id="slideRoot" aria-live="polite">
       <!-- 画像 -->
       <div class="hero" aria-hidden="true">
-        <!-- 例：assets/images/tutorial_image01.png 〜 08.png を参照（未入稿ならプレースホルダ） -->
-        <img id="slideImg" src="assets/images/tutorial_image01.png" alt="チュートリアル画像">
+        <!-- 例：assets/images/tutorial_photos/tutorial_image01.png 〜 08.png を参照 -->
+        <img id="slideImg" src="assets/images/tutorial_photos/tutorial_image01.png" alt="チュートリアル画像">
       </div>
 
       <!-- テキスト：下1/4相当 -->
@@ -216,7 +221,7 @@
 
     function render(){
       const s = slides[idx];
-      imgEl.src = s.img;
+      imgEl.src = s.img;                // 1:1 画像（contain）で表示
       textEl.innerHTML = s.html;
 
       // 1ページ目のみ：規約スクロール＋同意
