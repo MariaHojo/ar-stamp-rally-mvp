@@ -8,36 +8,19 @@
   <style>
     :root{
       --accent:#005ABB;
-      --accent-weak:#e7f1ff;
-      --bg:#f7f8fb;
-      --card:#ffffff;
-      --text:#101418;
-      --muted:#5f6b7a;
-      --danger:#d63636;
-      --ring: rgba(0,90,187,.35);
-      --maxw: 860px;
-      --radius: 14px;
-      --shadow: 0 8px 26px rgba(16,20,24,.08);
-      --shadow-sm: 0 2px 10px rgba(16,20,24,.06);
-      --fs: clamp(15px, 1.1vw + .4rem, 18px);
-      --fs-sm: clamp(12px, .7vw + .3rem, 14px);
-      --fs-lg: clamp(18px, 1.2vw + .6rem, 22px);
-      --fs-xl: clamp(22px, 1.6vw + .8rem, 28px);
     }
-    html,body{margin:0;background:var(--bg);color:var(--text);font-size:var(--fs)}
-    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.6}
 
-    /* 右上：言語切替（既存スタイル微調整） */
+    /* 右上の言語アイコン（tutorial と同じテイスト・四角28px） */
     .lang-switch{position:fixed; right:12px; top:12px; z-index:2147483647}
     .lang-btn{
       appearance:none;border:0;background:#fff;border:1px solid #e3eaf6;border-radius:12px;
-      padding:6px; cursor:pointer; box-shadow:0 10px 28px rgba(0,0,0,.12)
+      padding:6px; cursor:pointer; box-shadow:0 10px 28px rgba(0,0,0,.15)
     }
-    .lang-btn:focus-visible{outline:3px solid var(--ring)}
+    .lang-btn:focus-visible{outline:3px solid rgba(0,90,187,.35)}
     .lang-icon{width:28px;height:28px;display:block}
     .lang-menu{
       position:absolute; right:0; margin-top:8px; background:#fff; border:1px solid #e3eaf6; border-radius:12px;
-      box-shadow:0 10px 28px rgba(0,0,0,.12); display:none; min-width:160px; overflow:hidden
+      box-shadow:0 10px 28px rgba(0,0,0,.15); display:none; min-width:160px; overflow:hidden
     }
     .lang-menu.is-open{display:block}
     .lang-item{
@@ -46,134 +29,152 @@
     }
     .lang-item:hover{background:#f2f6ff}
 
-    /* レイアウト */
-    .wrap{max-width:var(--maxw); margin: clamp(14px, 3vw, 28px) auto; padding: 0 12px;}
-    header .page-title{
-      font-size: var(--fs-xl);
-      margin: 6px 0 18px;
-      letter-spacing:.01em;
+    /* ====== レイアウト（端末に合わせた横幅/文字） ====== */
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; line-height:1.6; margin:0}
+    .wrap{
+      max-width:min(860px, 92vw);
+      margin:64px auto 24px;
+      padding: clamp(12px, 3vw, 20px);
     }
-
-    /* セクションはカードで囲う */
+    header h1{
+      margin:0 0 12px;
+      font-size:clamp(20px, 5.2vw, 28px);
+      line-height:1.25;
+    }
     .section{
-      background:var(--card);
-      border-radius: var(--radius);
-      border: 1px solid #e8edf5;
-      box-shadow: var(--shadow);
-      padding: clamp(14px, 2.2vw, 20px);
-      margin: 16px 0;
+      background:#fff;
+      border:1px solid #e9eef6;
+      border-radius:14px;
+      box-shadow:0 6px 20px rgba(0,0,0,.05);
+      padding: clamp(12px, 3.2vw, 18px);
+      margin: clamp(12px, 3.2vw, 18px) 0;
     }
     .sec-title{
-      margin: 0 0 10px;
-      font-size: var(--fs-lg);
-      line-height: 1.3;
-      letter-spacing: .01em;
+      margin:0 0 10px;
+      font-size: clamp(16px, 4.4vw, 20px);
+      line-height:1.3;
     }
     .note{
-      margin: 6px 0 14px;
-      color: var(--muted);
-      font-size: var(--fs-sm);
-      background: #f4f7fb;
-      border: 1px dashed #dfe7f5;
-      border-radius: 10px;
-      padding: 8px 10px;
+      margin:4px 0 10px;
+      font-size: clamp(12px, 3.2vw, 14px);
+      color:#444;
     }
 
-    /* フィールド塊 */
-    .field{
-      background: #fff;
-      border: 1px solid #edf1f7;
-      border-radius: 12px;
-      padding: 12px;
-      margin: 12px 0;
-      box-shadow: var(--shadow-sm);
-    }
+    /* ====== フィールド共通 ====== */
+    .field{ margin: 12px 0; }
     .label-row{
-      display:flex; align-items:baseline; gap:8px; margin-bottom:6px;
-      font-weight: 800; letter-spacing:.01em;
+      display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;
+      margin:0 0 6px;
     }
-    .label-row label{font-size: 1em;}
-    .req{
-      color: var(--danger);
-      font-size: var(--fs-sm);
-      font-weight: 800;
-    }
-    .hint{
-      font-size: var(--fs-sm);
-      color: var(--muted);
-      margin: 2px 0 8px;
-    }
-    .err{
-      display:none;
-      margin-top:8px;
-      color: var(--danger);
-      background: #fff1f1;
-      border: 1px solid #ffd9d9;
-      padding: 8px 10px;
-      border-radius: 8px;
-      font-size: var(--fs-sm);
-    }
+    .label-row label{ font-weight:800; font-size: clamp(14px, 4vw, 16px); }
+    .req{ color:#c00; font-size:11px; }
 
-    /* 年齢行（入力と単位） */
-    .age-row{display:flex; align-items:center; gap:8px;}
+    .hint{ font-size:12px; color:#666; margin:0 0 6px; }
+    .err{ display:none; color:#c00; font-size:12px; margin-top:6px; }
+
+    /* 年齢 */
+    .age-row{ display:flex; align-items:center; gap:6px; }
     .age-input{
-      flex:0 0 120px;
-      appearance:none; background:#fff; color:var(--text);
-      border:1px solid #dfe6f2; border-radius:10px;
-      padding:10px 12px; font-size:1rem;
-      box-shadow: inset 0 1px 0 rgba(16,20,24,.04);
+      width:90px;
+      font-size:16px;
+      padding:8px 10px;
+      border:1px solid #dfe6f0; border-radius:10px;
     }
-    .age-input:focus{outline:3px solid var(--ring); border-color:#bcd5f8}
-    .age-suffix{color:var(--muted); font-size:.95em}
+    .age-suffix{ font-size:14px; color:#333; }
 
-    /* ラジオ：大きめピル、選択状態を明確に */
+    /* ====== ラジオ（見た目改善 & 余白縮小） ====== */
     .likert, .yn{
-      display:flex; flex-wrap:wrap; gap:8px;
+      display:flex; gap:6px; flex-wrap:wrap;
     }
     .radio-pill{
       display:inline-flex; align-items:center; justify-content:center;
-      border:1.6px solid #d7e2f2; border-radius: 999px;
-      background: #fff; color:#0f1419; cursor:pointer;
-      padding: 10px 14px; min-width:44px; min-height:44px;
-      font-weight: 800; user-select:none; transition: all .14s ease;
+      border:1px solid #dfe6f0; border-radius:10px;
+      padding:6px 10px;                 /* ★余白を小さく */
+      background:#fff;
+      font-weight:800; font-size:14px;  /* ★文字もやや小さく */
+      line-height:1;
+      user-select:none;
+      position:relative;
+      min-height:36px;                  /* タップ面確保 */
     }
-    .radio-pill input{display:none}
-    .radio-pill span{display:inline-block; line-height:1}
-    .radio-pill:is(:hover,.is-active){ border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-weak); }
-    .radio-pill.is-active{ background: #f5faff; color:#0a3c74 }
+    .radio-pill input{
+      position:absolute; inset:0; opacity:0; margin:0; cursor:pointer;
+    }
+    .radio-pill.is-active,
+    .radio-pill:has(input:checked){
+      border-color:var(--accent);
+      box-shadow:0 0 0 2px rgba(0,90,187,.12) inset;
+    }
 
-    /* リッカート両端ラベル（小さめ） */
+    /* ラベルの 1〜5 スケール表示（端に注釈） */
     .likert-scale{
-      display:flex; justify-content:space-between; margin-top:6px; color:var(--muted); font-size: var(--fs-sm);
+      display:flex; justify-content:space-between;
+      font-size:12px; color:#666; margin-top:6px;
     }
 
-    /* セクション下の送信 */
-    .footer{ margin: 18px 0 8px; text-align:center; }
+    /* ====== 1〜5回答は「横一行で完結」 ======
+       長文の選択肢（*awareness）は例外で折り返し可能のまま */
+    /* 5段階の対象グループを列挙（可読性重視） */
+    .likert[data-name="hist_interest"],
+    .likert[data-name="preservation_interest"],
+    .likert[data-name="self_research"],
+    .likert[data-name="hist_change"],
+    .likert[data-name="preservation_change"],
+    .likert[data-name="panel_interest"],
+    .likert[data-name="archives_interest"],
+    .likert[data-name="fun"],
+    .likert[data-name="usability"]{
+      flex-wrap:nowrap;
+      justify-content:space-between;
+    }
+    .likert[data-name="hist_interest"] .radio-pill,
+    .likert[data-name="preservation_interest"] .radio-pill,
+    .likert[data-name="self_research"] .radio-pill,
+    .likert[data-name="hist_change"] .radio-pill,
+    .likert[data-name="preservation_change"] .radio-pill,
+    .likert[data-name="panel_interest"] .radio-pill,
+    .likert[data-name="archives_interest"] .radio-pill,
+    .likert[data-name="fun"] .radio-pill,
+    .likert[data-name="usability"] .radio-pill{
+      flex:1 1 20%;
+      padding:8px 0;          /* 数字のみなので左右余白さらに圧縮 */
+      max-width:none;
+    }
+
+    /* ====== 長文選択肢のグループ（横幅に収める工夫） ====== */
+    .likert[data-name="panel_awareness"],
+    .likert[data-name="archives_awareness"]{
+      /* スマホでは2列グリッド相当で折返し、横幅に収まる */
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:6px;
+    }
+    @media (min-width:700px){
+      /* 画面が広い時は3列まで拡張して詰める */
+      .likert[data-name="panel_awareness"],
+      .likert[data-name="archives_awareness"]{
+        grid-template-columns: repeat(3, minmax(0,1fr));
+      }
+    }
+    .likert[data-name="panel_awareness"] .radio-pill,
+    .likert[data-name="archives_awareness"] .radio-pill{
+      width:100%;
+      min-width:0;          /* ラベル長くても列崩れしない */
+      text-align:center;
+      white-space:normal;   /* 自由に改行可 */
+      padding:8px 10px;     /* 読みやすさは維持しつつ控えめに */
+      font-size:13px;       /* 少し小さめで詰める */
+      line-height:1.25;
+    }
+
+    /* 送信ボタン */
+    .footer{ margin-top: 16px; }
     .btn{
-      appearance:none; border:0; border-radius:12px;
-      padding: 14px 20px; font-weight: 900;
-      background: var(--accent); color:#fff; cursor:pointer;
-      width: clamp(220px, 40vw, 320px);
-      box-shadow: 0 10px 30px rgba(0,90,187,.25);
+      appearance:none; border:0; border-radius:12px; width:100%;
+      padding:14px 16px; background:var(--accent); color:#fff; font-weight:900;
+      box-shadow:0 10px 30px rgba(0,90,187,.25)
     }
-    .btn[aria-busy="true"]{ opacity:.7; cursor:wait }
-    .btn:focus-visible{ outline:3px solid var(--ring) }
-
-    /* 入力全体にフォーカスリング */
-    input:focus-visible, textarea:focus-visible{ outline:3px solid var(--ring) }
-
-    /* テキストエリア */
-    .textarea{
-      width:100%; min-height: 120px; resize: vertical;
-      border:1px solid #dfe6f2; border-radius:12px; padding:12px;
-      font-size:1rem; background:#fff;
-    }
-
-    /* 見出しと質問/回答のサイズ差 */
-    .field .label-row label{ font-size: 1.0rem; }
-    .field .likert .radio-pill,
-    .field .yn .radio-pill{ font-size: 1.0rem; }
-    .field .hint, .field .err{ font-size: var(--fs-sm); }
+    .btn[aria-busy="true"]{ opacity:.7; pointer-events:none }
   </style>
 </head>
 <body>
@@ -188,9 +189,10 @@
     </div>
   </div>
 
+  <!-- 既存のアンケート本文（質問は変更なし） -->
   <div class="wrap">
     <header>
-      <h1 class="page-title" data-i18n="survey.title">アンケート</h1>
+      <h1 data-i18n="survey.title">アンケート</h1>
     </header>
 
     <form id="surveyForm" novalidate>
@@ -201,8 +203,7 @@
         <!-- 年代（必須） -->
         <div class="field" id="f-age">
           <div class="label-row">
-            <label for="age" data-i18n="survey.age.label">年代</label>
-            <span class="req" data-i18n="common.required">*必須</span>
+            <label for="age" data-i18n="survey.age.label">年代</label><span class="req" data-i18n="common.required">*必須</span>
           </div>
           <div class="hint" data-i18n="survey.age.hint">半角数字で入力</div>
           <div class="age-row">
@@ -214,10 +215,7 @@
 
         <!-- 歴史に興味（必須） -->
         <div class="field" id="f-histInterest">
-          <div class="label-row">
-            <label data-i18n="survey.histInterest.label">歴史に興味があるか</label>
-            <span class="req" data-i18n="common.required">*必須</span>
-          </div>
+          <div class="label-row"><label data-i18n="survey.histInterest.label">歴史に興味があるか</label><span class="req" data-i18n="common.required">*必須</span></div>
           <div class="likert" data-name="hist_interest" role="radiogroup" aria-describedby="histInterestScale histInterestErr">
             <label class="radio-pill"><input type="radio" name="hist_interest" value="1"><span>1</span></label>
             <label class="radio-pill"><input type="radio" name="hist_interest" value="2"><span>2</span></label>
@@ -231,10 +229,7 @@
 
         <!-- 歴史資料の保存への関心（必須） -->
         <div class="field" id="f-presInterest">
-          <div class="label-row">
-            <label data-i18n="survey.presInterest.label">歴史資料の保存に関心があるか</label>
-            <span class="req" data-i18n="common.required">*必須</span>
-          </div>
+          <div class="label-row"><label data-i18n="survey.presInterest.label">歴史資料の保存に関心があるか</label><span class="req" data-i18n="common.required">*必須</span></div>
           <div class="likert" data-name="preservation_interest" role="radiogroup" aria-describedby="presInterestScale presInterestErr">
             <label class="radio-pill"><input type="radio" name="preservation_interest" value="1"><span>1</span></label>
             <label class="radio-pill"><input type="radio" name="preservation_interest" value="2"><span>2</span></label>
@@ -248,10 +243,7 @@
 
         <!-- 自主的に調べた経験（必須） -->
         <div class="field" id="f-selfResearch">
-          <div class="label-row">
-            <label data-i18n="survey.selfResearch.label">興味を持った歴史の事柄について、自主的に調べたことがあるか</label>
-            <span class="req" data-i18n="common.required">*必須</span>
-          </div>
+          <div class="label-row"><label data-i18n="survey.selfResearch.label">興味を持った歴史の事柄について、自主的に調べたことがあるか</label><span class="req" data-i18n="common.required">*必須</span></div>
           <div class="likert" data-name="self_research" role="radiogroup" aria-describedby="selfResearchScale selfResearchErr">
             <label class="radio-pill"><input type="radio" name="self_research" value="1"><span>1</span></label>
             <label class="radio-pill"><input type="radio" name="self_research" value="2"><span>2</span></label>
@@ -265,10 +257,7 @@
 
         <!-- アプリで歴史への興味の変化（必須） -->
         <div class="field" id="f-histChange">
-          <div class="label-row">
-            <label data-i18n="survey.histChange.label">本アプリを通して、歴史への興味に変化はあったか</label>
-            <span class="req" data-i18n="common.required">*必須</span>
-          </div>
+          <div class="label-row"><label data-i18n="survey.histChange.label">本アプリを通して、歴史への興味に変化はあったか</label><span class="req" data-i18n="common.required">*必須</span></div>
           <div class="likert" data-name="hist_change" role="radiogroup" aria-describedby="histChangeScale histChangeErr">
             <label class="radio-pill"><input type="radio" name="hist_change" value="1"><span>1</span></label>
             <label class="radio-pill"><input type="radio" name="hist_change" value="2"><span>2</span></label>
@@ -282,10 +271,7 @@
 
         <!-- アプリで保存への関心の変化（必須） -->
         <div class="field" id="f-presChange">
-          <div class="label-row">
-            <label data-i18n="survey.presChange.label">本アプリを通して、歴史資料の保存の関心に変化はあったか</label>
-            <span class="req" data-i18n="common.required">*必須</span>
-          </div>
+          <div class="label-row"><label data-i18n="survey.presChange.label">本アプリを通して、歴史資料の保存の関心に変化はあったか</label><span class="req" data-i18n="common.required">*必須</span></div>
           <div class="likert" data-name="preservation_change" role="radiogroup" aria-describedby="presChangeScale presChangeErr">
             <label class="radio-pill"><input type="radio" name="preservation_change" value="1"><span>1</span></label>
             <label class="radio-pill"><input type="radio" name="preservation_change" value="2"><span>2</span></label>
@@ -303,7 +289,7 @@
         <h2 class="sec-title" id="forICU" data-i18n="survey.forICU.title">ICU在学生・教職員の方へ（任意回答）</h2>
         <p class="note" data-i18n="survey.forICU.note">該当しない方・回答を希望しない方は、このセクションは空欄で構いません。</p>
 
-        <!-- パネル展示の認知 -->
+        <!-- パネル展示の認知（長文=折返しOK） -->
         <div class="field">
           <div class="label-row"><label data-i18n="survey.panelAwareness.label">ICU内の歴史関係の組織・展示について：パネル展示（例：本館173教室前）を知っていたか</label></div>
           <div class="likert" data-name="panel_awareness">
@@ -315,7 +301,7 @@
           </div>
         </div>
 
-        <!-- パネル展示への関心 -->
+        <!-- パネル展示への関心（1〜5 = 横一行） -->
         <div class="field">
           <div class="label-row"><label data-i18n="survey.panelInterest.label">本アプリを通して、パネル展示への関心が高まったか</label></div>
           <div class="likert" data-name="panel_interest">
@@ -330,7 +316,7 @@
         <!-- アーカイブズの説明 -->
         <p class="note" data-i18n="survey.archives.note">本アプリの写真や解説は、ICUアーカイブズ（ICUの歴史に関する資料や記録の保存・収集・提供を行う組織。図書館1階に展示室、2階に分室）にご協力いただき提供されています。</p>
 
-        <!-- アーカイブズ認知 -->
+        <!-- アーカイブズ認知（長文=折返しOK） -->
         <div class="field">
           <div class="label-row"><label data-i18n="survey.archivesAwareness.label">ICUアーカイブズのことを知っていたか</label></div>
           <div class="likert" data-name="archives_awareness">
@@ -342,7 +328,7 @@
           </div>
         </div>
 
-        <!-- アーカイブズ訪問 -->
+        <!-- アーカイブズ訪問（値はそのまま・表示文だけ翻訳） -->
         <div class="field">
           <div class="label-row"><label data-i18n="survey.archivesVisited.label">ICUアーカイブズを訪問したことがあるか</label></div>
           <div class="yn" data-name="archives_visited">
@@ -351,7 +337,7 @@
           </div>
         </div>
 
-        <!-- アーカイブズへの関心 -->
+        <!-- アーカイブズへの関心（1〜5 = 横一行） -->
         <div class="field">
           <div class="label-row"><label data-i18n="survey.archivesInterest.label">本アプリにより、ICUアーカイブズへの関心が高まったか</label></div>
           <div class="likert" data-name="archives_interest">
@@ -369,10 +355,7 @@
         <h2 class="sec-title" id="aboutApp" data-i18n="survey.aboutApp">アプリについて</h2>
 
         <div class="field" id="f-fun">
-          <div class="label-row">
-            <label data-i18n="survey.fun.label">面白かったか</label>
-            <span class="req" data-i18n="common.required">*必須</span>
-          </div>
+          <div class="label-row"><label data-i18n="survey.fun.label">面白かったか</label><span class="req" data-i18n="common.required">*必須</span></div>
           <div class="likert" data-name="fun" role="radiogroup" aria-describedby="funScale funErr">
             <label class="radio-pill"><input type="radio" name="fun" value="1"><span>1</span></label>
             <label class="radio-pill"><input type="radio" name="fun" value="2"><span>2</span></label>
@@ -385,10 +368,7 @@
         </div>
 
         <div class="field" id="f-usability">
-          <div class="label-row">
-            <label data-i18n="survey.usability.label">使いやすかったか</label>
-            <span class="req" data-i18n="common.required">*必須</span>
-          </div>
+          <div class="label-row"><label data-i18n="survey.usability.label">使いやすかったか</label><span class="req" data-i18n="common.required">*必須</span></div>
           <div class="likert" data-name="usability" role="radiogroup" aria-describedby="usabilityScale usabilityErr">
             <label class="radio-pill"><input type="radio" name="usability" value="1"><span>1</span></label>
             <label class="radio-pill"><input type="radio" name="usability" value="2"><span>2</span></label>
@@ -406,7 +386,7 @@
         <h2 class="sec-title" id="free" data-i18n="survey.free.title">自由記述欄（任意）</h2>
         <div class="field">
           <div class="label-row"><label for="free_text" data-i18n="survey.free.label">ご意見・ご感想など</label></div>
-          <textarea id="free_text" name="free_text" class="textarea" placeholder="ご自由にお書きください（任意）" data-i18n-ph="survey.free.ph"></textarea>
+          <textarea id="free_text" name="free_text" class="textarea" placeholder="ご自由にお書きください（任意）" data-i18n-ph="survey.free.ph" style="width:100%; min-height:110px; padding:10px; border:1px solid #dfe6f0; border-radius:10px;"></textarea>
         </div>
       </section>
 
@@ -416,7 +396,7 @@
     </form>
   </div>
 
-  <!-- 言語メニュー + 簡易i18n（既存） -->
+  <!-- 言語メニュー + 簡易i18n（元のまま） -->
   <script>
     (function(){
       const DICT = {
@@ -529,28 +509,13 @@
         const btn  = document.getElementById('langBtn');
         const menu = document.getElementById('langMenu');
         const items= menu?.querySelectorAll('.lang-item');
-        const open = (v)=>{
-          if (!menu || !btn) return;
-          menu.classList.toggle('is-open', v);
-          btn.setAttribute('aria-expanded', v ? 'true':'false');
-        };
-        btn?.addEventListener('click', (e)=>{
-          e.stopPropagation();
-          open(!menu.classList.contains('is-open'));
-        });
+        const open = (v)=>{ if (!menu || !btn) return; menu.classList.toggle('is-open', v); btn.setAttribute('aria-expanded', v ? 'true':'false'); };
+        btn?.addEventListener('click', (e)=>{ e.stopPropagation(); open(!menu.classList.contains('is-open')); });
         document.addEventListener('click', ()=> open(false));
-        items?.forEach(it=>{
-          it.addEventListener('click', ()=>{
-            const lang = it.dataset.lang || 'ja';
-            setLang(lang);
-            applyI18n(lang);
-          });
-        });
+        items?.forEach(it=>{ it.addEventListener('click', ()=>{ const lang = it.dataset.lang || 'ja'; setLang(lang); applyI18n(lang); }); });
       })();
 
-      document.addEventListener('DOMContentLoaded', ()=>{
-        applyI18n(getLang());
-      });
+      document.addEventListener('DOMContentLoaded', ()=>{ applyI18n(getLang()); });
     })();
   </script>
 
