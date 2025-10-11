@@ -2,74 +2,141 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>プライバシーポリシー・ご利用上の注意</title>
+  <title>プライバシーポリシー・ご利用上の注意 | ARスタンプラリー</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <link rel="stylesheet" href="css/style.css" />
   <style>
-    body{
-      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      margin:0;
-      background:#fff;
-      color:#111;
-      line-height:1.8;
+    :root{
+      --accent:#005ABB;
+      --text:#111;
+      --bg:#fff;
+      --muted:#444;
+      --container: 980px;
     }
-    .wrap{
-      max-width:720px;
-      margin:0 auto;
-      padding:clamp(14px,4vw,30px);
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.7}
+    .wrap{max-width:var(--container);margin:0 auto;padding:clamp(12px,3vw,18px)}
+    h1{font-size:22px;margin:0 0 12px;font-weight:900}
+    h2{font-size:18px;margin:18px 0 8px}
+    p{margin:.6em 0;color:#222}
+    .note{color:var(--muted)}
+
+    .card{
+      background:#fff;border:1px solid #e9eef6;border-radius:14px;
+      box-shadow:0 10px 30px rgba(0,0,0,.05);
+      padding:clamp(12px,3vw,18px);
     }
-    h1{
-      font-size:22px;
-      margin-bottom:10px;
-      font-weight:900;
-      color:#005ABB;
+
+    /* 言語スイッチ（右上） */
+    .lang-switch{position:fixed; right:12px; top:12px; z-index:2147483647}
+    .lang-btn{
+      appearance:none;border:0;background:#fff;border:1px solid #e3eaf6;border-radius:12px;
+      padding:6px; cursor:pointer; box-shadow:0 10px 28px rgba(0,0,0,.15)
     }
-    h2{
-      font-size:18px;
-      margin-top:24px;
-      color:#005ABB;
+    .lang-btn:focus-visible{outline:3px solid rgba(0,90,187,.35)}
+    .lang-icon{width:28px;height:28px;display:block}
+    .lang-menu{
+      position:absolute; right:0; margin-top:8px; background:#fff; border:1px solid #e3eaf6; border-radius:12px;
+      box-shadow:0 10px 28px rgba(0,0,0,.15); display:none; min-width:160px; overflow:hidden
     }
-    p{margin:6px 0 10px;}
-    .back{
-      display:inline-block;
-      margin-top:20px;
-      background:#005ABB;
-      color:#fff;
-      border-radius:12px;
-      padding:10px 16px;
-      text-decoration:none;
-      font-weight:700;
-      cursor:pointer;
-    }
+    .lang-menu.is-open{display:block}
+    .lang-item{display:block; width:100%; text-align:left; background:#fff; border:0; padding:10px 12px; cursor:pointer; font-weight:800; color:#000}
+    .lang-item:hover{background:#f2f6ff}
+
+    .back{display:inline-block;margin-top:14px}
+    .link{color:var(--accent);text-decoration:none;font-weight:800}
   </style>
 </head>
 <body>
+  <!-- 言語スイッチ -->
+  <div class="lang-switch" id="langSwitch">
+    <button id="langBtn" class="lang-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="langMenu">
+      <img class="lang-icon" src="assets/images/ui/lang.png" alt="言語 / Language">
+    </button>
+    <div id="langMenu" class="lang-menu" role="menu" aria-label="Language">
+      <button class="lang-item" data-lang="ja" role="menuitem">日本語</button>
+      <button class="lang-item" data-lang="en" role="menuitem">English</button>
+    </div>
+  </div>
+
   <div class="wrap">
-    <h1>プライバシーポリシー・ご利用上の注意</h1>
+    <h1 data-i18n="title">プライバシーポリシー・ご利用上の注意</h1>
+    <div class="card">
+      <h2 data-i18n="privacy.h">プライバシーポリシー</h2>
+      <p data-i18n="privacy.p1">本アプリケーションは大学の卒業研究の一環として実施されています。アンケート等でご記入いただいた情報は、本研究における分析目的のみに使用し、研究目的以外には一切利用いたしません。</p>
+      <p data-i18n="privacy.p2">収集したデータは、個人を特定できない形に匿名化したうえで統計的に処理・分析を行います。分析結果を公表する際にも、個人を識別出来る情報が含まれることはありません。</p>
+      <p data-i18n="privacy.p3">また、利用者の同意なく第三者に個人情報を提供することはありません。</p>
+      <p data-i18n="privacy.p4">本アプリケーションは無料でご使用いただけますが、通信にかかる費用（モバイル通信料など）は利用者のご負担となります。</p>
 
-    <h2>プライバシーポリシー</h2>
-    <p>本アプリケーションは大学の卒業研究の一環として実施されています。アンケート等でご記入いただいた情報は、本研究における分析目的のみに使用し、研究目的以外には一切利用いたしません。</p>
-    <p>収集したデータは、個人を特定できない形に匿名化したうえで統計的に処理・分析を行います。分析結果を公表する際にも、個人を識別出来る情報が含まれることはありません。</p>
-    <p>また、利用者の同意なく第三者に個人情報を提供することはありません。</p>
-    <p>本アプリケーションは無料でご使用いただけますが、通信にかかる費用（モバイル通信料など）は利用者のご負担となります。</p>
+      <h2 data-i18n="terms.h">ご利用上の注意</h2>
+      <p data-i18n="terms.p1">本アプリは、AR（拡張現実）を用いた体験型コンテンツを含み、歩行や屋外での利用を伴う場合があります。ご利用の際は、周囲の安全に十分ご注意ください。また、AR利用中の事故・ケガ・機器の破損などについて、運営は一切の責任を負いかねます。</p>
+      <p class="note" data-i18n="terms.p2">※端末のバッテリー残量や通信環境にもご注意ください。屋外では日射・天候・足元などの状況に合わせ、無理のない範囲でご利用ください。</p>
 
-    <h2>ご利用上の注意</h2>
-    <p>本アプリは、AR（拡張現実）を用いた体験型コンテンツを含み、歩行や屋外での利用を伴う場合があります。ご利用の際は、周囲の安全に十分ご注意ください。また、AR利用中の事故・ケガ・機器の破損などについて、運営は一切の責任を負いかねます。</p>
-
-    <a id="backBtn" class="back" href="#">戻る</a>
+      <a class="back link" href="map.html" data-i18n="back">← マップへ戻る</a>
+    </div>
   </div>
 
   <script>
-    // 版数クエリ（キャッシュ回避）— 他ページと同じ仕組みに合わせます
-    if (!window.withV) {
-      window.BUILD_V = window.BUILD_V || '20251005';
-      window.withV = (url) => url + (url.includes('?') ? '&' : '?') + 'v=' + window.BUILD_V;
-    }
+    (function(){
+      const DICT = {
+        ja: {
+          'title':'プライバシーポリシー・ご利用上の注意',
+          'privacy.h':'プライバシーポリシー',
+          'privacy.p1':'本アプリケーションは大学の卒業研究の一環として実施されています。アンケート等でご記入いただいた情報は、本研究における分析目的のみに使用し、研究目的以外には一切利用いたしません。',
+          'privacy.p2':'収集したデータは、個人を特定できない形に匿名化したうえで統計的に処理・分析を行います。分析結果を公表する際にも、個人を識別出来る情報が含まれることはありません。',
+          'privacy.p3':'また、利用者の同意なく第三者に個人情報を提供することはありません。',
+          'privacy.p4':'本アプリケーションは無料でご使用いただけますが、通信にかかる費用（モバイル通信料など）は利用者のご負担となります。',
+          'terms.h':'ご利用上の注意',
+          'terms.p1':'本アプリは、AR（拡張現実）を用いた体験型コンテンツを含み、歩行や屋外での利用を伴う場合があります。ご利用の際は、周囲の安全に十分ご注意ください。また、AR利用中の事故・ケガ・機器の破損などについて、運営は一切の責任を負いかねます。',
+          'terms.p2':'※端末のバッテリー残量や通信環境にもご注意ください。屋外では日射・天候・足元などの状況に合わせ、無理のない範囲でご利用ください。',
+          'back':'← マップへ戻る'
+        },
+        en: {
+          'title':'Privacy Policy & Cautions for Use',
+          'privacy.h':'Privacy Policy',
+          'privacy.p1':'This application is conducted as part of a university graduation research project. Any information you provide (e.g., in the survey) will be used solely for analysis within this research and will not be used for any other purposes.',
+          'privacy.p2':'Collected data will be anonymized so individuals cannot be identified and will be processed and analyzed statistically. Even when publishing results, no personally identifiable information will be included.',
+          'privacy.p3':'We will not provide personal information to third parties without the user’s consent.',
+          'privacy.p4':'This application is free to use; however, any communication costs (e.g., mobile data charges) are borne by the user.',
+          'terms.h':'Cautions for Use',
+          'terms.p1':'This app includes AR (augmented reality) experiences and may involve walking and outdoor use. Please pay close attention to your surroundings for safety. The organizers cannot be held responsible for any accidents, injuries, or device damage that may occur during AR use.',
+          'terms.p2':'* Please also be mindful of your device’s battery and network conditions. When outdoors, use the app within reasonable limits according to sunlight, weather, and footing.',
+          'back':'← Back to Map'
+        }
+      };
 
-    document.getElementById('backBtn').addEventListener('click', function (e) {
-      e.preventDefault();
-      // 直接 map.html の最新へ遷移（history.back() は使わない）
-      location.href = withV('map.html');
-    }, {passive:false});
+      function getLang(){ try { return localStorage.getItem('app_lang') || 'ja'; } catch { return 'ja'; } }
+      function setLang(v){ try { localStorage.setItem('app_lang', v); } catch{} }
+      function applyI18n(lang){
+        const dict = DICT[lang] || DICT.ja;
+        document.querySelectorAll('[data-i18n]').forEach(el=>{
+          const k = el.getAttribute('data-i18n');
+          if (dict[k] != null) el.textContent = dict[k];
+        });
+        document.documentElement.setAttribute('lang', lang==='en'?'en':'ja');
+        document.title = (lang==='en') ? 'Privacy Policy & Cautions | AR Stamp Rally' : 'プライバシーポリシー・ご利用上の注意 | ARスタンプラリー';
+      }
+
+      // 言語メニュー
+      (function initLangMenu(){
+        const btn  = document.getElementById('langBtn');
+        const menu = document.getElementById('langMenu');
+        const items= menu?.querySelectorAll('.lang-item');
+        const open = (v)=>{ menu.classList.toggle('is-open', v); btn.setAttribute('aria-expanded', v ? 'true':'false'); };
+        btn?.addEventListener('click', (e)=>{ e.stopPropagation(); open(!menu.classList.contains('is-open')); });
+        document.addEventListener('click', ()=> open(false));
+        items?.forEach(it=>{
+          it.addEventListener('click', ()=>{
+            const lang = it.dataset.lang || 'ja';
+            setLang(lang);
+            applyI18n(lang);
+          });
+        });
+      })();
+
+      document.addEventListener('DOMContentLoaded', ()=>{
+        applyI18n(getLang());
+      });
+    })();
   </script>
 </body>
 </html>
