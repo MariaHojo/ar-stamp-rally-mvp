@@ -14,132 +14,170 @@
       --muted:#444;
       --bg:#fff;
       --card:#ffffff;
-      --shadow:0 12px 28px rgba(0,0,0,.08);
       --radius:16px;
-      --link:#0a58ca;
+      --shadow:0 12px 32px rgba(0,0,0,.08);
     }
-    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.75}
-    .wrap{max-width:960px;margin:0 auto;padding:clamp(12px,3vw,18px);min-height:100vh;display:flex;flex-direction:column;gap:12px}
-    header{padding:2px 0 6px}
-    h1{margin:0;font-size:22px;font-weight:900;color:var(--accent)}
-    h2{font-size:18px;margin:20px 0 10px;color:#0c4ea0}
-    p{margin:.55em 0}
-    a{color:var(--link);text-decoration:none}
-    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:clamp(12px,3vw,18px)}
-    .toc h2{margin-top:0}
-    .toc-list{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:6px}
-    .toc-list a{display:block;padding:10px 12px;border:1px solid #e3eaf6;border-radius:12px;background:#f8fbff;font-weight:700;color:var(--accent)}
-    .section{scroll-margin-top:18px}
-    .note{font-size:14px;color:#333}
-    .placeholder{
-      border:1px dashed #c9d6ee;background:#f6f8fe;border-radius:12px;min-height:120px;
-      display:flex;align-items:center;justify-content:center;color:#6b7ea6;font-weight:700
-    }
-    .list{margin:.2em 0 .2em 1.2em}
-    .columns{display:grid;gap:12px}
-    @media (min-width:720px){ .columns{grid-template-columns:1fr 1fr} }
-
-    .backRow{margin:10px 0 0;display:flex;gap:10px;flex-wrap:wrap}
-    .btn{
-      appearance:none;border:0;border-radius:12px;padding:14px 16px;font-weight:900;cursor:pointer;
-      background:var(--accent);color:#fff;box-shadow:0 10px 28px rgba(0,90,187,.22)
-    }
-    .btn-ghost{background:#e9eef6;color:#111;box-shadow:none}
-    .footerSpace{height:max(10px, env(safe-area-inset-bottom))}
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.6}
+    .wrap{max-width:960px;margin:0 auto;padding:clamp(10px,3vw,16px)}
+    header{display:flex;align-items:center;gap:10px;padding:4px 0 10px}
+    h1{font-size:22px;margin:0;font-weight:900}
+    .back{margin-left:auto}
+    .back a{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:10px 14px;border-radius:12px;font-weight:800}
+    nav.toc{background:#f7f9fe;border:1px solid #e3eaf6;border-radius:12px;padding:12px;box-shadow:var(--shadow);margin:8px 0 18px}
+    nav.toc a{color:var(--accent);text-decoration:none}
+    nav.toc ul{margin:6px 0 0 1.2em;padding:0}
+    nav.toc li{margin:6px 0}
+    section.card{background:var(--card);border:1px solid #e9eef6;border-radius:var(--radius);box-shadow:var(--shadow);padding:clamp(12px,2.4vw,18px);margin:14px 0}
+    section.card h2{margin:.2em 0 .4em;font-size:20px}
+    section.card h3{margin:1.0em 0 .4em;font-size:18px}
+    p{margin:.5em 0}
+    figure{margin:10px 0; background:#fff; border:1px solid #e9eef6; border-radius:12px; overflow:hidden}
+    .ph{width:100%; aspect-ratio:1/1; object-fit:cover; display:block} /* 1:1の写真表示 */
+    figcaption{font-size:13px;color:#333;padding:8px 10px;background:#f9fbff;border-top:1px solid #e9eef6}
+    .note{font-size:13px;color:#555}
+    footer{margin:18px 0 6px;color:#555;font-size:13px}
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <h1>スペシャルコンテンツ</h1>
-      <p class="note" style="margin-top:6px">※アンケートにご回答いただいた方へのお礼コンテンツです。</p>
+      <div class="back"><a href="map.html">マップへ戻る</a></div>
     </header>
 
     <!-- 目次 -->
-    <section class="card toc" aria-labelledby="tocTitle">
-      <h2 id="tocTitle">目次</h2>
-      <ul class="toc-list">
-        <li><a href="#about">このページの説明</a></li>
-        <li><a href="#extra-photos">ARスタンプラリーに載せられなかった写真</a></li>
-        <li><a href="#other-spots">ARスタンプラリーで紹介できなかったスポットの写真</a></li>
-        <li><a href="#partners">協力者一覧・アクセス</a></li>
-        <li><a href="#thanks">感謝の言葉</a></li>
+    <nav class="toc" aria-label="目次">
+      <strong>目次</strong>
+      <ul>
+        <li><a href="#about-page">ページの説明</a></li>
+        <li><a href="#more-spots">ARスタンプラリーで紹介できなかったスポットの写真</a></li>
+        <li><a href="#about-archives">ICUアーカイブズについて</a></li>
       </ul>
-    </section>
+    </nav>
 
     <!-- 1. このページの説明 -->
-    <section id="about" class="card section" aria-labelledby="aboutTitle">
-      <h2 id="aboutTitle">1. このページの説明</h2>
+    <section id="about-page" class="card">
+      <h2>1. このページの説明</h2>
       <p>
-        アンケートにご回答いただきありがとうございます。以下は本編で載せきることが出来なかった写真や今回のスタンプラリーでは紹介できないICUの面白い歴史を持つスポットの写真と、その解説が書かれています。
-        次に、今回このアプリを作成するにあたりご協力いただいたICUアーカイブズについてやその活動・アクセス情報、ICUの歴史を学びたいときに有用な団体の情報やアクセスを載せております。
+        アンケートにご回答いただきありがとうございます。このページでは今回のスタンプラリーでは紹介できなかったICUの
+        面白い歴史を持つスポットの写真と、その解説が書かれています。次に、今回このアプリを作成するにあたりご協力いただいた
+        ICUアーカイブズについてやその活動・アクセス情報を載せております。
       </p>
     </section>
 
-    <!-- 2. 載せられなかった写真 -->
-    <section id="extra-photos" class="card section" aria-labelledby="extraPhotosTitle">
-      <h2 id="extraPhotosTitle">2. ARスタンプラリーに載せられなかった写真</h2>
-      <div class="columns">
-        <div class="placeholder">
-          <h3>本館</h3>
-          <figure>
-            <img src="assets/images/special_photos/本館正面_1950年_改修前.jpg" alt="アメリカンナイト_1961">
-            <figcaption>アメリカンナイト_1961</figcaption>
-          </figure>
-          <p></p>
-          <h3>ガッキ</h3>
-          <figure>
-            <img src="assets/images/special_photos/アメリカンナイト_1961.jpg" alt="アメリカンナイト_1961">
-            <figcaption>アメリカンナイト_1961</figcaption>
-          </figure>
-          <p></p>
-        
-        </div>
-        <div class="placeholder">! 内容未定（写真や解説をここに追加）</div>
-      </div>
+    <!-- 2. まだ紹介していないスポットについて -->
+    <section id="more-spots" class="card">
+      <h2>2. まだ紹介していないスポットについて</h2>
+
+      <h3>・ICUの農場（1952–1953年ごろ）</h3>
+      <p>ICUの中で暮らせるように、ICUには昔農場があったんだ。下の3つの写真は、全部1952–1953年に撮られたものだよ。</p>
+
+      <figure>
+        <img class="ph" src="assets/images/special_photos/special_sec2_3.jpg" alt="トウモロコシの種まきの様子（1952–1953）">
+        <figcaption>今の府中自動車運転免許試験場の近くで、トウモロコシの種をまいているところだね。</figcaption>
+      </figure>
+
+      <figure>
+        <img class="ph" src="assets/images/special_photos/special_sec2_2.jpg" alt="鶏舎の近く（1952–1953）">
+        <figcaption>これは鶏舎の近く。</figcaption>
+      </figure>
+
+      <figure>
+        <img class="ph" src="assets/images/special_photos/special_sec2_1.jpg" alt="牛舎の近く（1952–1953）">
+        <figcaption>これは牛舎の近くで撮られていると思われるよ！</figcaption>
+      </figure>
+
+      <p>
+        ICUではかつて、”ICU牛乳”の名前で牛乳が（学外にも！）市販されてたんだ。1956年には食堂裏手への移設が承認されているから、
+        その前からあったんだね。1970年に製造を中止してしまったよ。ジャージー種乳牛から生産された高品質ミルクとして知られ、
+        表面に浮いた固形脂肪分で、ふたを取ってひっくり返してもこぼれなかったとの話が伝わっているよ。この時に使っていた牛乳瓶を、
+        図書館1階のアーカイブズ展示室で展示しているから、興味がある人はぜひ見ていってね！
+      </p>
+
+      <h3>・D館（ディッフェンドルファー記念館）</h3>
+
+      <figure>
+        <img class="ph" src="assets/images/special_photos/special_sec2_4.jpg" alt="D館 外観（年代不詳）">
+        <figcaption>ディッフェンドルファー記念館、通称D館。東棟と西棟があるよ。</figcaption>
+      </figure>
+
+      <p>
+        これもむかーしからある建物で、東棟と西棟があるよ。東棟は1958年に完成しているから、そろそろ70歳かな？
+        ここにはスナックバーと呼ばれる売店があったんだ。コーヒーを出すようなカウンターもあって、今でもカウンターがあった場所は床の色が違うんだよ！
+      </p>
+
+      <figure>
+        <img class="ph" src="assets/images/special_photos/special_sec2_5.jpg" alt="D館 内部・施設（年代不詳）">
+        <figcaption>郵便局もここに入っていたし、地下には美容室があったんだ。</figcaption>
+      </figure>
+
+      <p>
+        そして、D館4階のガラスは古くて、歪んでいるのが分かるよ。この窓のアルミサッシは日本で最も古いものなんだよ！
+        解説パネルがあるので、ぜひ地下から4階まで行って、読んでみてね。
+      </p>
+
+      <h3>・三軒家</h3>
+      <p>
+        ICUを上から見ると、A駐車場の横からILC館(8番)までまっすぐななめに道があるのが分かるかな？ここには「三軒家」と呼ばれていたところがあったんだよ。
+      </p>
+
+      <figure>
+        <img class="ph" src="assets/images/special_photos/special_sec2_9.jpg" alt="ICU全景（上空・現在）">
+        <figcaption>現在の上空写真。斜めの道筋が見えるね。</figcaption>
+      </figure>
+
+      <figure>
+        <img class="ph" src="assets/images/special_photos/special_sec2_6.jpg" alt="三軒家 周辺の様子（資料写真1）">
+        <figcaption>三軒家付近（資料写真）。</figcaption>
+      </figure>
+
+      <figure>
+        <img class="ph" src="assets/images/special_photos/special_sec2_7.jpg" alt="三軒家 周辺の様子（資料写真2）">
+        <figcaption>三軒家付近（資料写真）。</figcaption>
+      </figure>
+
+      <p>下の拡大写真を見ると、「三軒家」という文字が見て取れるね。鎌倉時代にはこのあたりに幹線街道があったとされるよ。</p>
+
+      <figure>
+        <img class="ph" src="assets/images/special_photos/special_sec2_8.jpg" alt="三軒家 表記の拡大">
+        <figcaption>三軒家の文字が確認できる拡大図。</figcaption>
+      </figure>
+
+      <p>これは現代の写真だけど、この横の木々も武蔵野の原生林なんだ。</p>
     </section>
 
-    <!-- 3. その他のスポット -->
-    <section id="other-spots" class="card section" aria-labelledby="otherSpotsTitle">
-      <h2 id="otherSpotsTitle">3. その他のスポットについて</h2>
-      <div class="placeholder">! 内容未定（スポット写真・解説をここに追加）</div>
+    <!-- 3. 協力者（ICUアーカイブズ） -->
+    <section id="about-archives" class="card">
+      <h2>3. 協力者</h2>
+      <h3>ICUアーカイブズ様</h3>
+      <p>
+        今回、ほとんどの写真資料や、その解説文を書くにあたっての情報などを提供していただきました。
+        この場を借りて心より感謝申し上げます。
+      </p>
+      <p>
+        ICUアーカイブズ様の活動内容は以下の通りです。<br>
+        「ICUアーカイブズは大学歴史資料室の後継組織として2020年9月に発足しました。ICUアーカイブズは国際基督教大学の歴史に関する資料および大学の行政記録の収集・整理・保存・提供を行っています。」<br>
+        （「ICUアーカイブズについて」ICUアーカイブズ）
+      </p>
+      <p>
+        図書館の一階に展示室、二階に分室があります。ICUの歴史が詰まった大変興味深い場所ですので、ご訪問なさってください。
+      </p>
+      <p class="note">
+        HPリンクはこちらです：<a href="https://www-lib.icu.ac.jp/Archives/index.htm" target="_blank" rel="noopener">https://www-lib.icu.ac.jp/Archives/index.htm</a>
+      </p>
     </section>
 
-    <!-- 4. 協力者一覧・アクセス -->
-    <section id="partners" class="card section" aria-labelledby="partnersTitle">
-      <h2 id="partnersTitle">4. 協力者一覧・アクセス</h2>
-      <h3 style="margin:.4em 0 0">ICUアーカイブズ</h3>
-      <ul class="list">
-        <li>ご協力内容：資料提供・史料監修 など（※具体を後日追記）</li>
-        <li>活動内容：ICUに関する歴史資料の保存・公開（※後日追記）</li>
-        <li>公式サイト：<a href="#" rel="noopener">（リンク未設定）</a></li>
-        <li>アクセス：<span class="note">（後日追記）</span></li>
-      </ul>
-
-      <h3 style="margin:14px 0 0">湯浅八郎記念館</h3>
-      <ul class="list">
-        <li>紹介：<span class="note">（後日追記）</span></li>
-        <li>公式情報：<a href="#" rel="noopener">（リンク未設定）</a></li>
-      </ul>
-
-      <h3 style="margin:14px 0 0">泰山荘プロジェクト</h3>
-      <ul class="list">
-        <li>紹介：<span class="note">（後日追記）</span></li>
-        <li>公式情報：<a href="#" rel="noopener">（リンク未設定）</a></li>
-      </ul>
-    </section>
-
-    <!-- 5. 感謝の言葉 -->
-    <section id="thanks" class="card section" aria-labelledby="thanksTitle">
-      <h2 id="thanksTitle">5. 感謝の言葉</h2>
-      <p>ここまで見てくれてありがとう！皆も自分で調べてみてね。</p>
-      <div class="backRow">
-        <a class="btn" href="map.html">マップへ戻る</a>
-        <a class="btn-ghost" href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">ページ上部へ</a>
-      </div>
-    </section>
-
-    <div class="footerSpace"></div>
+    <footer>
+      <a href="map.html">← マップへ戻る</a>
+    </footer>
   </div>
+
+  <script>
+    // 既定のキャッシュバスター（firebase.js が未読でも動くフォールバック）
+    if (!window.withV) {
+      window.BUILD_V = window.BUILD_V || '20251005';
+      window.withV = (url) => url + (url.includes('?') ? '&' : '?') + 'v=' + window.BUILD_V;
+    }
+  </script>
 </body>
 </html>
