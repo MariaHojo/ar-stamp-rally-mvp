@@ -259,8 +259,7 @@
             p2:'ICUアーカイブズ様の活動内容は以下の通りです。<br>「ICUアーカイブズは大学歴史資料室の後継組織として2020年9月に発足しました。ICUアーカイブズは国際基督教大学の歴史に関する資料および大学の行政記録の収集・整理・保存・提供を行っています。」<br>（「ICUアーカイブズについて」ICUアーカイブズ）',
             p3:'図書館の一階に展示室、二階に分室があります。ICUの歴史が詰まった大変興味深い場所ですので、ぜひご興味を持たれた方は訪れてみてください。',
             linkLabel:'HPリンクはこちらです：'
-          },
-          toc: { }, // placeholder to avoid errors
+          }
         },
         en: {
           title: 'Special Content | AR Stamp Rally',
@@ -299,7 +298,7 @@
               p2:'From the ICU website: an aerial map where you can see the diagonal route.',
               cap1:'Source: “Map around the ICU site – Vories Architectural Office (Blueprint: Diazo print)” L-243-00-001, ICU Archives, Mitaka, Tokyo',
               cap2:'Source: “Map around the ICU site – Vories Architectural Office (Blueprint: Diazo print)” L-243-00-001, ICU Archives, Mitaka, Tokyo',
-              p3:'In the enlarged image below, you can read the words “Sangen-ya, 三軒家.” The diagonal road beneath the label is the same one visible on the current map. It is said that a main road existed around here in the Kamakura period.',
+              p3:'In the enlarged image below, you can read the words “Sangen-ya 三軒家.” The diagonal road beneath the label is the same one visible on the current map. It is said that a main road existed around here in the Kamakura period.',
               cap3:'It’s a long road indeed!',
               p4:'This is a modern photograph, but the trees along the side are part of the native Musashino forest.'
             }
@@ -332,7 +331,7 @@
           if (val != null) el.innerHTML = val;
         });
 
-        // Title element needs special care
+        // Title element
         const titleEl = document.querySelector('title[data-i18n="title"]');
         if (titleEl) titleEl.textContent = d.title || 'Special Content | AR Stamp Rally';
 
