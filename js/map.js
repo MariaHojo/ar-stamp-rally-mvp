@@ -28,12 +28,12 @@ const COMPLETE_TARGET = 6;
 
 /* ====== 表示名・写真パス ====== */
 const SPOT_LABELS = {
-  spot1: '本館 H-173',
-  spot2: 'T館',
-  spot3: '学生食堂（ガッキ）前',
-  spot4: 'チャペル前',
-  spot5: '体育館（Pec-A）前',
-  spot6: '本館307前',
+  spot1: '本館 1F<br>University Hall 1F',
+  spot2: 'T館<br>Troyer Memorial Arts and Science Hall',
+  spot3: '大学食堂<br>Cafeteria',
+  spot4: 'チャペル<br>Chapel',
+  spot5: '新体育館<br>PEC-A',
+  spot6: '<h2>Goal</h2>本館 3F<br>University Hall 3F',
 };
 const photoSrc = (spotId) => {
   const nn = String(spotId.replace('spot','')).padStart(2,'0');
