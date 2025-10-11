@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <link rel="stylesheet" href="css/style.css" />
   <style>
+    /* 右上の言語アイコン（tutorial と同じテイスト・四角28px） */
     .lang-switch{position:fixed; right:12px; top:12px; z-index:2147483647}
     .lang-btn{
       appearance:none;border:0;background:#fff;border:1px solid #e3eaf6;border-radius:12px;
@@ -18,7 +19,10 @@
       box-shadow:0 10px 28px rgba(0,0,0,.15); display:none; min-width:160px; overflow:hidden
     }
     .lang-menu.is-open{display:block}
-    .lang-item{display:block; width:100%; text-align:left; background:#fff; border:0; padding:10px 12px; cursor:pointer; font-weight:800}
+    .lang-item{
+      display:block; width:100%; text-align:left; background:#fff; border:0; padding:10px 12px;
+      cursor:pointer; font-weight:800; color:#000; /* ←選択言語テキストは黒 */
+    }
     .lang-item:hover{background:#f2f6ff}
   </style>
 </head>
@@ -34,33 +38,33 @@
     </div>
   </div>
 
-  <!-- ここから既存のアンケート本文（単一の <body> 内に統合） -->
+  <!-- ここから既存のアンケート本文（貼付版 UIを維持） -->
   <div class="wrap">
     <header>
-      <h1>アンケート</h1>
+      <h1 data-i18n="survey.title">アンケート</h1>
     </header>
 
     <form id="surveyForm" novalidate>
       <!-- あなたについて -->
       <section class="section" aria-labelledby="aboutYou">
-        <h2 class="sec-title" id="aboutYou">あなたについて</h2>
+        <h2 class="sec-title" id="aboutYou" data-i18n="survey.aboutYou">あなたについて</h2>
 
         <!-- 年代（必須） -->
         <div class="field" id="f-age">
           <div class="label-row">
-            <label for="age">年代</label><span class="req">*必須</span>
+            <label for="age" data-i18n="survey.age.label">年代</label><span class="req" data-i18n="common.required">*必須</span>
           </div>
-          <div class="hint">半角数字で入力</div>
+          <div class="hint" data-i18n="survey.age.hint">半角数字で入力</div>
           <div class="age-row">
             <input id="age" name="age" class="age-input" type="tel" inputmode="numeric" pattern="[0-9]*" placeholder="18" aria-describedby="ageErr" />
-            <span class="age-suffix">歳</span>
+            <span class="age-suffix" data-i18n="survey.age.suffix">歳</span>
           </div>
-          <div class="err" id="ageErr">年代（年齢）を半角数字で入力してください。</div>
+          <div class="err" id="ageErr" data-i18n="survey.age.err">年代（年齢）を半角数字で入力してください。</div>
         </div>
 
         <!-- 歴史に興味（必須） -->
         <div class="field" id="f-histInterest">
-          <div class="label-row"><label>歴史に興味があるか</label><span class="req">*必須</span></div>
+          <div class="label-row"><label data-i18n="survey.histInterest.label">歴史に興味があるか</label><span class="req" data-i18n="common.required">*必須</span></div>
           <div class="likert" data-name="hist_interest" role="radiogroup" aria-describedby="histInterestScale histInterestErr">
             <label class="radio-pill"><input type="radio" name="hist_interest" value="1"><span>1</span></label>
             <label class="radio-pill"><input type="radio" name="hist_interest" value="2"><span>2</span></label>
@@ -68,13 +72,13 @@
             <label class="radio-pill"><input type="radio" name="hist_interest" value="4"><span>4</span></label>
             <label class="radio-pill"><input type="radio" name="hist_interest" value="5"><span>5</span></label>
           </div>
-          <div class="likert-scale" id="histInterestScale"><span>そう思わない</span><span>そう思う</span></div>
-          <div class="err" id="histInterestErr">1〜5のいずれかを選択してください。</div>
+          <div class="likert-scale" id="histInterestScale"><span data-i18n="common.disagree">そう思わない</span><span data-i18n="common.agree">そう思う</span></div>
+          <div class="err" id="histInterestErr" data-i18n="common.likertErr">1〜5のいずれかを選択してください。</div>
         </div>
 
         <!-- 歴史資料の保存への関心（必須） -->
         <div class="field" id="f-presInterest">
-          <div class="label-row"><label>歴史資料の保存に関心があるか</label><span class="req">*必須</span></div>
+          <div class="label-row"><label data-i18n="survey.presInterest.label">歴史資料の保存に関心があるか</label><span class="req" data-i18n="common.required">*必須</span></div>
           <div class="likert" data-name="preservation_interest" role="radiogroup" aria-describedby="presInterestScale presInterestErr">
             <label class="radio-pill"><input type="radio" name="preservation_interest" value="1"><span>1</span></label>
             <label class="radio-pill"><input type="radio" name="preservation_interest" value="2"><span>2</span></label>
@@ -82,13 +86,13 @@
             <label class="radio-pill"><input type="radio" name="preservation_interest" value="4"><span>4</span></label>
             <label class="radio-pill"><input type="radio" name="preservation_interest" value="5"><span>5</span></label>
           </div>
-          <div class="likert-scale" id="presInterestScale"><span>そう思わない</span><span>そう思う</span></div>
-          <div class="err" id="presInterestErr">1〜5のいずれかを選択してください。</div>
+          <div class="likert-scale" id="presInterestScale"><span data-i18n="common.disagree">そう思わない</span><span data-i18n="common.agree">そう思う</span></div>
+          <div class="err" id="presInterestErr" data-i18n="common.likertErr">1〜5のいずれかを選択してください。</div>
         </div>
 
         <!-- 自主的に調べた経験（必須） -->
         <div class="field" id="f-selfResearch">
-          <div class="label-row"><label>興味を持った歴史の事柄について、自主的に調べたことがあるか</label><span class="req">*必須</span></div>
+          <div class="label-row"><label data-i18n="survey.selfResearch.label">興味を持った歴史の事柄について、自主的に調べたことがあるか</label><span class="req" data-i18n="common.required">*必須</span></div>
           <div class="likert" data-name="self_research" role="radiogroup" aria-describedby="selfResearchScale selfResearchErr">
             <label class="radio-pill"><input type="radio" name="self_research" value="1"><span>1</span></label>
             <label class="radio-pill"><input type="radio" name="self_research" value="2"><span>2</span></label>
@@ -96,13 +100,13 @@
             <label class="radio-pill"><input type="radio" name="self_research" value="4"><span>4</span></label>
             <label class="radio-pill"><input type="radio" name="self_research" value="5"><span>5</span></label>
           </div>
-          <div class="likert-scale" id="selfResearchScale"><span>そう思わない</span><span>そう思う</span></div>
-          <div class="err" id="selfResearchErr">1〜5のいずれかを選択してください。</div>
+          <div class="likert-scale" id="selfResearchScale"><span data-i18n="common.disagree">そう思わない</span><span data-i18n="common.agree">そう思う</span></div>
+          <div class="err" id="selfResearchErr" data-i18n="common.likertErr">1〜5のいずれかを選択してください。</div>
         </div>
 
         <!-- アプリで歴史への興味の変化（必須） -->
         <div class="field" id="f-histChange">
-          <div class="label-row"><label>本アプリを通して、歴史への興味に変化はあったか</label><span class="req">*必須</span></div>
+          <div class="label-row"><label data-i18n="survey.histChange.label">本アプリを通して、歴史への興味に変化はあったか</label><span class="req" data-i18n="common.required">*必須</span></div>
           <div class="likert" data-name="hist_change" role="radiogroup" aria-describedby="histChangeScale histChangeErr">
             <label class="radio-pill"><input type="radio" name="hist_change" value="1"><span>1</span></label>
             <label class="radio-pill"><input type="radio" name="hist_change" value="2"><span>2</span></label>
@@ -110,13 +114,13 @@
             <label class="radio-pill"><input type="radio" name="hist_change" value="4"><span>4</span></label>
             <label class="radio-pill"><input type="radio" name="hist_change" value="5"><span>5</span></label>
           </div>
-          <div class="likert-scale" id="histChangeScale"><span>そう思わない</span><span>そう思う</span></div>
-          <div class="err" id="histChangeErr">1〜5のいずれかを選択してください。</div>
+          <div class="likert-scale" id="histChangeScale"><span data-i18n="common.disagree">そう思わない</span><span data-i18n="common.agree">そう思う</span></div>
+          <div class="err" id="histChangeErr" data-i18n="common.likertErr">1〜5のいずれかを選択してください。</div>
         </div>
 
         <!-- アプリで保存への関心の変化（必須） -->
         <div class="field" id="f-presChange">
-          <div class="label-row"><label>本アプリを通して、歴史資料の保存の関心に変化はあったか</label><span class="req">*必須</span></div>
+          <div class="label-row"><label data-i18n="survey.presChange.label">本アプリを通して、歴史資料の保存の関心に変化はあったか</label><span class="req" data-i18n="common.required">*必須</span></div>
           <div class="likert" data-name="preservation_change" role="radiogroup" aria-describedby="presChangeScale presChangeErr">
             <label class="radio-pill"><input type="radio" name="preservation_change" value="1"><span>1</span></label>
             <label class="radio-pill"><input type="radio" name="preservation_change" value="2"><span>2</span></label>
@@ -124,31 +128,31 @@
             <label class="radio-pill"><input type="radio" name="preservation_change" value="4"><span>4</span></label>
             <label class="radio-pill"><input type="radio" name="preservation_change" value="5"><span>5</span></label>
           </div>
-          <div class="likert-scale" id="presChangeScale"><span>そう思わない</span><span>そう思う</span></div>
-          <div class="err" id="presChangeErr">1〜5のいずれかを選択してください。</div>
+          <div class="likert-scale" id="presChangeScale"><span data-i18n="common.disagree">そう思わない</span><span data-i18n="common.agree">そう思う</span></div>
+          <div class="err" id="presChangeErr" data-i18n="common.likertErr">1〜5のいずれかを選択してください。</div>
         </div>
       </section>
 
       <!-- ICU在学生・教職員の方へ（任意・統合セクション） -->
       <section class="section" aria-labelledby="forICU">
-        <h2 class="sec-title" id="forICU">ICU在学生・教職員の方へ（任意回答）</h2>
-        <p class="note">該当しない方・回答を希望しない方は、このセクションは空欄で構いません。</p>
+        <h2 class="sec-title" id="forICU" data-i18n="survey.forICU.title">ICU在学生・教職員の方へ（任意回答）</h2>
+        <p class="note" data-i18n="survey.forICU.note">該当しない方・回答を希望しない方は、このセクションは空欄で構いません。</p>
 
         <!-- パネル展示の認知 -->
         <div class="field">
-          <div class="label-row"><label>ICU内の歴史関係の組織・展示について：パネル展示（例：本館173教室前）を知っていたか</label></div>
+          <div class="label-row"><label data-i18n="survey.panelAwareness.label">ICU内の歴史関係の組織・展示について：パネル展示（例：本館173教室前）を知っていたか</label></div>
           <div class="likert" data-name="panel_awareness">
-            <label class="radio-pill"><input type="radio" name="panel_awareness" value="1"><span>知らない</span></label>
-            <label class="radio-pill"><input type="radio" name="panel_awareness" value="2"><span>見かけたことがある</span></label>
-            <label class="radio-pill"><input type="radio" name="panel_awareness" value="3"><span>軽く見たことがある</span></label>
-            <label class="radio-pill"><input type="radio" name="panel_awareness" value="4"><span>読んだことがある</span></label>
-            <label class="radio-pill"><input type="radio" name="panel_awareness" value="5"><span>じっくり読んだことがある</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_awareness" value="1"><span data-i18n="survey.know.no">知らない</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_awareness" value="2"><span data-i18n="survey.panel.seen">見かけたことがある</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_awareness" value="3"><span data-i18n="survey.panel.looked">軽く見たことがある</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_awareness" value="4"><span data-i18n="survey.panel.read">読んだことがある</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_awareness" value="5"><span data-i18n="survey.panel.deepread">じっくり読んだことがある</span></label>
           </div>
         </div>
 
         <!-- パネル展示への関心 -->
         <div class="field">
-          <div class="label-row"><label>本アプリを通して、パネル展示への関心が高まったか</label></div>
+          <div class="label-row"><label data-i18n="survey.panelInterest.label">本アプリを通して、パネル展示への関心が高まったか</label></div>
           <div class="likert" data-name="panel_interest">
             <label class="radio-pill"><input type="radio" name="panel_interest" value="1"><span>1</span></label>
             <label class="radio-pill"><input type="radio" name="panel_interest" value="2"><span>2</span></label>
@@ -159,33 +163,32 @@
         </div>
 
         <!-- アーカイブズの説明 -->
-        <p class="note">本アプリの写真や解説は、ICUアーカイブズ（ICUの歴史に関する資料や記録の保存・収集・提供を行う組織。図書館1階に展示室、2階に分室）にご協力いただき提供されています。</p>
+        <p class="note" data-i18n="survey.archives.note">本アプリの写真や解説は、ICUアーカイブズ（ICUの歴史に関する資料や記録の保存・収集・提供を行う組織。図書館1階に展示室、2階に分室）にご協力いただき提供されています。</p>
 
         <!-- アーカイブズ認知 -->
         <div class="field">
-          <div class="label-row"><label>ICUアーカイブズのことを知っていたか</label></div>
+          <div class="label-row"><label data-i18n="survey.archivesAwareness.label">ICUアーカイブズのことを知っていたか</label></div>
           <div class="likert" data-name="archives_awareness">
-            <label class="radio-pill"><input type="radio" name="archives_awareness" value="1"><span>知らない</span></label>
-            <label class="radio-pill"><input type="radio" name="archives_awareness" value="2"><span>見かけたことがある</span></label>
-            <label class="radio-pill"><input type="radio" name="archives_awareness" value="3"><span>存在を知っている</span></label>
-            <label class="radio-pill"><input type="radio" name="archives_awareness" value="4"><span>どういう組織か軽く知っている</span></label>
-            <label class="radio-pill"><input type="radio" name="archives_awareness" value="5"><span>どういう組織か詳しく知っている</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_awareness" value="1"><span data-i18n="survey.know.no">知らない</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_awareness" value="2"><span data-i18n="survey.archives.seen">見かけたことがある</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_awareness" value="3"><span data-i18n="survey.archives.know">存在を知っている</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_awareness" value="4"><span data-i18n="survey.archives.little">どういう組織か軽く知っている</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_awareness" value="5"><span data-i18n="survey.archives.well">どういう組織か詳しく知っている</span></label>
           </div>
         </div>
 
-        <!-- アーカイブズ訪問 -->
+        <!-- アーカイブズ訪問（値はそのまま・表示文だけ翻訳） -->
         <div class="field">
-          <div class="label-row"><label>ICUアーカイブズを訪問したことがあるか</label></div>
+          <div class="label-row"><label data-i18n="survey.archivesVisited.label">ICUアーカイブズを訪問したことがあるか</label></div>
           <div class="yn" data-name="archives_visited">
-            <!-- 値と表示の整合：yes=はい / no=いいえ に直すなら以下を入れ替えてください -->
-            <label class="radio-pill"><input type="radio" name="archives_visited" value="no"><span>いいえ</span></label>
-            <label class="radio-pill"><input type="radio" name="archives_visited" value="yes"><span>はい</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_visited" value="no"><span data-i18n="common.no">いいえ</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_visited" value="yes"><span data-i18n="common.yes">はい</span></label>
           </div>
         </div>
 
         <!-- アーカイブズへの関心 -->
         <div class="field">
-          <div class="label-row"><label>本アプリにより、ICUアーカイブズへの関心が高まったか</label></div>
+          <div class="label-row"><label data-i18n="survey.archivesInterest.label">本アプリにより、ICUアーカイブズへの関心が高まったか</label></div>
           <div class="likert" data-name="archives_interest">
             <label class="radio-pill"><input type="radio" name="archives_interest" value="1"><span>1</span></label>
             <label class="radio-pill"><input type="radio" name="archives_interest" value="2"><span>2</span></label>
@@ -198,10 +201,10 @@
 
       <!-- アプリについて（必須2問） -->
       <section class="section" aria-labelledby="aboutApp">
-        <h2 class="sec-title" id="aboutApp">アプリについて</h2>
+        <h2 class="sec-title" id="aboutApp" data-i18n="survey.aboutApp">アプリについて</h2>
 
         <div class="field" id="f-fun">
-          <div class="label-row"><label>面白かったか</label><span class="req">*必須</span></div>
+          <div class="label-row"><label data-i18n="survey.fun.label">面白かったか</label><span class="req" data-i18n="common.required">*必須</span></div>
           <div class="likert" data-name="fun" role="radiogroup" aria-describedby="funScale funErr">
             <label class="radio-pill"><input type="radio" name="fun" value="1"><span>1</span></label>
             <label class="radio-pill"><input type="radio" name="fun" value="2"><span>2</span></label>
@@ -209,12 +212,12 @@
             <label class="radio-pill"><input type="radio" name="fun" value="4"><span>4</span></label>
             <label class="radio-pill"><input type="radio" name="fun" value="5"><span>5</span></label>
           </div>
-          <div class="likert-scale" id="funScale"><span>そう思わない</span><span>そう思う</span></div>
-          <div class="err" id="funErr">1〜5のいずれかを選択してください。</div>
+          <div class="likert-scale" id="funScale"><span data-i18n="common.disagree">そう思わない</span><span data-i18n="common.agree">そう思う</span></div>
+          <div class="err" id="funErr" data-i18n="common.likertErr">1〜5のいずれかを選択してください。</div>
         </div>
 
         <div class="field" id="f-usability">
-          <div class="label-row"><label>使いやすかったか</label><span class="req">*必須</span></div>
+          <div class="label-row"><label data-i18n="survey.usability.label">使いやすかったか</label><span class="req" data-i18n="common.required">*必須</span></div>
           <div class="likert" data-name="usability" role="radiogroup" aria-describedby="usabilityScale usabilityErr">
             <label class="radio-pill"><input type="radio" name="usability" value="1"><span>1</span></label>
             <label class="radio-pill"><input type="radio" name="usability" value="2"><span>2</span></label>
@@ -222,50 +225,163 @@
             <label class="radio-pill"><input type="radio" name="usability" value="4"><span>4</span></label>
             <label class="radio-pill"><input type="radio" name="usability" value="5"><span>5</span></label>
           </div>
-          <div class="likert-scale" id="usabilityScale"><span>そう思わない</span><span>そう思う</span></div>
-          <div class="err" id="usabilityErr">1〜5のいずれかを選択してください。</div>
+          <div class="likert-scale" id="usabilityScale"><span data-i18n="common.disagree">そう思わない</span><span data-i18n="common.agree">そう思う</span></div>
+          <div class="err" id="usabilityErr" data-i18n="common.likertErr">1〜5のいずれかを選択してください。</div>
         </div>
       </section>
 
       <!-- 自由記述（任意） -->
       <section class="section" aria-labelledby="free">
-        <h2 class="sec-title" id="free">自由記述欄（任意）</h2>
+        <h2 class="sec-title" id="free" data-i18n="survey.free.title">自由記述欄（任意）</h2>
         <div class="field">
-          <div class="label-row"><label for="free_text">ご意見・ご感想など</label></div>
-          <textarea id="free_text" name="free_text" class="textarea" placeholder="ご自由にお書きください（任意）"></textarea>
+          <div class="label-row"><label for="free_text" data-i18n="survey.free.label">ご意見・ご感想など</label></div>
+          <textarea id="free_text" name="free_text" class="textarea" placeholder="ご自由にお書きください（任意）" data-i18n-ph="survey.free.ph"></textarea>
         </div>
       </section>
 
       <div class="footer">
-        <button id="submitSurveyBtn" type="button" class="btn" aria-busy="false">アンケート送信</button>
+        <button id="submitSurveyBtn" type="button" class="btn" aria-busy="false" data-i18n="survey.submit">アンケート送信</button>
       </div>
     </form>
   </div>
   <!-- 既存本文ここまで -->
 
+  <!-- 言語メニュー + 簡易i18n -->
   <script>
-    // 言語メニュー（共通）
-    (function initLangMenu(){
-      const btn  = document.getElementById('langBtn');
-      const menu = document.getElementById('langMenu');
-      const items= menu?.querySelectorAll('.lang-item');
-      const open = (v)=>{
-        if (!menu || !btn) return;
-        menu.classList.toggle('is-open', v);
-        btn.setAttribute('aria-expanded', v ? 'true':'false');
+    (function(){
+      const DICT = {
+        ja: {
+          'survey.title':'アンケート',
+          'survey.aboutYou':'あなたについて',
+          'survey.age.label':'年代',
+          'common.required':'*必須',
+          'survey.age.hint':'半角数字で入力',
+          'survey.age.suffix':'歳',
+          'survey.age.err':'年代（年齢）を半角数字で入力してください。',
+          'survey.histInterest.label':'歴史に興味があるか',
+          'common.disagree':'そう思わない',
+          'common.agree':'そう思う',
+          'common.likertErr':'1〜5のいずれかを選択してください。',
+          'survey.presInterest.label':'歴史資料の保存に関心があるか',
+          'survey.selfResearch.label':'興味を持った歴史の事柄について、自主的に調べたことがあるか',
+          'survey.histChange.label':'本アプリを通して、歴史への興味に変化はあったか',
+          'survey.presChange.label':'本アプリを通して、歴史資料の保存の関心に変化はあったか',
+          'survey.forICU.title':'ICU在学生・教職員の方へ（任意回答）',
+          'survey.forICU.note':'該当しない方・回答を希望しない方は、このセクションは空欄で構いません。',
+          'survey.panelAwareness.label':'ICU内の歴史関係の組織・展示について：パネル展示（例：本館173教室前）を知っていたか',
+          'survey.know.no':'知らない',
+          'survey.panel.seen':'見かけたことがある',
+          'survey.panel.looked':'軽く見たことがある',
+          'survey.panel.read':'読んだことがある',
+          'survey.panel.deepread':'じっくり読んだことがある',
+          'survey.panelInterest.label':'本アプリを通して、パネル展示への関心が高まったか',
+          'survey.archives.note':'本アプリの写真や解説は、ICUアーカイブズ（ICUの歴史に関する資料や記録の保存・収集・提供を行う組織。図書館1階に展示室、2階に分室）にご協力いただき提供されています。',
+          'survey.archivesAwareness.label':'ICUアーカイブズのことを知っていたか',
+          'survey.archives.seen':'見かけたことがある',
+          'survey.archives.know':'存在を知っている',
+          'survey.archives.little':'どういう組織か軽く知っている',
+          'survey.archives.well':'どういう組織か詳しく知っている',
+          'survey.archivesVisited.label':'ICUアーカイブズを訪問したことがあるか',
+          'common.no':'いいえ',
+          'common.yes':'はい',
+          'survey.archivesInterest.label':'本アプリにより、ICUアーカイブズへの関心が高まったか',
+          'survey.aboutApp':'アプリについて',
+          'survey.fun.label':'面白かったか',
+          'survey.usability.label':'使いやすかったか',
+          'survey.free.title':'自由記述欄（任意）',
+          'survey.free.label':'ご意見・ご感想など',
+          'survey.free.ph':'ご自由にお書きください（任意）',
+          'survey.submit':'アンケート送信'
+        },
+        en: {
+          'survey.title':'Survey',
+          'survey.aboutYou':'About you',
+          'survey.age.label':'Age',
+          'common.required':'*Required',
+          'survey.age.hint':'Enter half-width numbers',
+          'survey.age.suffix':'yrs',
+          'survey.age.err':'Please enter your age in half-width digits.',
+          'survey.histInterest.label':'Are you interested in history?',
+          'common.disagree':'Strongly disagree',
+          'common.agree':'Strongly agree',
+          'common.likertErr':'Please select one from 1 to 5.',
+          'survey.presInterest.label':'Are you interested in preserving historical materials?',
+          'survey.selfResearch.label':'Have you ever researched a historical topic on your own?',
+          'survey.histChange.label':'Did this app change your interest in history?',
+          'survey.presChange.label':'Did this app change your interest in preservation of historical materials?',
+          'survey.forICU.title':'For current ICU students/faculty (optional)',
+          'survey.forICU.note':'If not applicable or you prefer not to answer, you may leave this section blank.',
+          'survey.panelAwareness.label':'Regarding history-related organizations/exhibitions on campus: Were you aware of the panel exhibitions (e.g., in front of Main Bldg. Room 173)?',
+          'survey.know.no':'Not aware',
+          'survey.panel.seen':'Have seen it around',
+          'survey.panel.looked':'Have glanced at it',
+          'survey.panel.read':'Have read it',
+          'survey.panel.deepread':'Have read it thoroughly',
+          'survey.panelInterest.label':'Did this app increase your interest in the panel exhibitions?',
+          'survey.archives.note':'Photos and descriptions in this app were provided with cooperation from ICU Archives (an organization that preserves/collects/provides historical materials and records of ICU; exhibition room on 1F and branch office on 2F of the Library).',
+          'survey.archivesAwareness.label':'Were you aware of ICU Archives?',
+          'survey.archives.seen':'Have seen it',
+          'survey.archives.know':'Know it exists',
+          'survey.archives.little':'Roughly know what it is',
+          'survey.archives.well':'Know it well',
+          'survey.archivesVisited.label':'Have you ever visited ICU Archives?',
+          'common.no':'No',
+          'common.yes':'Yes',
+          'survey.archivesInterest.label':'Did this app increase your interest in ICU Archives?',
+          'survey.aboutApp':'About the app',
+          'survey.fun.label':'Was it fun?',
+          'survey.usability.label':'Was it easy to use?',
+          'survey.free.title':'Free-text (optional)',
+          'survey.free.label':'Comments/Feedback',
+          'survey.free.ph':'Feel free to write anything (optional)',
+          'survey.submit':'Submit Survey'
+        }
       };
-      btn?.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        open(!menu.classList.contains('is-open'));
-      });
-      document.addEventListener('click', ()=> open(false));
-      items?.forEach(it=>{
-        it.addEventListener('click', ()=>{
-          const lang = it.dataset.lang || 'ja';
-          try { localStorage.setItem('app_lang', lang); } catch(e){}
-          if (typeof window.applyLang === 'function') { window.applyLang(lang); }
-          else { location.reload(); }
+
+      function getLang(){ try { return localStorage.getItem('app_lang') || 'ja'; } catch { return 'ja'; } }
+      function setLang(lang){ try { localStorage.setItem('app_lang', lang); } catch {} }
+
+      function applyI18n(lang){
+        const dict = DICT[lang] || DICT.ja;
+        document.querySelectorAll('[data-i18n]').forEach(el=>{
+          const key = el.getAttribute('data-i18n');
+          if (dict[key] != null) el.textContent = dict[key];
         });
+        // placeholder 翻訳対応
+        document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+          const key = el.getAttribute('data-i18n-ph');
+          if (dict[key] != null) el.setAttribute('placeholder', dict[key]);
+        });
+        document.documentElement.setAttribute('lang', lang==='en'?'en':'ja');
+        document.title = (lang==='en') ? 'Survey | AR Stamp Rally' : 'アンケート | ARスタンプラリー';
+      }
+
+      // 言語メニュー
+      (function initLangMenu(){
+        const btn  = document.getElementById('langBtn');
+        const menu = document.getElementById('langMenu');
+        const items= menu?.querySelectorAll('.lang-item');
+        const open = (v)=>{
+          if (!menu || !btn) return;
+          menu.classList.toggle('is-open', v);
+          btn.setAttribute('aria-expanded', v ? 'true':'false');
+        };
+        btn?.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          open(!menu.classList.contains('is-open'));
+        });
+        document.addEventListener('click', ()=> open(false));
+        items?.forEach(it=>{
+          it.addEventListener('click', ()=>{
+            const lang = it.dataset.lang || 'ja';
+            setLang(lang);
+            applyI18n(lang);
+          });
+        });
+      })();
+
+      document.addEventListener('DOMContentLoaded', ()=>{
+        applyI18n(getLang());
       });
     })();
   </script>

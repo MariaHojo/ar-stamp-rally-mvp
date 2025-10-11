@@ -21,30 +21,40 @@
     .wrap{max-width:var(--container);margin:0 auto;padding:clamp(10px,3vw,14px)}
     a.link{color:var(--accent);text-decoration:none;font-weight:800}
 
+    /* ======= 上部 1/6 のエリア（利用規約 / スタンプ帳 / チュートリアル・言語） ======= */
     .top-grid{
       display:grid;
-      grid-template-columns: 1fr 2fr 1fr;
-      gap:8px; align-items:center;
+      grid-template-columns: 1fr 2fr 1fr; /* 左1/4, 中央1/2, 右1/4 */
+      gap:8px;
+      align-items:center;
       margin-bottom:clamp(10px,3vw,14px);
     }
-    @media (max-width:560px){ .top-grid{grid-template-columns: 1fr 1fr 1fr} }
-    .top-cell{display:flex;align-items:center}
-    .top-cell.left{justify-content:flex-start; gap:12px; flex-wrap:wrap}
-    .top-cell.center{justify-content:center}
-    .top-cell.right{justify-content:flex-end; position:relative}
-
-    /* スタンプ帳（ドロップダウン） */
-    .stampbook{ position:relative; width:100%; max-width:520px; background:#fff;border:1px solid #e9eef6;border-radius:14px; box-shadow:0 6px 24px rgba(0,0,0,.05); overflow:visible; z-index:20; }
-    .stampbook-header{ width:100%; text-align:center; background:#fff; color:#111; appearance:none;border:0; padding:12px 14px; font-weight:900; letter-spacing:.02em; display:flex;align-items:center;justify-content:center; gap:10px; cursor:pointer; }
-    .stampbook-header .arrow{color:#333}
-    .stampbook-body{
-      position:absolute; left:0; right:0; top:calc(100% + 6px);
-      display:none; padding:10px 12px 12px; background:#fff; border:1px solid #e9eef6; border-radius:14px; box-shadow:0 18px 48px rgba(0,0,0,.18); max-height:60vh; overflow:auto;
+    @media (max-width:560px){
+      .top-grid{grid-template-columns: 1fr 1fr 1fr}
     }
+    .top-cell{display:flex;justify-content:center}
+    .top-cell.left{justify-content:flex-start; gap:12px; flex-wrap:wrap}
+    .top-cell.right{justify-content:flex-end}
 
+    .stampbook{
+      width:100%;
+      max-width:520px;
+      background:#fff;border:1px solid #e9eef6;border-radius:14px;
+      box-shadow:0 6px 24px rgba(0,0,0,.05);overflow:hidden;
+    }
+    .stampbook-header{
+      width:100%; text-align:center; background:#fff; color:#111;
+      appearance:none;border:0; padding:12px 14px; font-weight:900; letter-spacing:.02em;
+      display:flex;align-items:center;justify-content:center; gap:10px; cursor:pointer;
+    }
+    .stampbook-header .arrow{color:#333}
+    .stampbook-body{display:none;padding:10px 12px 12px;background:#fff}
     .stamp-count{font-size:13px;color:#333}
+
     .stamp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-    .stamp-cell{border:1px solid #e3eaf6;border-radius:12px;padding:10px;min-height:72px;background:#fff;display:flex;align-items:center;gap:10px}
+    .stamp-cell{
+      border:1px solid #e3eaf6;border-radius:12px;padding:10px;min-height:72px;background:#fff;display:flex;align-items:center;gap:10px
+    }
     .stamp-thumb{width:52px;height:52px;border-radius:10px;background:#eef5ff;flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center}
     .stamp-thumb img{width:100%;height:100%;object-fit:cover}
     .stamp-meta{flex:1}
@@ -56,49 +66,108 @@
     .complete-inline{margin:8px 0 0;text-align:center;display:none}
     .complete-inline a{color:var(--accent);text-decoration:none;font-weight:900}
 
-    /* 言語アイコン＋メニュー */
-    .lang-btn{appearance:none;border:0;background:#fff;border:1px solid #e3eaf6;border-radius:12px;padding:6px;cursor:pointer;box-shadow:var(--menuShadow)}
+    /* ======= 言語スイッチ（右上アイコン：tutorial.html と同じ四角形） ======= */
+    .lang-switch{position:relative}
+    .lang-btn{
+      appearance:none;border:0;background:#fff;border:1px solid #e3eaf6;border-radius:12px;
+      padding:6px; cursor:pointer; box-shadow:var(--menuShadow)
+    }
     .lang-btn:focus-visible{outline:3px solid rgba(0,90,187,.35)}
-    .lang-icon{width:28px;height:28px;display:block}
-    .lang-menu{position:absolute; right:0; top:44px; background:#fff; border:1px solid #e3eaf6; border-radius:12px; box-shadow:var(--menuShadow); display:none; min-width:160px; overflow:hidden; z-index:50}
+    .lang-icon{width:28px;height:28px;display:block} /* ←四角で小さく固定 */
+    .lang-menu{
+      position:absolute; right:0; margin-top:8px; background:#fff; border:1px solid #e3eaf6; border-radius:12px;
+      box-shadow:var(--menuShadow); display:none; min-width:160px; overflow:hidden; z-index:20;
+    }
     .lang-menu.is-open{display:block}
-    .lang-item{display:block;width:100%;text-align:left;background:#fff;border:0;padding:10px 12px;cursor:pointer;font-weight:800}
+    .lang-item{
+      display:block; width:100%; text-align:left; background:#fff; border:0; padding:10px 12px;
+      cursor:pointer; font-weight:800; color:#000; /* ←選択肢テキストは黒 */
+    }
     .lang-item:hover{background:#f2f6ff}
 
-    .map-wrap{ position:relative;width:100%;max-width:920px;margin:0 auto 14px;background:#fff; border-radius:var(--radius);box-shadow:0 10px 30px rgba(0,0,0,.05);overflow:hidden; }
+    /* ======= 中央：地図 ======= */
+    .map-wrap{
+      position:relative;width:100%;max-width:920px;margin:0 auto 14px;background:#fff;
+      border-radius:var(--radius);box-shadow:0 10px 30px rgba(0,0,0,.05);overflow:hidden;
+    }
     .map-img{display:block;width:100%;height:auto;object-fit:contain;background:#fff}
-    .pin{ position:absolute;width:40px;height:40px;transform:translate(-50%,-100%); display:inline-block; }
+    .pin{
+      position:absolute;width:40px;height:40px;transform:translate(-50%,-100%);
+      display:inline-block;
+    }
     .pin img{width:100%;height:100%;display:block}
     .pin:focus-visible{outline:3px solid rgba(0,90,187,.35);border-radius:50%}
 
-    .hint{ max-width:920px;margin:10px auto;color:#333;background:#f6f7fb;border:1px solid #e9eef6; border-radius:12px;padding:10px 12px;font-size:14px }
+    /* ======= 下から1/4：説明テキスト ======= */
+    .hint{
+      max-width:920px;margin:10px auto;color:#333;background:#f6f7fb;border:1px solid #e9eef6;
+      border-radius:12px;padding:10px 12px;font-size:14px
+    }
 
-    .footer-cta{ position:sticky;bottom:0;left:0;right:0;z-index:5;background:linear-gradient(to top,#fff,#fff 70%,rgba(255,255,255,0)); padding:10px 0 max(12px, env(safe-area-inset-bottom)); }
-    .btn{ appearance:none;border:0;border-radius:12px;padding:14px 16px;font-weight:900; background:var(--accent);color:#fff;cursor:pointer;width:100%;box-shadow:0 10px 30px rgba(0,90,187,.25) }
+    /* ======= 画面最下部：カメラ起動 ======= */
+    .footer-cta{
+      position:sticky;bottom:0;left:0;right:0;z-index:5;background:linear-gradient(to top,#fff,#fff 70%,rgba(255,255,255,0));
+      padding:10px 0 max(12px, env(safe-area-inset-bottom));
+    }
+    .btn{
+      appearance:none;border:0;border-radius:12px;padding:14px 16px;font-weight:900;
+      background:var(--accent);color:#fff;cursor:pointer;width:100%;box-shadow:0 10px 30px rgba(0,90,187,.25)
+    }
     .btn-secondary{background:#e9eef6;color:#111;box-shadow:none}
 
+    /* ======= カメラのスポット選択（吹き出し・最適化） ======= */
     .camera-chooser-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);z-index:998;display:none}
     .camera-chooser-overlay.is-open{display:block}
-    .camera-chooser{ position:fixed;left:50%;top:50%;transform:translate(-50%,-50%); width:min(94vw,560px);max-height:78vh;overflow:auto;background:#fff;border-radius:16px; box-shadow:0 18px 48px rgba(0,0,0,.3);padding:14px;z-index:999;display:none }
+    .camera-chooser{
+      position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+      width:min(94vw,560px);max-height:78vh;overflow:auto;background:#fff;border-radius:16px;
+      box-shadow:0 18px 48px rgba(0,0,0,.3);padding:14px;z-index:999;display:none
+    }
     .camera-chooser.is-open{display:block}
     .camera-chooser h3{margin:0 0 8px;font-size:18px}
     .camera-chooser p{margin:0 0 10px;color:#333}
+
+    /* ★ 正方形× 2列（スマホで3行＝計6枚） */
     .camera-chooser .list{ display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; }
     @media (min-width:520px){ .camera-chooser .list{ grid-template-columns:repeat(3, 1fr); } }
     .camera-chooser .item{ padding:0; border:none; background:transparent }
-    .thumbWrap{ position:relative; aspect-ratio:1/1; border-radius:12px; overflow:hidden; border:1px solid #e3eaf6; box-shadow:0 10px 26px rgba(0,0,0,.12); background:#f3f6fc; }
-    .thumbWrap img{ width:100%; height:100%; object-fit:cover; display:block; background:linear-gradient(90deg,#f2f5fb 25%,#e8eef9 37%,#f2f5fb 63%); background-size:400% 100%; animation: shimmer 1.4s ease infinite; }
-    @keyframes shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
-    .thumbWrap .label{ position:absolute; left:8px; right:8px; bottom:8px; font-weight:900; font-size:13px; line-height:1.2; color:#fff; text-shadow:-1px -1px 0 #2b3a68, 1px -1px 0 #2b3a68, -1px 1px 0 #2b3a68, 1px 1px 0 #2b3a68; background:linear-gradient(to top, rgba(0,0,0,.45), rgba(0,0,0,0)); padding:8px 10px 10px; border-radius:0 0 10px 10px; }
 
+    .thumbWrap{
+      position:relative; aspect-ratio:1/1; border-radius:12px; overflow:hidden;
+      border:1px solid #e3eaf6; box-shadow:0 10px 26px rgba(0,0,0,.12); background:#f3f6fc;
+    }
+    .thumbWrap img{
+      width:100%; height:100%; object-fit:cover; display:block;
+      background:linear-gradient(90deg,#f2f5fb 25%,#e8eef9 37%,#f2f5fb 63%); background-size:400% 100%;
+      animation: shimmer 1.4s ease infinite;
+    }
+    @keyframes shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
+
+    /* 名札（写真に重ねる縁取り文字） */
+    .thumbWrap .label{
+      position:absolute; left:8px; right:8px; bottom:8px;
+      font-weight:900; font-size:13px; line-height:1.2; color:#fff;
+      text-shadow:
+        -1px -1px 0 #2b3a68, 1px -1px 0 #2b3a68,
+        -1px  1px 0 #2b3a68, 1px  1px 0 #2b3a68;
+      background:linear-gradient(to top, rgba(0,0,0,.45), rgba(0,0,0,0));
+      padding:8px 10px 10px; border-radius:0 0 10px 10px;
+    }
+
+    /* ======= 完走モーダル ======= */
     .complete-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);z-index:1000;display:none}
     .complete-overlay.is-open{display:block}
-    .complete-modal{ position:fixed;left:50%;top:50%;transform:translate(-50%,-50%); width:min(92vw,560px);max-height:80vh;overflow:auto;background:#fff;border-radius:18px; box-shadow:0 20px 60px rgba(0,0,0,.35);padding:20px;z-index:1001;display:none }
+    .complete-modal{
+      position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+      width:min(92vw,560px);max-height:80vh;overflow:auto;background:#fff;border-radius:18px;
+      box-shadow:0 20px 60px rgba(0,0,0,.35);padding:20px;z-index:1001;display:none
+    }
     .complete-modal.is-open{display:block}
     .complete-title{margin:0 0 6px;font-size:20px}
     .complete-lead{margin:0 0 14px}
     .complete-row{display:flex;gap:8px;flex-wrap:wrap}
 
+    /* 取得/未取得の見た目（スタンプ帳） */
     .stamp-cell .stamp-thumb img { opacity:0; filter: grayscale(0.2); transition: opacity .2s }
     .stamp-cell.is-got .stamp-thumb img { opacity:1; filter:none }
   </style>
@@ -106,90 +175,113 @@
 <body>
   <div id="pageRoot">
     <div class="wrap">
-      <!-- 上部 -->
+      <!-- 上部 1/6 エリア -->
       <div class="top-grid" aria-label="上部メニュー">
-        <!-- 左：規約＋チュートリアル -->
         <div class="top-cell left">
-          <a class="link" href="terms.html" data-i18n="map.terms">プライバシーポリシー・ご利用上の注意</a>
-          <a class="link" href="tutorial.html" data-i18n="map.tutorial">チュートリアル</a>
+          <a class="link" id="termsLink" href="terms.html" data-i18n="map.terms">プライバシーポリシー・ご利用上の注意</a>
+          <a class="link" id="tutorialLink" href="tutorial.html" data-i18n="map.tutorial">チュートリアル</a>
         </div>
 
-        <!-- 中央：スタンプ帳 -->
-        <div class="top-cell center">
+        <div class="top-cell">
+          <!-- スタンプ帳（折り畳み：単独で開閉・他要素は追従しない） -->
           <section class="stampbook" aria-label="スタンプ帳">
             <button id="stampToggle" class="stampbook-header" type="button" aria-expanded="false" aria-controls="stampBody">
-              <span class="arrow">▼</span><span data-i18n="map.stampbook">スタンプ帳</span>
+              <span class="arrow">▼</span><span id="stampBookTitle" data-i18n="map.stampbook">スタンプ帳</span>
               <span class="stamp-count" id="stampCount" style="margin-left:8px">0/6</span>
             </button>
 
-            <!-- コンプリート時リンク -->
+            <!-- コンプリート時リンク（JS制御で表示） -->
             <div id="completeInline" class="complete-inline">
-              <a href="post-survey.html" data-i18n="map.toSurveyInline">📝 アンケートに答える</a>
+              <!-- 仕様変更：「コンプリートを確認する」→「アンケートに答える」 -->
+              <a id="completeLink" href="post-survey.html" data-i18n="map.checkComplete">📝 アンケートに答える</a>
             </div>
+            <!-- ★ コンプリート時のみ表示するスペシャルコンテンツへのリンク -->
             <div id="specialInline" class="complete-inline" style="display:none">
-              <a href="special.html" data-i18n="map.special">🌟 スペシャルコンテンツ</a>
+              <!-- 仕様変更：「スペシャルコンテンツを見る」→「スペシャルコンテンツ」 -->
+              <a id="specialLink" href="special.html" data-i18n="map.special">🌟 スペシャルコンテンツ</a>
             </div>
 
-            <div id="stampBody" class="stampbook-body" role="region" aria-label="スタンプ一覧">
+            <div id="stampBody" class="stampbook-body">
               <div class="stamp-grid">
                 <div class="stamp-cell" data-spot="spot1">
                   <div class="stamp-thumb"><img src="assets/images/stamps/stamp01.png" alt="スタンプ1"></div>
-                  <div class="stamp-meta"><div class="stamp-name" data-i18n="spots.s1">本館173前</div><div class="stamp-status"><span class="mark" data-i18n="map.notgot">未取得</span></div></div>
+                  <div class="stamp-meta">
+                    <div class="stamp-name" data-i18n="spot.1">本館173前</div>
+                    <div class="stamp-status"><span class="mark" data-i18n="map.notgot">未取得</span></div>
+                  </div>
                 </div>
                 <div class="stamp-cell" data-spot="spot2">
                   <div class="stamp-thumb"><img src="assets/images/stamps/stamp02.png" alt="スタンプ2"></div>
-                  <div class="stamp-meta"><div class="stamp-name" data-i18n="spots.s2">トロイヤー記念館（T館）前</div><div class="stamp-status"><span class="mark" data-i18n="map.notgot">未取得</span></div></div>
+                  <div class="stamp-meta">
+                    <div class="stamp-name" data-i18n="spot.2">トロイヤー記念館（T館）前</div>
+                    <div class="stamp-status"><span class="mark" data-i18n="map.notgot">未取得</span></div>
+                  </div>
                 </div>
                 <div class="stamp-cell" data-spot="spot3">
                   <div class="stamp-thumb"><img src="assets/images/stamps/stamp03.png" alt="スタンプ3"></div>
-                  <div class="stamp-meta"><div class="stamp-name" data-i18n="spots.s3">学生食堂（ガッキ）前</div><div class="stamp-status"><span class="mark" data-i18n="map.notgot">未取得</span></div></div>
+                  <div class="stamp-meta">
+                    <div class="stamp-name" data-i18n="spot.3">学生食堂（ガッキ）前</div>
+                    <div class="stamp-status"><span class="mark" data-i18n="map.notgot">未取得</span></div>
+                  </div>
                 </div>
                 <div class="stamp-cell" data-spot="spot4">
                   <div class="stamp-thumb"><img src="assets/images/stamps/stamp04.png" alt="スタンプ4"></div>
-                  <div class="stamp-meta"><div class="stamp-name" data-i18n="spots.s4">チャペル前</div><div class="stamp-status"><span class="mark" data-i18n="map.notgot">未取得</span></div></div>
+                  <div class="stamp-meta">
+                    <div class="stamp-name" data-i18n="spot.4">チャペル前</div>
+                    <div class="stamp-status"><span class="mark" data-i18n="map.notgot">未取得</span></div>
+                  </div>
                 </div>
                 <div class="stamp-cell" data-spot="spot5">
                   <div class="stamp-thumb"><img src="assets/images/stamps/stamp05.png" alt="スタンプ5"></div>
-                  <div class="stamp-meta"><div class="stamp-name" data-i18n="spots.s5">体育館（Pec-A）前</div><div class="stamp-status"><span class="mark" data-i18n="map.notgot">未取得</span></div></div>
+                  <div class="stamp-meta">
+                    <div class="stamp-name" data-i18n="spot.5">体育館（Pec-A）前</div>
+                    <div class="stamp-status"><span class="mark" data-i18n="map.notgot">未取得</span></div>
+                  </div>
                 </div>
                 <div class="stamp-cell" data-spot="spot6">
                   <div class="stamp-thumb"><img src="assets/images/stamps/stamp06.png" alt="スタンプ6"></div>
-                  <div class="stamp-meta"><div class="stamp-name" data-i18n="spots.s6">本館307前</div><div class="stamp-status"><span class="mark" data-i18n="map.notgot">未取得</span></div></div>
+                  <div class="stamp-meta">
+                    <div class="stamp-name" data-i18n="spot.6">本館307前</div>
+                    <div class="stamp-status"><span class="mark" data-i18n="map.notgot">未取得</span></div>
+                  </div>
                 </div>
               </div>
             </div>
           </section>
         </div>
 
-        <!-- 右：言語 -->
         <div class="top-cell right">
-          <button id="langBtn" class="lang-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="langMenu">
-            <img class="lang-icon" src="assets/images/ui/lang.png" alt="言語 / Language">
-          </button>
-          <div id="langMenu" class="lang-menu" role="menu" aria-label="Language">
-            <button class="lang-item" data-lang="ja" role="menuitem">日本語</button>
-            <button class="lang-item" data-lang="en" role="menuitem">English</button>
+          <!-- 言語アイコンを右上に（四角28px） -->
+          <div class="lang-switch" id="langSwitch">
+            <button id="langBtn" class="lang-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="langMenu">
+              <img class="lang-icon" src="assets/images/ui/lang.png" alt="言語 / Language">
+            </button>
+            <div id="langMenu" class="lang-menu" role="menu" aria-label="Language">
+              <button class="lang-item" data-lang="ja" role="menuitem">日本語</button>
+              <button class="lang-item" data-lang="en" role="menuitem">English</button>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- 地図 -->
+      <!-- 中央：地図 -->
       <div class="map-wrap" aria-label="キャンパスマップ">
         <img class="map-img" src="assets/images/campasMap.png" alt="キャンパス地図" />
+        <!-- ピン（必要に応じて） -->
       </div>
 
-      <!-- カメラ起動 -->
+      <!-- 画面最下部：カメラ起動 -->
       <div class="footer-cta">
         <button id="cameraBtn" class="btn" data-i18n="map.openAR">AR起動</button>
       </div>
     </div>
   </div>
 
-  <!-- スポット選択モーダル -->
+  <!-- スポット選択の吹き出し -->
   <div id="cameraChooserOverlay" class="camera-chooser-overlay" aria-hidden="true"></div>
   <div id="cameraChooser" class="camera-chooser" role="dialog" aria-modal="true" aria-labelledby="cameraChooserTitle" aria-describedby="cameraChooserDesc">
-    <h3 id="cameraChooserTitle" data-i18n="map.chooseSpot">スポットを選んでください</h3>
-    <p id="cameraChooserDesc" style="margin:0 0 10px;color:#333" data-i18n="map.tapToOpen">写真をタップするとARが起動します。</p>
+    <h3 id="cameraChooserTitle" data-i18n="map.choose">スポットを選んでください</h3>
+    <p id="cameraChooserDesc" style="margin:0 0 10px;color:#333" data-i18n="map.chooseDesc">写真をタップするとARが起動します。</p>
     <div id="cameraChooserList" class="list"></div>
     <div style="margin-top:10px;text-align:right">
       <button id="cameraChooserClose" class="btn btn-secondary" type="button" data-i18n="common.close">閉じる</button>
@@ -202,12 +294,12 @@
     <h2 id="completeTitle" class="complete-title" data-i18n="map.completedTitle">🎉 コンプリート！</h2>
     <p id="completeLead" class="complete-lead" data-i18n="map.completedLead">全てのスタンプを集めました。ご参加ありがとうございます！</p>
     <div class="complete-row">
-      <button id="closeComplete" class="btn btn-secondary" type="button" data-i18n="common.backToMap">マップに戻る</button>
+      <button id="closeComplete" class="btn btn-secondary" type="button" data-i18n="map.backToMap">マップに戻る</button>
       <a id="toSurvey" class="btn" href="post-survey.html" data-i18n="map.toSurvey">アンケートへ</a>
     </div>
   </div>
 
-  <!-- 折り畳み・言語メニュー -->
+  <!-- スタンプ帳の開閉（単独挙動） -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const btn = document.getElementById('stampToggle');
@@ -219,23 +311,114 @@
         btn.setAttribute('aria-expanded', open ? 'false' : 'true');
         if (arrow) arrow.textContent = open ? '▼' : '▲';
       });
+    });
+  </script>
+
+  <!-- 言語メニュー & 簡易i18n（このページ内だけ適用） -->
+  <script>
+    (function(){
+      const DICT = {
+        ja: {
+          'map.terms': 'プライバシーポリシー・ご利用上の注意',
+          'map.tutorial': 'チュートリアル',
+          'map.stampbook': 'スタンプ帳',
+          'map.notgot': '未取得',
+          'map.got': '取得済み',
+          'map.checkComplete': '📝 アンケートに答える',
+          'map.special': '🌟 スペシャルコンテンツ',
+          'map.openAR': 'AR起動',
+          'map.choose': 'スポットを選んでください',
+          'map.chooseDesc': '写真をタップするとARが起動します。',
+          'common.close': '閉じる',
+          'map.completedTitle': '🎉 コンプリート！',
+          'map.completedLead': '全てのスタンプを集めました。ご参加ありがとうございます！',
+          'map.backToMap': 'マップに戻る',
+          'map.toSurvey': 'アンケートへ',
+          'spot.1': '本館173前',
+          'spot.2': 'トロイヤー記念館（T館）前',
+          'spot.3': '学生食堂（ガッキ）前',
+          'spot.4': 'チャペル前',
+          'spot.5': '体育館（Pec-A）前',
+          'spot.6': '本館307前'
+        },
+        en: {
+          'map.terms': 'Privacy & Terms',
+          'map.tutorial': 'Tutorial',
+          'map.stampbook': 'Stamp Book',
+          'map.notgot': 'Not collected',
+          'map.got': 'Collected',
+          'map.checkComplete': '📝 Take the survey',
+          'map.special': '🌟 Special Content',
+          'map.openAR': 'Open AR',
+          'map.choose': 'Choose a spot',
+          'map.chooseDesc': 'Tap a photo to launch AR.',
+          'common.close': 'Close',
+          'map.completedTitle': '🎉 Completed!',
+          'map.completedLead': 'You collected all the stamps. Thank you for joining!',
+          'map.backToMap': 'Back to Map',
+          'map.toSurvey': 'Go to Survey',
+          'spot.1': 'Main Building 173',
+          'spot.2': 'Troyer Memorial Hall (T Bldg.)',
+          'spot.3': 'Student Cafeteria (GAKKI)',
+          'spot.4': 'Chapel',
+          'spot.5': 'Gym (Pec-A)',
+          'spot.6': 'Main Building 307'
+        }
+      };
+
+      function getLang(){
+        try { return localStorage.getItem('app_lang') || 'ja'; } catch { return 'ja'; }
+      }
+      function setLang(lang){
+        try { localStorage.setItem('app_lang', lang); } catch {}
+      }
+      function applyI18n(lang){
+        const dict = DICT[lang] || DICT.ja;
+        document.querySelectorAll('[data-i18n]').forEach(el=>{
+          const key = el.getAttribute('data-i18n');
+          if (dict[key] != null) el.textContent = dict[key];
+        });
+        // スタンプ状態文字（取得済/未取得）を現在の状態に合わせて再表示
+        document.querySelectorAll('.stamp-cell').forEach(cell=>{
+          const got = cell.classList.contains('is-got');
+          const mark = cell.querySelector('.stamp-status .mark');
+          if (mark) mark.textContent = dict[got ? 'map.got' : 'map.notgot'];
+        });
+        // <html lang=...>
+        document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'ja');
+        // タイトル
+        document.title = (lang==='en') ? 'Map | AR Stamp Rally' : 'マップ | ARスタンプラリー';
+      }
 
       // 言語メニュー
-      const langBtn = document.getElementById('langBtn');
-      const langMenu= document.getElementById('langMenu');
-      const items   = langMenu?.querySelectorAll('.lang-item');
-      const open = (v)=>{ langMenu.classList.toggle('is-open', v); langBtn.setAttribute('aria-expanded', v ? 'true':'false'); };
-      langBtn?.addEventListener('click', (e)=>{ e.stopPropagation(); open(!langMenu.classList.contains('is-open')); });
-      document.addEventListener('click', ()=> open(false));
-      items?.forEach(it=>{
-        it.addEventListener('click', ()=>{
-          const lang = it.dataset.lang || 'ja';
-          try { localStorage.setItem('app_lang', lang); } catch(e){}
-          if (typeof window.applyLang === 'function') { window.applyLang(lang); }
-          else { location.reload(); }
+      (function initLangMenu(){
+        const btn  = document.getElementById('langBtn');
+        const menu = document.getElementById('langMenu');
+        const items= menu?.querySelectorAll('.lang-item');
+        const open = (v)=>{
+          if (!menu || !btn) return;
+          menu.classList.toggle('is-open', v);
+          btn.setAttribute('aria-expanded', v ? 'true':'false');
+        };
+        btn?.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          open(!menu.classList.contains('is-open'));
         });
+        document.addEventListener('click', ()=> open(false));
+        items?.forEach(it=>{
+          it.addEventListener('click', ()=>{
+            const lang = it.dataset.lang || 'ja';
+            setLang(lang);
+            applyI18n(lang);
+          });
+        });
+      })();
+
+      // 初期適用
+      document.addEventListener('DOMContentLoaded', ()=>{
+        applyI18n(getLang());
       });
-    });
+    })();
   </script>
 
   <script src="js/firebase.js" defer></script>
