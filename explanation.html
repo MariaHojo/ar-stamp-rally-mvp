@@ -67,37 +67,6 @@
 </head>
 <body>
   <div class="wrap">
-    <script>
-  (function(){
-    function getLang(){ try { return localStorage.getItem('app_lang') || 'ja'; } catch { return 'ja'; } }
-    function applyExplainLang(){
-      var lang = getLang();
-
-      // スタンプ取得メッセージ
-      var stampNote = document.getElementById('stampNote');
-      if (stampNote){
-        stampNote.textContent = (lang === 'en') ? 'You got a stamp!' : 'スタンプをゲットしました！';
-      }
-
-      // 「マップに戻る」ボタン
-      var back = document.getElementById('backToMap');
-      if (back){
-        back.textContent = (lang === 'en') ? 'Back to Map' : 'マップに戻る';
-      }
-
-      // クイズ系（念のため）
-      var quizTitle = document.querySelector('.quizTitle');
-      var showBtn   = document.getElementById('showAnswerBtn');
-      if (quizTitle) quizTitle.textContent = (lang === 'en') ? 'Quiz' : 'クイズ';
-      if (showBtn)   showBtn.textContent   = (lang === 'en') ? 'Show Answer' : '答えを見る';
-    }
-
-    document.addEventListener('DOMContentLoaded', applyExplainLang);
-    window.addEventListener('storage', (e)=>{ if (e.key === 'app_lang') applyExplainLang(); });
-    window.addEventListener('app_lang_changed', applyExplainLang);
-  }());
-</script>
-
     <header>
       <h1 id="spotTitle">スポット</h1>
     </header>
@@ -116,7 +85,7 @@
 
       <!-- クイズ -->
       <div id="quizSection">
-        <div class="quizTitle">クイズ</div>
+        <div class="quizTitle" id="quizTitle">クイズ</div>
         <div id="quizBody" class="quizBody"></div>
         <div id="quizChoices" class="choices"></div>
         <button id="showAnswerBtn" class="btn" type="button">答えを見る</button>
@@ -138,17 +107,39 @@
     <div class="footerSpace"></div>
   </div>
 
-  <!-- 言語に応じて「スタンプをゲットしました！」を切替 -->
+  <!-- 言語反映 -->
   <script>
     (function(){
       function getLang(){ try { return localStorage.getItem('app_lang') || 'ja'; } catch { return 'ja'; } }
-      document.addEventListener('DOMContentLoaded', function () {
+      function applyExplainLang(){
         var lang = getLang();
+
+        // タイトル（ブラウザ）
+        document.title = (lang === 'en') ? 'Explanation | AR Stamp Rally' : '解説 | ARスタンプラリー';
+        document.documentElement.setAttribute('lang', (lang==='en')?'en':'ja');
+
+        // スタンプ取得メッセージ
         var stampNote = document.getElementById('stampNote');
         if (stampNote){
           stampNote.textContent = (lang === 'en') ? 'You got a stamp!' : 'スタンプをゲットしました！';
         }
-      });
+
+        // 「マップに戻る」ボタン
+        var back = document.getElementById('backToMap');
+        if (back){
+          back.textContent = (lang === 'en') ? 'Back to Map' : 'マップに戻る';
+        }
+
+        // クイズラベル / 答えを見る
+        var quizTitle = document.getElementById('quizTitle');
+        var showBtn   = document.getElementById('showAnswerBtn');
+        if (quizTitle) quizTitle.textContent = (lang === 'en') ? 'Quiz' : 'クイズ';
+        if (showBtn)   showBtn.textContent   = (lang === 'en') ? 'Show Answer' : '答えを見る';
+      }
+
+      document.addEventListener('DOMContentLoaded', applyExplainLang);
+      window.addEventListener('storage', (e)=>{ if (e.key === 'app_lang') applyExplainLang(); });
+      window.addEventListener('app_lang_changed', applyExplainLang);
     }());
   </script>
 

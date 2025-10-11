@@ -21,10 +21,10 @@
     .wrap{max-width:var(--container);margin:0 auto;padding:clamp(10px,3vw,14px)}
     a.link{color:var(--accent);text-decoration:none;font-weight:800}
 
-    /* ======= 上部 1/6 のエリア（利用規約 / スタンプ帳 / チュートリアル・言語） ======= */
+    /* ======= 上部 1/6 ======= */
     .top-grid{
       display:grid;
-      grid-template-columns: 1fr 2fr 1fr; /* 左1/4, 中央1/2, 右1/4 */
+      grid-template-columns: 1fr 2fr 1fr;
       gap:8px;
       align-items:center;
       margin-bottom:clamp(10px,3vw,14px);
@@ -66,14 +66,14 @@
     .complete-inline{margin:8px 0 0;text-align:center;display:none}
     .complete-inline a{color:var(--accent);text-decoration:none;font-weight:900}
 
-    /* ======= 言語スイッチ（右上アイコン：tutorial.html と同じ四角形） ======= */
+    /* ======= 言語スイッチ ======= */
     .lang-switch{position:relative}
     .lang-btn{
       appearance:none;border:0;background:#fff;border:1px solid #e3eaf6;border-radius:12px;
       padding:6px; cursor:pointer; box-shadow:var(--menuShadow)
     }
     .lang-btn:focus-visible{outline:3px solid rgba(0,90,187,.35)}
-    .lang-icon{width:28px;height:28px;display:block} /* ←四角で小さく固定 */
+    .lang-icon{width:28px;height:28px;display:block} /* 28px四角 */
     .lang-menu{
       position:absolute; right:0; margin-top:8px; background:#fff; border:1px solid #e3eaf6; border-radius:12px;
       box-shadow:var(--menuShadow); display:none; min-width:160px; overflow:hidden; z-index:20;
@@ -81,11 +81,11 @@
     .lang-menu.is-open{display:block}
     .lang-item{
       display:block; width:100%; text-align:left; background:#fff; border:0; padding:10px 12px;
-      cursor:pointer; font-weight:800; color:#000; /* ←選択肢テキストは黒 */
+      cursor:pointer; font-weight:800; color:#000; /* ←黒文字 */
     }
     .lang-item:hover{background:#f2f6ff}
 
-    /* ======= 中央：地図 ======= */
+    /* ======= 地図 ======= */
     .map-wrap{
       position:relative;width:100%;max-width:920px;margin:0 auto 14px;background:#fff;
       border-radius:var(--radius);box-shadow:0 10px 30px rgba(0,0,0,.05);overflow:hidden;
@@ -98,13 +98,13 @@
     .pin img{width:100%;height:100%;display:block}
     .pin:focus-visible{outline:3px solid rgba(0,90,187,.35);border-radius:50%}
 
-    /* ======= 下から1/4：説明テキスト ======= */
+    /* ======= ヒント ======= */
     .hint{
       max-width:920px;margin:10px auto;color:#333;background:#f6f7fb;border:1px solid #e9eef6;
       border-radius:12px;padding:10px 12px;font-size:14px
     }
 
-    /* ======= 画面最下部：カメラ起動 ======= */
+    /* ======= 最下部 CTA ======= */
     .footer-cta{
       position:sticky;bottom:0;left:0;right:0;z-index:5;background:linear-gradient(to top,#fff,#fff 70%,rgba(255,255,255,0));
       padding:10px 0 max(12px, env(safe-area-inset-bottom));
@@ -115,7 +115,7 @@
     }
     .btn-secondary{background:#e9eef6;color:#111;box-shadow:none}
 
-    /* ======= カメラのスポット選択（吹き出し・最適化） ======= */
+    /* ======= カメラのスポット選択 ======= */
     .camera-chooser-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);z-index:998;display:none}
     .camera-chooser-overlay.is-open{display:block}
     .camera-chooser{
@@ -127,7 +127,6 @@
     .camera-chooser h3{margin:0 0 8px;font-size:18px}
     .camera-chooser p{margin:0 0 10px;color:#333}
 
-    /* ★ 正方形× 2列（スマホで3行＝計6枚） */
     .camera-chooser .list{ display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; }
     @media (min-width:520px){ .camera-chooser .list{ grid-template-columns:repeat(3, 1fr); } }
     .camera-chooser .item{ padding:0; border:none; background:transparent }
@@ -143,7 +142,6 @@
     }
     @keyframes shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
 
-    /* 名札（写真に重ねる縁取り文字） */
     .thumbWrap .label{
       position:absolute; left:8px; right:8px; bottom:8px;
       font-weight:900; font-size:13px; line-height:1.2; color:#fff;
@@ -167,7 +165,6 @@
     .complete-lead{margin:0 0 14px}
     .complete-row{display:flex;gap:8px;flex-wrap:wrap}
 
-    /* 取得/未取得の見た目（スタンプ帳） */
     .stamp-cell .stamp-thumb img { opacity:0; filter: grayscale(0.2); transition: opacity .2s }
     .stamp-cell.is-got .stamp-thumb img { opacity:1; filter:none }
   </style>
@@ -175,7 +172,7 @@
 <body>
   <div id="pageRoot">
     <div class="wrap">
-      <!-- 上部 1/6 エリア -->
+      <!-- 上部メニュー -->
       <div class="top-grid" aria-label="上部メニュー">
         <div class="top-cell left">
           <a class="link" id="termsLink" href="terms.html" data-i18n="map.terms">プライバシーポリシー・ご利用上の注意</a>
@@ -183,21 +180,17 @@
         </div>
 
         <div class="top-cell">
-          <!-- スタンプ帳（折り畳み：単独で開閉・他要素は追従しない） -->
+          <!-- スタンプ帳（単独開閉） -->
           <section class="stampbook" aria-label="スタンプ帳">
             <button id="stampToggle" class="stampbook-header" type="button" aria-expanded="false" aria-controls="stampBody">
               <span class="arrow">▼</span><span id="stampBookTitle" data-i18n="map.stampbook">スタンプ帳</span>
               <span class="stamp-count" id="stampCount" style="margin-left:8px">0/6</span>
             </button>
 
-            <!-- コンプリート時リンク（JS制御で表示） -->
             <div id="completeInline" class="complete-inline">
-              <!-- 仕様変更：「コンプリートを確認する」→「アンケートに答える」 -->
               <a id="completeLink" href="post-survey.html" data-i18n="map.checkComplete">📝 アンケートに答える</a>
             </div>
-            <!-- ★ コンプリート時のみ表示するスペシャルコンテンツへのリンク -->
             <div id="specialInline" class="complete-inline" style="display:none">
-              <!-- 仕様変更：「スペシャルコンテンツを見る」→「スペシャルコンテンツ」 -->
               <a id="specialLink" href="special.html" data-i18n="map.special">🌟 スペシャルコンテンツ</a>
             </div>
 
@@ -251,7 +244,7 @@
         </div>
 
         <div class="top-cell right">
-          <!-- 言語アイコンを右上に（四角28px） -->
+          <!-- 言語アイコン -->
           <div class="lang-switch" id="langSwitch">
             <button id="langBtn" class="lang-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="langMenu">
               <img class="lang-icon" src="assets/images/ui/lang.png" alt="言語 / Language">
@@ -264,29 +257,27 @@
         </div>
       </div>
 
-      <!-- 中央：地図 -->
+      <!-- 地図 -->
       <div class="map-wrap" aria-label="キャンパスマップ">
         <img class="map-img" src="assets/images/campasMap.png" alt="キャンパス地図" />
-        <!-- ピン（必要に応じて） -->
       </div>
 
-      <!-- 画面最下部：カメラ起動 -->
+      <!-- 最下部：カメラ -->
       <div class="footer-cta">
         <button id="cameraBtn" class="btn" data-i18n="map.openAR">AR起動</button>
       </div>
     </div>
   </div>
 
-  <!-- スポット選択の吹き出し -->
-<div id="cameraChooser" class="camera-chooser" role="dialog" aria-modal="true" aria-labelledby="cameraChooserTitle" aria-describedby="cameraChooserDesc">
-  <h3 id="cameraChooserTitle" data-i18n="chooser.title">スポットを選んでください</h3>
-  <p id="cameraChooserDesc" style="margin:0 0 10px;color:#333" data-i18n="chooser.desc">写真をタップするとARが起動します。</p>
-  <div id="cameraChooserList" class="list"></div>
-  <div style="margin-top:10px;text-align:right">
-    <button id="cameraChooserClose" class="btn btn-secondary" type="button" data-i18n="chooser.close">閉じる</button>
+  <!-- スポット選択（モーダル本体） -->
+  <div id="cameraChooser" class="camera-chooser" role="dialog" aria-modal="true" aria-labelledby="cameraChooserTitle" aria-describedby="cameraChooserDesc">
+    <h3 id="cameraChooserTitle" data-i18n="chooser.title">スポットを選んでください</h3>
+    <p id="cameraChooserDesc" style="margin:0 0 10px;color:#333" data-i18n="chooser.desc">写真をタップするとARが起動します。</p>
+    <div id="cameraChooserList" class="list"></div>
+    <div style="margin-top:10px;text-align:right">
+      <button id="cameraChooserClose" class="btn btn-secondary" type="button" data-i18n="chooser.close">閉じる</button>
+    </div>
   </div>
-</div>
-
 
   <!-- 完走モーダル -->
   <div id="completeOverlay" class="complete-overlay" aria-hidden="true"></div>
@@ -299,7 +290,7 @@
     </div>
   </div>
 
-  <!-- スタンプ帳の開閉（単独挙動） -->
+  <!-- スタンプ帳の開閉 -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const btn = document.getElementById('stampToggle');
@@ -314,7 +305,7 @@
     });
   </script>
 
-  <!-- 言語メニュー & 簡易i18n（このページ内だけ適用） -->
+  <!-- 言語メニュー & i18n -->
   <script>
     (function(){
       const DICT = {
@@ -327,9 +318,6 @@
           'map.checkComplete': '📝 アンケートに答える',
           'map.special': '🌟 スペシャルコンテンツ',
           'map.openAR': 'AR起動',
-          'map.choose': 'スポットを選んでください',
-          'map.chooseDesc': '写真をタップするとARが起動します。',
-          'common.close': '閉じる',
           'map.completedTitle': '🎉 コンプリート！',
           'map.completedLead': '全てのスタンプを集めました。ご参加ありがとうございます！',
           'map.backToMap': 'マップに戻る',
@@ -339,7 +327,10 @@
           'spot.3': '学生食堂（ガッキ）前',
           'spot.4': 'チャペル前',
           'spot.5': '体育館（Pec-A）前',
-          'spot.6': '本館307前'
+          'spot.6': '本館307前',
+          'chooser.title': 'スポットを選んでください',
+          'chooser.desc':  '写真をタップするとARが起動します。',
+          'chooser.close': '閉じる'
         },
         en: {
           'map.terms': 'Privacy & Terms',
@@ -350,9 +341,6 @@
           'map.checkComplete': '📝 Take the survey',
           'map.special': '🌟 Special Content',
           'map.openAR': 'Open AR',
-          'map.choose': 'Choose a spot',
-          'map.chooseDesc': 'Tap a photo to launch AR.',
-          'common.close': 'Close',
           'map.completedTitle': '🎉 Completed!',
           'map.completedLead': 'You collected all the stamps. Thank you for joining!',
           'map.backToMap': 'Back to Map',
@@ -362,31 +350,30 @@
           'spot.3': 'Student Cafeteria (GAKKI)',
           'spot.4': 'Chapel',
           'spot.5': 'Gym (Pec-A)',
-          'spot.6': 'Main Building 307'
+          'spot.6': 'Main Building 307',
+          'chooser.title': 'Choose a spot',
+          'chooser.desc':  'Tap a photo to launch AR.',
+          'chooser.close': 'Close'
         }
       };
 
-      function getLang(){
-        try { return localStorage.getItem('app_lang') || 'ja'; } catch { return 'ja'; }
-      }
-      function setLang(lang){
-        try { localStorage.setItem('app_lang', lang); } catch {}
-      }
+      function getLang(){ try { return localStorage.getItem('app_lang') || 'ja'; } catch { return 'ja'; } }
+      function setLang(v){ try { localStorage.setItem('app_lang', v); } catch{} }
+
       function applyI18n(lang){
         const dict = DICT[lang] || DICT.ja;
         document.querySelectorAll('[data-i18n]').forEach(el=>{
           const key = el.getAttribute('data-i18n');
           if (dict[key] != null) el.textContent = dict[key];
         });
-        // スタンプ状態文字（取得済/未取得）を現在の状態に合わせて再表示
+        // スタンプ状態のマーク（取得/未取得）
         document.querySelectorAll('.stamp-cell').forEach(cell=>{
           const got = cell.classList.contains('is-got');
           const mark = cell.querySelector('.stamp-status .mark');
-          if (mark) mark.textContent = dict[got ? 'map.got' : 'map.notgot'];
+          if (mark) mark.textContent = (got ? dict['map.got'] : dict['map.notgot']);
         });
-        // <html lang=...>
-        document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'ja');
-        // タイトル
+        // lang属性 / タイトル
+        document.documentElement.setAttribute('lang', lang==='en'?'en':'ja');
         document.title = (lang==='en') ? 'Map | AR Stamp Rally' : 'マップ | ARスタンプラリー';
       }
 
@@ -395,123 +382,83 @@
         const btn  = document.getElementById('langBtn');
         const menu = document.getElementById('langMenu');
         const items= menu?.querySelectorAll('.lang-item');
-        const open = (v)=>{
-          if (!menu || !btn) return;
-          menu.classList.toggle('is-open', v);
-          btn.setAttribute('aria-expanded', v ? 'true':'false');
-        };
-        btn?.addEventListener('click', (e)=>{
-          e.stopPropagation();
-          open(!menu.classList.contains('is-open'));
-        });
+        const open = (v)=>{ menu.classList.toggle('is-open', v); btn.setAttribute('aria-expanded', v ? 'true':'false'); };
+        btn?.addEventListener('click', (e)=>{ e.stopPropagation(); open(!menu.classList.contains('is-open')); });
         document.addEventListener('click', ()=> open(false));
         items?.forEach(it=>{
           it.addEventListener('click', ()=>{
             const lang = it.dataset.lang || 'ja';
             setLang(lang);
             applyI18n(lang);
+            // スポット選択モーダルのラベルも即時更新
+            try { window._applyChooserLang && window._applyChooserLang(); } catch(e){}
+            // 他タブ等にも通知
+            try { window.dispatchEvent(new Event('app_lang_changed')); } catch(e){}
           });
         });
       })();
 
-      // 初期適用
-      document.addEventListener('DOMContentLoaded', ()=>{
-        applyI18n(getLang());
-      });
+      document.addEventListener('DOMContentLoaded', ()=>{ applyI18n(getLang()); });
     })();
   </script>
 
   <script src="js/firebase.js" defer></script>
+
+  <!-- スポット選択モーダルのラベル i18n（map.js がDOMを生成後にも反応） -->
   <script>
-  // === Camera chooser spot-name i18n ===
-  (function(){
-    const NAMES = {
-      ja: {
-        spot1:'本館173前',
-        spot2:'トロイヤー記念館（T館）前',
-        spot3:'学生食堂（ガッキ）前',
-        spot4:'チャペル前',
-        spot5:'体育館（Pec-A）前',
-        spot6:'本館307前',
-      },
-      en: {
-        spot1:'In front of Main Building 173',
-        spot2:'In front of Troyer Memorial (T Bldg.)',
-        spot3:'In front of Student Cafeteria',
-        spot4:'In front of the Chapel',
-        spot5:'In front of Gym (Pec-A)',
-        spot6:'In front of Main Building 307',
-      }
-    };
-    function getLang(){ try { return localStorage.getItem('app_lang') || 'ja'; } catch { return 'ja'; } }
-    function applyChooserLang(){
-      const lang = getLang();
-      // 吹き出しのタイトル/説明/閉じる も念のため対応（既に対応済みでも上書きOK）
-      const title = document.getElementById('cameraChooserTitle');
-      const desc  = document.getElementById('cameraChooserDesc');
-      const close = document.getElementById('cameraChooserClose');
-      if (title) title.textContent = (lang === 'en') ? 'Choose a spot' : 'スポットを選んでください';
-      if (desc)  desc.textContent  = (lang === 'en') ? 'Tap a photo to launch AR.' : '写真をタップするとARが起動します。';
-      if (close) close.textContent = (lang === 'en') ? 'Close' : '閉じる';
-
-      // アイテムのラベルを書き換え（.thumbWrap .label に入っている想定）
-      document.querySelectorAll('#cameraChooserList .item').forEach(item=>{
-        const spot = item.getAttribute('data-spot') || item.dataset.spot;
-        const label = item.querySelector('.thumbWrap .label') || item.querySelector('.label');
-        if (spot && label && NAMES[lang] && NAMES[lang][spot]) {
-          label.textContent = NAMES[lang][spot];
+    (function(){
+      const NAMES = {
+        ja: {
+          spot1:'本館173前',
+          spot2:'トロイヤー記念館（T館）前',
+          spot3:'学生食堂（ガッキ）前',
+          spot4:'チャペル前',
+          spot5:'体育館（Pec-A）前',
+          spot6:'本館307前',
+        },
+        en: {
+          spot1:'In front of Main Building 173',
+          spot2:'In front of Troyer Memorial (T Bldg.)',
+          spot3:'In front of Student Cafeteria',
+          spot4:'In front of the Chapel',
+          spot5:'In front of Gym (Pec-A)',
+          spot6:'In front of Main Building 307',
         }
-      });
-    }
+      };
+      function getLang(){ try { return localStorage.getItem('app_lang') || 'ja'; } catch { return 'ja'; } }
 
-    // モーダル内容が生成されたタイミングを監視（map.js がDOM追加後に実行されるように）
-    const list = document.getElementById('cameraChooserList');
-    if (list) {
-      const mo = new MutationObserver(applyChooserLang);
-      mo.observe(list, {childList:true, subtree:true});
-    }
-    // 言語切替にも追従
-    window.addEventListener('storage', (e)=>{ if (e.key === 'app_lang') applyChooserLang(); });
-    window.addEventListener('app_lang_changed', applyChooserLang);
+      function applyChooserLang(){
+        const lang = getLang();
+        const title = document.getElementById('cameraChooserTitle');
+        const desc  = document.getElementById('cameraChooserDesc');
+        const close = document.getElementById('cameraChooserClose');
+        if (title) title.textContent = (lang === 'en') ? 'Choose a spot' : 'スポットを選んでください';
+        if (desc)  desc.textContent  = (lang === 'en') ? 'Tap a photo to launch AR.' : '写真をタップするとARが起動します。';
+        if (close) close.textContent = (lang === 'en') ? 'Close' : '閉じる';
 
-    document.addEventListener('DOMContentLoaded', applyChooserLang);
-  })();
-</script>
+        document.querySelectorAll('#cameraChooserList .item').forEach(item=>{
+          const spot = item.getAttribute('data-spot') || item.dataset.spot;
+          const label = item.querySelector('.thumbWrap .label') || item.querySelector('.label');
+          if (spot && label && NAMES[lang] && NAMES[lang][spot]) {
+            label.textContent = NAMES[lang][spot];
+          }
+        });
+      }
 
+      // 外部からも呼べるよう公開
+      window._applyChooserLang = applyChooserLang;
+
+      const list = document.getElementById('cameraChooserList');
+      if (list) {
+        const mo = new MutationObserver(applyChooserLang);
+        mo.observe(list, {childList:true, subtree:true});
+      }
+      window.addEventListener('storage', (e)=>{ if (e.key === 'app_lang') applyChooserLang(); });
+      window.addEventListener('app_lang_changed', applyChooserLang);
+      document.addEventListener('DOMContentLoaded', applyChooserLang);
+    })();
+  </script>
 
   <script src="js/map.js?v=20251003" defer></script>
-  <script>
-  // map.html 簡易 i18n（スポット選択モーダルのみ）
-  (function(){
-    const DICT = {
-      ja: {
-        'chooser.title': 'スポットを選んでください',
-        'chooser.desc':  '写真をタップするとARが起動します。',
-        'chooser.close': '閉じる'
-      },
-      en: {
-        'chooser.title': 'Choose a spot',
-        'chooser.desc':  'Tap a photo to launch AR.',
-        'chooser.close': 'Close'
-      }
-    };
-    function getLang(){ try { return localStorage.getItem('app_lang') || 'ja'; } catch { return 'ja'; } }
-    function applyI18n(){
-      const lang = getLang();
-      const dict = DICT[lang] || DICT.ja;
-      document.querySelectorAll('[data-i18n]').forEach(el=>{
-        const k = el.getAttribute('data-i18n');
-        if (dict[k] != null) el.textContent = dict[k];
-      });
-      // ページのlang属性
-      document.documentElement.setAttribute('lang', lang==='en'?'en':'ja');
-    }
-    document.addEventListener('DOMContentLoaded', applyI18n);
-
-    // もし言語メニューから切り替えたら反映（他スクリプトからこのイベントを投げる想定）
-    window.addEventListener('app_lang_changed', applyI18n);
-  })();
-</script>
-
 </body>
 </html>
