@@ -422,6 +422,39 @@
   </script>
 
   <script src="js/firebase.js" defer></script>
+  <script>
+  // === Stampbook status i18n (取得/未取得) ===
+  (function(){
+    function getLang(){ try { return localStorage.getItem('app_lang') || 'ja'; } catch { return 'ja'; } }
+    function statusText(isGot, lang){
+      if (lang === 'en') return isGot ? 'Collected' : 'Not collected';
+      return isGot ? '取得済み' : '未取得';
+    }
+    function applyStampStatusLang(){
+      const lang = getLang();
+      document.querySelectorAll('.stamp-cell').forEach(cell=>{
+        const isGot = cell.classList.contains('is-got');
+        const el = cell.querySelector('.stamp-status .mark') || cell.querySelector('.stamp-status');
+        if (el) el.textContent = statusText(isGot, lang);
+      });
+    }
+
+    // 初期反映
+    document.addEventListener('DOMContentLoaded', ()=>{
+      applyStampStatusLang();
+
+      // .stamp-cell の class 変化（取得状態の更新）を監視して再反映
+      const cells = document.querySelectorAll('.stamp-cell');
+      const obs = new MutationObserver(()=>applyStampStatusLang());
+      cells.forEach(cell=>obs.observe(cell,{ attributes:true, attributeFilter:['class'] }));
+
+      // 言語切替（他ページ共通のハンドラがあればそれにも追従）
+      window.addEventListener('storage', (e)=>{ if (e.key === 'app_lang') applyStampStatusLang(); });
+      window.addEventListener('app_lang_changed', applyStampStatusLang);
+    });
+  })();
+</script>
+
   <script src="js/map.js?v=20251003" defer></script>
   <script>
   // map.html 簡易 i18n（スポット選択モーダルのみ）
