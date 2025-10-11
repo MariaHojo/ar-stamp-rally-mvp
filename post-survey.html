@@ -6,6 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <link rel="stylesheet" href="css/style.css" />
   <style>
+    :root{
+      --accent:#005ABB;
+    }
+
     /* 右上の言語アイコン（tutorial と同じテイスト・四角28px） */
     .lang-switch{position:fixed; right:12px; top:12px; z-index:2147483647}
     .lang-btn{
@@ -25,90 +29,153 @@
     }
     .lang-item:hover{background:#f2f6ff}
 
-    /* ===== アンケートの補助スタイル（今回の修正分） ===== */
-    /* ラジオUI（共通の見た目は既存css/style.cssに合わせる前提） */
+    /* ====== レイアウト（端末に合わせた横幅/文字） ====== */
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; line-height:1.6; margin:0}
+    .wrap{
+      max-width:min(860px, 92vw);
+      margin:64px auto 24px;
+      padding: clamp(12px, 3vw, 20px);
+    }
+    header h1{
+      margin:0 0 12px;
+      font-size:clamp(20px, 5.2vw, 28px);
+      line-height:1.25;
+    }
+    .section{
+      background:#fff;
+      border:1px solid #e9eef6;
+      border-radius:14px;
+      box-shadow:0 6px 20px rgba(0,0,0,.05);
+      padding: clamp(12px, 3.2vw, 18px);
+      margin: clamp(12px, 3.2vw, 18px) 0;
+    }
+    .sec-title{
+      margin:0 0 10px;
+      font-size: clamp(16px, 4.4vw, 20px);
+      line-height:1.3;
+    }
+    .note{
+      margin:4px 0 10px;
+      font-size: clamp(12px, 3.2vw, 14px);
+      color:#444;
+    }
+
+    /* ====== フィールド共通 ====== */
+    .field{ margin: 12px 0; }
+    .label-row{
+      display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;
+      margin:0 0 6px;
+    }
+    .label-row label{ font-weight:800; font-size: clamp(14px, 4vw, 16px); }
+    .req{ color:#c00; font-size:11px; }
+
+    .hint{ font-size:12px; color:#666; margin:0 0 6px; }
+    .err{ display:none; color:#c00; font-size:12px; margin-top:6px; }
+
+    /* 年齢 */
+    .age-row{ display:flex; align-items:center; gap:6px; }
+    .age-input{
+      width:90px;
+      font-size:16px;
+      padding:8px 10px;
+      border:1px solid #dfe6f0; border-radius:10px;
+    }
+    .age-suffix{ font-size:14px; color:#333; }
+
+    /* ====== ラジオ（見た目改善 & 余白縮小） ====== */
+    .likert, .yn{
+      display:flex; gap:6px; flex-wrap:wrap;
+    }
     .radio-pill{
-      display:flex; align-items:center; gap:8px;
-      border:1px solid #e3eaf6; border-radius:12px; padding:8px 10px;
-      background:#fff; cursor:pointer; user-select:none;
-      line-height:1.2;
+      display:inline-flex; align-items:center; justify-content:center;
+      border:1px solid #dfe6f0; border-radius:10px;
+      padding:6px 10px;                 /* ★余白を小さく */
+      background:#fff;
+      font-weight:800; font-size:14px;  /* ★文字もやや小さく */
+      line-height:1;
+      user-select:none;
+      position:relative;
+      min-height:36px;                  /* タップ面確保 */
     }
-    .radio-pill input{margin:0}
-    .radio-pill span{display:inline-block}
-
-    /* 1〜5 の標準Likert：なるべく1行を維持（既存仕様） */
-    .likert{display:flex; flex-wrap:nowrap; gap:8px; overflow-x:auto}
-    .yn{display:flex; gap:8px; flex-wrap:wrap}
-
-    /* ★ 重なっていた2つの質問はグリッドにして自動折返し */
-    .likert-grid{
-      display:grid !important;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap:8px;
-      align-items:stretch;
+    .radio-pill input{
+      position:absolute; inset:0; opacity:0; margin:0; cursor:pointer;
     }
-    .likert-grid .radio-pill{width:100%}
-
-    /* ラベル行・必須表記 */
-    .label-row{display:flex; align-items:baseline; gap:8px; flex-wrap:wrap}
-    .label-row .req{color:#c62828; font-size:12px}
-
-    /* セクションの小見出し（今回追加：説明テキスト用） */
-    .subhead{
-      margin:8px 0 6px; font-weight:800; color:#333; font-size:15px;
+    .radio-pill.is-active,
+    .radio-pill:has(input:checked){
+      border-color:var(--accent);
+      box-shadow:0 0 0 2px rgba(0,90,187,.12) inset;
     }
 
-    /* スマホ向け調整 */
-    @media (max-width:480px){
-      .likert{gap:6px}
-      .radio-pill{padding:8px 8px}
-      .likert-grid{
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap:6px;
-      }
+    /* ラベルの 1〜5 スケール表示（端に注釈） */
+    .likert-scale{
+      display:flex; justify-content:space-between;
+      font-size:12px; color:#666; margin-top:6px;
     }
 
-  /* Awareness系の選択肢は可変グリッドで折り返し、重なり防止 */
-  .likert[data-name="panel_awareness"],
-  .likert[data-name="archives_awareness"]{
-    display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap:10px;
-    align-items:stretch;
-  }
-  /* ラジオ-pillを小ぶり＆可変行に */
-  .likert[data-name="panel_awareness"] .radio-pill,
-  .likert[data-name="archives_awareness"] .radio-pill{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    padding:8px 10px;             /* 余白を少し控えめに */
-    border:1px solid #e3eaf6;
-    border-radius:12px;
-    height:auto;                   /* 複数行テキストに追従 */
-    white-space:normal;            /* 折り返し許可 */
-  }
-  .likert[data-name="panel_awareness"] .radio-pill input,
-  .likert[data-name="archives_awareness"] .radio-pill input{
-    width:18px; height:18px;
-    flex:0 0 auto;
-  }
-  .likert[data-name="panel_awareness"] .radio-pill span,
-  .likert[data-name="archives_awareness"] .radio-pill span{
-    font-size:14px;                /* 文字少し小さめ */
-    line-height:1.3;
-    font-weight:600;
-  }
+    /* ====== 1〜5回答は「横一行で完結」 ======
+       長文の選択肢（*awareness）は例外で折り返し可能のまま */
+    /* 5段階の対象グループを列挙（可読性重視） */
+    .likert[data-name="hist_interest"],
+    .likert[data-name="preservation_interest"],
+    .likert[data-name="self_research"],
+    .likert[data-name="hist_change"],
+    .likert[data-name="preservation_change"],
+    .likert[data-name="panel_interest"],
+    .likert[data-name="archives_interest"],
+    .likert[data-name="fun"],
+    .likert[data-name="usability"]{
+      flex-wrap:nowrap;
+      justify-content:space-between;
+    }
+    .likert[data-name="hist_interest"] .radio-pill,
+    .likert[data-name="preservation_interest"] .radio-pill,
+    .likert[data-name="self_research"] .radio-pill,
+    .likert[data-name="hist_change"] .radio-pill,
+    .likert[data-name="preservation_change"] .radio-pill,
+    .likert[data-name="panel_interest"] .radio-pill,
+    .likert[data-name="archives_interest"] .radio-pill,
+    .likert[data-name="fun"] .radio-pill,
+    .likert[data-name="usability"] .radio-pill{
+      flex:1 1 20%;
+      padding:8px 0;          /* 数字のみなので左右余白さらに圧縮 */
+      max-width:none;
+    }
 
-  /* 画面幅が広い時はカラム幅を少し広げる */
-  @media (min-width: 480px){
+    /* ====== 長文選択肢のグループ（横幅に収める工夫） ====== */
     .likert[data-name="panel_awareness"],
     .likert[data-name="archives_awareness"]{
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      /* スマホでは2列グリッド相当で折返し、横幅に収まる */
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:6px;
     }
-  }
-</style>
+    @media (min-width:700px){
+      /* 画面が広い時は3列まで拡張して詰める */
+      .likert[data-name="panel_awareness"],
+      .likert[data-name="archives_awareness"]{
+        grid-template-columns: repeat(3, minmax(0,1fr));
+      }
+    }
+    .likert[data-name="panel_awareness"] .radio-pill,
+    .likert[data-name="archives_awareness"] .radio-pill{
+      width:100%;
+      min-width:0;          /* ラベル長くても列崩れしない */
+      text-align:center;
+      white-space:normal;   /* 自由に改行可 */
+      padding:8px 10px;     /* 読みやすさは維持しつつ控えめに */
+      font-size:13px;       /* 少し小さめで詰める */
+      line-height:1.25;
+    }
 
+    /* 送信ボタン */
+    .footer{ margin-top: 16px; }
+    .btn{
+      appearance:none; border:0; border-radius:12px; width:100%;
+      padding:14px 16px; background:var(--accent); color:#fff; font-weight:900;
+      box-shadow:0 10px 30px rgba(0,90,187,.25)
+    }
+    .btn[aria-busy="true"]{ opacity:.7; pointer-events:none }
+  </style>
 </head>
 <body>
   <!-- 言語スイッチ（共通） -->
@@ -122,6 +189,7 @@
     </div>
   </div>
 
+  <!-- 既存のアンケート本文（質問は変更なし） -->
   <div class="wrap">
     <header>
       <h1 data-i18n="survey.title">アンケート</h1>
@@ -221,34 +289,37 @@
         <h2 class="sec-title" id="forICU" data-i18n="survey.forICU.title">ICU在学生・教職員の方へ（任意回答）</h2>
         <p class="note" data-i18n="survey.forICU.note">該当しない方・回答を希望しない方は、このセクションは空欄で構いません。</p>
 
-        <!-- 導入テキスト（ただの説明） -->
-<p class="note" data-i18n="survey.panelIntro">
-  ICU内の歴史関係の組織・展示について
-</p>
+        <!-- パネル展示の認知（長文=折返しOK） -->
+        <div class="field">
+          <div class="label-row"><label data-i18n="survey.panelAwareness.label">ICU内の歴史関係の組織・展示について：パネル展示（例：本館173教室前）を知っていたか</label></div>
+          <div class="likert" data-name="panel_awareness">
+            <label class="radio-pill"><input type="radio" name="panel_awareness" value="1"><span data-i18n="survey.know.no">知らない</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_awareness" value="2"><span data-i18n="survey.panel.seen">見かけたことがある</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_awareness" value="3"><span data-i18n="survey.panel.looked">軽く見たことがある</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_awareness" value="4"><span data-i18n="survey.panel.read">読んだことがある</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_awareness" value="5"><span data-i18n="survey.panel.deepread">じっくり読んだことがある</span></label>
+          </div>
+        </div>
 
-<!-- パネル展示の認知（質問本体） -->
-<div class="field">
-  <div class="label-row">
-    <label data-i18n="survey.panelAwareness.q">
-      パネル展示（例：本館173教室前）を知っていたか
-    </label>
-  </div>
-  <div class="likert" data-name="panel_awareness">
-    <label class="radio-pill"><input type="radio" name="panel_awareness" value="1"><span data-i18n="survey.know.no">知らない</span></label>
-    <label class="radio-pill"><input type="radio" name="panel_awareness" value="2"><span data-i18n="survey.panel.seen">見かけたことがある</span></label>
-    <label class="radio-pill"><input type="radio" name="panel_awareness" value="3"><span data-i18n="survey.panel.looked">軽く見たことがある</span></label>
-    <label class="radio-pill"><input type="radio" name="panel_awareness" value="4"><span data-i18n="survey.panel.read">読んだことがある</span></label>
-    <label class="radio-pill"><input type="radio" name="panel_awareness" value="5"><span data-i18n="survey.panel.deepread">じっくり読んだことがある</span></label>
-  </div>
-</div>
+        <!-- パネル展示への関心（1〜5 = 横一行） -->
+        <div class="field">
+          <div class="label-row"><label data-i18n="survey.panelInterest.label">本アプリを通して、パネル展示への関心が高まったか</label></div>
+          <div class="likert" data-name="panel_interest">
+            <label class="radio-pill"><input type="radio" name="panel_interest" value="1"><span>1</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_interest" value="2"><span>2</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_interest" value="3"><span>3</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_interest" value="4"><span>4</span></label>
+            <label class="radio-pill"><input type="radio" name="panel_interest" value="5"><span>5</span></label>
+          </div>
+        </div>
 
         <!-- アーカイブズの説明 -->
         <p class="note" data-i18n="survey.archives.note">本アプリの写真や解説は、ICUアーカイブズ（ICUの歴史に関する資料や記録の保存・収集・提供を行う組織。図書館1階に展示室、2階に分室）にご協力いただき提供されています。</p>
 
-        <!-- アーカイブズ認知（質問本体） -->
+        <!-- アーカイブズ認知（長文=折返しOK） -->
         <div class="field">
-          <div class="label-row"><label data-i18n="survey.archivesAwareness.q">ICUアーカイブズのことを知っていたか</label></div>
-          <div class="likert likert-grid" data-name="archives_awareness" role="radiogroup">
+          <div class="label-row"><label data-i18n="survey.archivesAwareness.label">ICUアーカイブズのことを知っていたか</label></div>
+          <div class="likert" data-name="archives_awareness">
             <label class="radio-pill"><input type="radio" name="archives_awareness" value="1"><span data-i18n="survey.know.no">知らない</span></label>
             <label class="radio-pill"><input type="radio" name="archives_awareness" value="2"><span data-i18n="survey.archives.seen">見かけたことがある</span></label>
             <label class="radio-pill"><input type="radio" name="archives_awareness" value="3"><span data-i18n="survey.archives.know">存在を知っている</span></label>
@@ -266,16 +337,16 @@
           </div>
         </div>
 
-        <!-- アーカイブズへの関心 -->
+        <!-- アーカイブズへの関心（1〜5 = 横一行） -->
         <div class="field">
           <div class="label-row"><label data-i18n="survey.archivesInterest.label">本アプリにより、ICUアーカイブズへの関心が高まったか</label></div>
-        </div>
-        <div class="likert" data-name="archives_interest">
-          <label class="radio-pill"><input type="radio" name="archives_interest" value="1"><span>1</span></label>
-          <label class="radio-pill"><input type="radio" name="archives_interest" value="2"><span>2</span></label>
-          <label class="radio-pill"><input type="radio" name="archives_interest" value="3"><span>3</span></label>
-          <label class="radio-pill"><input type="radio" name="archives_interest" value="4"><span>4</span></label>
-          <label class="radio-pill"><input type="radio" name="archives_interest" value="5"><span>5</span></label>
+          <div class="likert" data-name="archives_interest">
+            <label class="radio-pill"><input type="radio" name="archives_interest" value="1"><span>1</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_interest" value="2"><span>2</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_interest" value="3"><span>3</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_interest" value="4"><span>4</span></label>
+            <label class="radio-pill"><input type="radio" name="archives_interest" value="5"><span>5</span></label>
+          </div>
         </div>
       </section>
 
@@ -315,7 +386,7 @@
         <h2 class="sec-title" id="free" data-i18n="survey.free.title">自由記述欄（任意）</h2>
         <div class="field">
           <div class="label-row"><label for="free_text" data-i18n="survey.free.label">ご意見・ご感想など</label></div>
-          <textarea id="free_text" name="free_text" class="textarea" placeholder="ご自由にお書きください（任意）" data-i18n-ph="survey.free.ph"></textarea>
+          <textarea id="free_text" name="free_text" class="textarea" placeholder="ご自由にお書きください（任意）" data-i18n-ph="survey.free.ph" style="width:100%; min-height:110px; padding:10px; border:1px solid #dfe6f0; border-radius:10px;"></textarea>
         </div>
       </section>
 
@@ -325,7 +396,7 @@
     </form>
   </div>
 
-  <!-- 言語メニュー + 簡易i18n -->
+  <!-- 言語メニュー + 簡易i18n（元のまま） -->
   <script>
     (function(){
       const DICT = {
@@ -345,37 +416,28 @@
           'survey.selfResearch.label':'興味を持った歴史の事柄について、自主的に調べたことがあるか',
           'survey.histChange.label':'本アプリを通して、歴史への興味に変化はあったか',
           'survey.presChange.label':'本アプリを通して、歴史資料の保存の関心に変化はあったか',
-
           'survey.forICU.title':'ICU在学生・教職員の方へ（任意回答）',
           'survey.forICU.note':'該当しない方・回答を希望しない方は、このセクションは空欄で構いません。',
-
-          /* ← 追加：説明テキスト（質問ではない） */
-          'survey.orgsIntro':'ICU内の歴史関係の組織・展示について',
-
-          /* ← 質問文を短く明確に */
-          'survey.panelAwareness.q':'パネル展示（例：本館173教室前）を知っていたか',
+          'survey.panelAwareness.label':'ICU内の歴史関係の組織・展示について：パネル展示（例：本館173教室前）を知っていたか',
           'survey.know.no':'知らない',
           'survey.panel.seen':'見かけたことがある',
           'survey.panel.looked':'軽く見たことがある',
           'survey.panel.read':'読んだことがある',
           'survey.panel.deepread':'じっくり読んだことがある',
-
+          'survey.panelInterest.label':'本アプリを通して、パネル展示への関心が高まったか',
           'survey.archives.note':'本アプリの写真や解説は、ICUアーカイブズ（ICUの歴史に関する資料や記録の保存・収集・提供を行う組織。図書館1階に展示室、2階に分室）にご協力いただき提供されています。',
-          'survey.archivesAwareness.q':'ICUアーカイブズのことを知っていたか',
+          'survey.archivesAwareness.label':'ICUアーカイブズのことを知っていたか',
           'survey.archives.seen':'見かけたことがある',
           'survey.archives.know':'存在を知っている',
           'survey.archives.little':'どういう組織か軽く知っている',
           'survey.archives.well':'どういう組織か詳しく知っている',
-
           'survey.archivesVisited.label':'ICUアーカイブズを訪問したことがあるか',
           'common.no':'いいえ',
           'common.yes':'はい',
           'survey.archivesInterest.label':'本アプリにより、ICUアーカイブズへの関心が高まったか',
-
           'survey.aboutApp':'アプリについて',
           'survey.fun.label':'面白かったか',
           'survey.usability.label':'使いやすかったか',
-
           'survey.free.title':'自由記述欄（任意）',
           'survey.free.label':'ご意見・ご感想など',
           'survey.free.ph':'ご自由にお書きください（任意）',
@@ -397,37 +459,28 @@
           'survey.selfResearch.label':'Have you ever researched a historical topic on your own?',
           'survey.histChange.label':'Did this app change your interest in history?',
           'survey.presChange.label':'Did this app change your interest in preservation of historical materials?',
-
           'survey.forICU.title':'For current ICU students/faculty (optional)',
           'survey.forICU.note':'If not applicable or you prefer not to answer, you may leave this section blank.',
-
-          /* ← Added: explanation text (not a question) */
-          'survey.orgsIntro':'About on-campus history-related organizations and exhibits',
-
-          /* ← Short, clear question */
-          'survey.panelAwareness.q':'Were you aware of the panel exhibitions (e.g., in front of Main Bldg. Room 173)?',
+          'survey.panelAwareness.label':'Regarding history-related organizations/exhibitions on campus: Were you aware of the panel exhibitions (e.g., in front of Main Bldg. Room 173)?',
           'survey.know.no':'Not aware',
           'survey.panel.seen':'Have seen it around',
           'survey.panel.looked':'Have glanced at it',
           'survey.panel.read':'Have read it',
           'survey.panel.deepread':'Have read it thoroughly',
-
-          'survey.archives.note':'Photos and descriptions in this app were provided with cooperation from the ICU Archives (organization preserving/collecting/providing historical materials & records of ICU; exhibition room on Library 1F and branch office on 2F).',
-          'survey.archivesAwareness.q':'Were you aware of the ICU Archives?',
+          'survey.panelInterest.label':'Did this app increase your interest in the panel exhibitions?',
+          'survey.archives.note':'Photos and descriptions in this app were provided with cooperation from ICU Archives (an organization that preserves/collects/provides historical materials and records of ICU; exhibition room on 1F and branch office on 2F of the Library).',
+          'survey.archivesAwareness.label':'Were you aware of ICU Archives?',
           'survey.archives.seen':'Have seen it',
           'survey.archives.know':'Know it exists',
           'survey.archives.little':'Roughly know what it is',
           'survey.archives.well':'Know it well',
-
-          'survey.archivesVisited.label':'Have you ever visited the ICU Archives?',
+          'survey.archivesVisited.label':'Have you ever visited ICU Archives?',
           'common.no':'No',
           'common.yes':'Yes',
-          'survey.archivesInterest.label':'Did this app increase your interest in the ICU Archives?',
-
+          'survey.archivesInterest.label':'Did this app increase your interest in ICU Archives?',
           'survey.aboutApp':'About the app',
           'survey.fun.label':'Was it fun?',
           'survey.usability.label':'Was it easy to use?',
-
           'survey.free.title':'Free-text (optional)',
           'survey.free.label':'Comments/Feedback',
           'survey.free.ph':'Feel free to write anything (optional)',
@@ -444,7 +497,6 @@
           const key = el.getAttribute('data-i18n');
           if (dict[key] != null) el.textContent = dict[key];
         });
-        // placeholder 翻訳対応
         document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
           const key = el.getAttribute('data-i18n-ph');
           if (dict[key] != null) el.setAttribute('placeholder', dict[key]);
@@ -453,33 +505,17 @@
         document.title = (lang==='en') ? 'Survey | AR Stamp Rally' : 'アンケート | ARスタンプラリー';
       }
 
-      // 言語メニュー
       (function initLangMenu(){
         const btn  = document.getElementById('langBtn');
         const menu = document.getElementById('langMenu');
         const items= menu?.querySelectorAll('.lang-item');
-        const open = (v)=>{
-          if (!menu || !btn) return;
-          menu.classList.toggle('is-open', v);
-          btn.setAttribute('aria-expanded', v ? 'true':'false');
-        };
-        btn?.addEventListener('click', (e)=>{
-          e.stopPropagation();
-          open(!menu.classList.contains('is-open'));
-        });
+        const open = (v)=>{ if (!menu || !btn) return; menu.classList.toggle('is-open', v); btn.setAttribute('aria-expanded', v ? 'true':'false'); };
+        btn?.addEventListener('click', (e)=>{ e.stopPropagation(); open(!menu.classList.contains('is-open')); });
         document.addEventListener('click', ()=> open(false));
-        items?.forEach(it=>{
-          it.addEventListener('click', ()=>{
-            const lang = it.dataset.lang || 'ja';
-            setLang(lang);
-            applyI18n(lang);
-          });
-        });
+        items?.forEach(it=>{ it.addEventListener('click', ()=>{ const lang = it.dataset.lang || 'ja'; setLang(lang); applyI18n(lang); }); });
       })();
 
-      document.addEventListener('DOMContentLoaded', ()=>{
-        applyI18n(getLang());
-      });
+      document.addEventListener('DOMContentLoaded', ()=>{ applyI18n(getLang()); });
     })();
   </script>
 
