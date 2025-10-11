@@ -37,7 +37,7 @@
     /* 画像（正方形 1:1 で表示。トリミングしない） */
     .hero{
       width:100%;
-      aspect-ratio: 1 / 1;        /* ← 1:1 に固定 */
+      aspect-ratio: 1 / 1;        /* 1:1 に固定 */
       border-radius:12px;
       overflow:hidden;
       background:#f3f6fc;
@@ -47,7 +47,7 @@
     .hero img{
       width:100%;
       height:100%;
-      object-fit: contain;        /* ← 画像を切らずに収める */
+      object-fit: contain;        /* 画像を切らずに収める */
       display:block;
     }
 
@@ -145,7 +145,8 @@
           <button id="prevBtn" class="btn btn-secondary" type="button">戻る</button>
           <button id="nextBtn" class="btn" type="button">次へ</button>
         </div>
-        <div class="ctaRow" style="margin-top:2px">
+        <!-- skip は 2 ページ目以降のみ表示 -->
+        <div id="skipRow" class="ctaRow" style="margin-top:2px; display:none;">
           <button id="skipBtn" class="btn-ghost" type="button">skip</button>
         </div>
       </section>
@@ -161,7 +162,7 @@
       window.withV = (url) => url + (url.includes('?') ? '&' : '?') + 'v=' + window.BUILD_V;
     }
 
-    // スライド定義（画像・テキスト）※構成はそのまま
+    // スライド定義（画像・テキスト）
     const slides = [
       {
         img: 'assets/images/tutorial_photos/tutorial_image01.png',
@@ -198,15 +199,16 @@
       },
     ];
 
-    const imgEl   = document.getElementById('slideImg');
-    const textEl  = document.getElementById('slideText');
-    const termsEl = document.getElementById('termsArea');
-    const agreeEl = document.getElementById('agreeChk');
-    const dotsEl  = document.getElementById('dots');
+    const imgEl    = document.getElementById('slideImg');
+    const textEl   = document.getElementById('slideText');
+    const termsEl  = document.getElementById('termsArea');
+    const agreeEl  = document.getElementById('agreeChk');
+    const dotsEl   = document.getElementById('dots');
 
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const skipBtn = document.getElementById('skipBtn');
+    const prevBtn  = document.getElementById('prevBtn');
+    const nextBtn  = document.getElementById('nextBtn');
+    const skipRow  = document.getElementById('skipRow');
+    const skipBtn  = document.getElementById('skipBtn');
 
     let idx = 0;
 
@@ -225,22 +227,17 @@
       textEl.innerHTML = s.html;
 
       // 1ページ目のみ：規約スクロール＋同意
-      if (s.showTerms){
-        termsEl.style.display = 'block';
-      } else {
-        termsEl.style.display = 'none';
-      }
+      termsEl.style.display = s.showTerms ? 'block' : 'none';
 
       // ボタン文言
       prevBtn.style.visibility = (idx === 0 ? 'hidden' : 'visible');
       nextBtn.textContent = (idx === slides.length - 1) ? 'はじめる' : '次へ';
 
+      // 1ページ目は skip を非表示、それ以降は表示
+      skipRow.style.display = (idx === 0) ? 'none' : 'flex';
+
       // 1ページ目は同意チェックが無いと次へ不可
-      if (idx === 0){
-        nextBtn.disabled = !agreeEl.checked;
-      } else {
-        nextBtn.disabled = false;
-      }
+      nextBtn.disabled = (idx === 0) ? !agreeEl.checked : false;
 
       renderDots();
     }
@@ -267,7 +264,7 @@
       location.href = withV('map.html');
     }
 
-    // 同意チェック
+    // 同意チェック（1ページ目のみ有効）
     agreeEl.addEventListener('change', ()=>{
       if (idx === 0){
         nextBtn.disabled = !agreeEl.checked;
