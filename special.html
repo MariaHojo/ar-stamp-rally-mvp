@@ -2,37 +2,42 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>スペシャルコンテンツ | ARスタンプラリー</title>
+  <title data-i18n="title">スペシャルコンテンツ | ARスタンプラリー</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <link rel="stylesheet" href="css/style.css" />
   <style>
     :root{
       --accent:#005ABB;
       --text:#111;
+      --muted:#444;
       --bg:#fff;
       --card:#ffffff;
-      --shadow:0 12px 32px rgba(0,0,0,.08);
       --radius:16px;
+      --shadow:0 12px 32px rgba(0,0,0,.08);
     }
-    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.65}
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.6}
     .wrap{max-width:960px;margin:0 auto;padding:clamp(10px,3vw,16px)}
-    header{padding:6px 0 10px; position:relative}
-    h1{margin:0;font-size:20px;font-weight:900}
-    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:clamp(12px,3vw,18px);margin-bottom:14px}
-    figure{margin:10px 0}
-    figure img{width:100%;height:auto;border-radius:10px;border:1px solid #e9eef6}
-    figcaption{font-size:12px;color:#333;margin-top:4px}
+    header{display:flex;align-items:center;gap:10px;padding:4px 0 10px}
+    h1{font-size:22px;margin:0;font-weight:900}
+    .back{margin-left:auto}
+    .back a{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:10px 14px;border-radius:12px;font-weight:800}
+    nav.toc{background:#f7f9fe;border:1px solid #e3eaf6;border-radius:12px;padding:12px;box-shadow:var(--shadow);margin:8px 0 18px}
+    nav.toc a{color:var(--accent);text-decoration:none}
+    nav.toc ul{margin:6px 0 0 1.2em;padding:0}
+    nav.toc li{margin:6px 0}
+    section.card{background:var(--card);border:1px solid #e9eef6;border-radius:var(--radius);box-shadow:var(--shadow);padding:clamp(12px,2.4vw,18px);margin:14px 0}
+    section.card h2{margin:.2em 0 .4em;font-size:20px}
+    section.card h3{margin:1.0em 0 .4em;font-size:18px}
+    p{margin:.5em 0}
+    figure{margin:10px 0; background:#fff; border:1px solid #e9eef6; border-radius:12px; overflow:hidden}
+    .ph{width:100%; aspect-ratio:1/1; object-fit:cover; display:block}
+    figcaption{font-size:13px;color:#333;padding:8px 10px;background:#f9fbff;border-top:1px solid #e9eef6}
+    .note{font-size:13px;color:#555}
+    footer{margin:18px 0 6px;color:#555;font-size:13px}
 
-    .ctaRow{margin:16px 0 0; display:flex; gap:10px; flex-wrap:wrap}
-    .btn{
-      appearance:none;border:0;border-radius:12px;padding:12px 14px;font-weight:900;cursor:pointer;
-      background:var(--accent);color:#fff;box-shadow:0 10px 28px rgba(0,90,187,.25); text-decoration:none; display:inline-block
-    }
-
-    /* 言語スイッチ */
+    /* === Language switch (top-right) === */
     .lang-switch{position:fixed; right:12px; top:12px; z-index:2147483647}
     .lang-btn{
       appearance:none;border:0;background:#fff;border:1px solid #e3eaf6;border-radius:12px;
@@ -47,13 +52,13 @@
     .lang-menu.is-open{display:block}
     .lang-item{
       display:block; width:100%; text-align:left; background:#fff; border:0; padding:10px 12px;
-      cursor:pointer; font-weight:800; color:#000; /* 黒文字 */
+      cursor:pointer; font-weight:800; color:#000;
     }
     .lang-item:hover{background:#f2f6ff}
   </style>
 </head>
 <body>
-  <!-- 言語スイッチ -->
+  <!-- Language switch -->
   <div class="lang-switch" id="langSwitch">
     <button id="langBtn" class="lang-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="langMenu">
       <img class="lang-icon" src="assets/images/ui/lang.png" alt="言語 / Language">
@@ -66,174 +71,302 @@
 
   <div class="wrap">
     <header>
-      <h1 data-i18n="sp.title">スペシャルコンテンツ</h1>
+      <h1 data-i18n="h1">スペシャルコンテンツ</h1>
+      <div class="back"><a href="map.html" data-i18n="backToMap">マップへ戻る</a></div>
     </header>
 
+    <!-- 目次 -->
+    <nav class="toc" aria-label="目次 / Table of contents">
+      <strong data-i18n="toc.title">目次</strong>
+      <ul>
+        <li><a href="#about-page" data-i18n="toc.about">ページの説明</a></li>
+        <li><a href="#more-spots" data-i18n="toc.moreSpots">ARスタンプラリーで紹介できなかったスポットの写真</a></li>
+        <li><a href="#about-archives" data-i18n="toc.archives">ICUアーカイブズについて</a></li>
+      </ul>
+    </nav>
+
     <!-- 1. このページの説明 -->
-    <section class="card">
-      <h2 data-i18n="sp.sec1.h">このページの説明</h2>
-      <p data-i18n="sp.sec1.p1">
-        アンケートにご回答いただきありがとうございます。このページでは今回のスタンプラリーでは紹介できなかったICUの面白い歴史を持つスポットの写真と、その解説が書かれています。次に、今回このアプリを作成するにあたりご協力いただいたICUアーカイブズについてやその活動・アクセス情報を載せております。
+    <section id="about-page" class="card">
+      <h2 data-i18n="sec1.title">1. このページの説明</h2>
+      <p data-i18n="sec1.p1">
+        アンケートにご回答いただきありがとうございます。このページでは今回のスタンプラリーでは紹介できなかったICUの
+        面白い歴史を持つスポットの写真と、その解説が書かれています。次に、今回このアプリを作成するにあたりご協力いただいた
+        ICUアーカイブズについてやその活動・アクセス情報を載せております。
       </p>
     </section>
 
     <!-- 2. まだ紹介していないスポットについて -->
-    <section class="card">
-      <h2 data-i18n="sp.sec2.h">まだ紹介していないスポットについて</h2>
-      <p data-i18n="sp.sec2.p0">
-        ICUの中で暮らせるように、ICUには昔農場があったんだ。下の3つの写真は、全部1952-1953年に撮られたものだよ。
+    <section id="more-spots" class="card">
+      <h2 data-i18n="sec2.title">2. まだ紹介していないスポットについて</h2>
+
+      <h3 data-i18n="sec2.farm.h3">・ICUの農場（1952–1953年ごろ）</h3>
+      <p data-i18n="sec2.farm.p1">ICUの中で暮らせるように、ICUには昔農場があったんだ。下の3つの写真は、全部1952–1953年に撮られたものだよ。</p>
+
+      <figure>
+        <img class="ph" src="assets/images/special_photos/special_sec2_3.jpg" alt="トウモロコシの種まきの様子（1952–1953）">
+        <figcaption data-i18n="sec2.farm.cap1">出典：『ICU 農場 (1951-1970)』P-03_42_014, ICUアーカイブス 三鷹 東京</figcaption>
+      </figure>
+      <p data-i18n="sec2.farm.p2">今の府中自動車運転免許試験場の近くで、トウモロコシの種をまいているところだね。</p>
+      <figure>
+        <img class="ph" src="assets/images/special_photos/special_sec2_2.jpg" alt="鶏舎の近く（1952–1953）">
+        <figcaption data-i18n="sec2.farm.cap2">出典：『ICU農場 ②』P-03_43_01_024, ICUアーカイブス 三鷹 東京</figcaption>
+      </figure>
+      <p data-i18n="sec2.farm.p3">これは鶏舎の近く。</p>
+      <figure>
+        <img class="ph" src="assets/images/special_photos/special_sec2_1.jpg" alt="牛舎の近く（1952–1953）">
+        <figcaption data-i18n="sec2.farm.cap3">出典：『ICU農場 ②』P-03_43_01_016, ICUアーカイブス 三鷹 東京</figcaption>
+      </figure>
+      <p data-i18n="sec2.farm.p4">
+        これは牛舎の近くで撮られていると思われるよ！
+      </p>
+      <p data-i18n="sec2.farm.p5">
+        ICUではかつて、”ICU牛乳”の名前で牛乳が（学外にも！）市販されてたんだ。1956年には食堂裏手への移設が承認されているから、
+        その前からあったんだね。1970年に製造を中止してしまったよ。ジャージー種乳牛から生産された高品質ミルクとして知られ、
+        表面に浮いた固形脂肪分で、ふたを取ってひっくり返してもこぼれなかったとの話が伝わっているよ。この時に使っていた牛乳瓶を、
+        図書館1階のアーカイブズ展示室で展示しているから、興味がある人はぜひ見ていってね！
       </p>
 
-      <figure><img src="assets/images/special_photos/special_sec2_3.jpg" alt=""></figure>
-      <p data-i18n="sp.sec2.p1">これは今の府中自動車運転免許試験場の近くで、トウモロコシの種をまいているところだね。</p>
+      <h3 data-i18n="sec2.d.h3">・D館（ディッフェンドルファー記念館）</h3>
 
-      <figure><img src="assets/images/special_photos/special_sec2_2.jpg" alt=""></figure>
-      <p data-i18n="sp.sec2.p2">これは鶏舎の近く</p>
-
-      <figure><img src="assets/images/special_photos/special_sec2_1.jpg" alt=""></figure>
-      <p data-i18n="sp.sec2.p3">これは牛舎の近くで撮られていると思われるよ！</p>
-
-      <p data-i18n="sp.sec2.p4">
-        ICUではかつて、”ICU牛乳”の名前で牛乳が（学外にも！）市販されてたんだ。1956年には食堂裏手への移設が承認されているから、その前からあったんだね。1970年に製造を中止してしまったよ。ジャージー種乳牛から生産された高品質ミルクとして知られ、表面に浮いた固形脂肪分で、ふたを取ってひっくり返してもこぼれなかったとの話が伝わっているよ。この時に使っていた牛乳瓶を、図書館1階のアーカイブズ展示室で展示しているから、興味がある人はぜひ見ていってね！
+      <figure>
+        <img class="ph" src="assets/images/special_photos/special_sec2_4.jpg" alt="D館 外観（年代不詳）">
+        <figcaption data-i18n="sec2.d.cap1">出典：『ICU農場 ②』P-03_43_01_016, ICUアーカイブス 三鷹 東京</figcaption>
+      </figure>
+      <p data-i18n="sec2.d.p1">ディッフェンドルファー記念館、通称D館。東棟と西棟があるよ。</p>
+      <p data-i18n="sec2.d.p2">
+        これもむかーしからある建物で、東棟と西棟があるよ。東棟は1958年に完成しているから、そろそろ70歳かな？
+        ここにはスナックバーと呼ばれる売店があったんだ。コーヒーを出すようなカウンターもあって、今でもカウンターがあった場所は床の色が違うんだよ！
+      </p>
+      <p data-i18n="sec2.d.p3">
+        郵便局もここに入っていたし、地下には美容室があったんだ。そして、D館4階のガラスは古くて、歪んでいるのが分かるよ。この窓のアルミサッシは日本で最も古いものなんだよ！
+        解説パネルがあるので、ぜひ地下から4階まで行って、読んでみてね。
       </p>
 
-      <h3 data-i18n="sp.sec2.d.h">・D館</h3>
-      <figure><img src="assets/images/special_photos/special_sec2_4.jpg" alt=""></figure>
-      <p data-i18n="sp.sec2.d.p1">これはディッフェンドルファー記念館、通称D館だね！これもむかーしからある建物で、東棟と西棟があるよ。東棟は1958年に完成しているから、そろそろ70歳かな？</p>
-      <p data-i18n="sp.sec2.d.p2">ここにはスナックバーと呼ばれる売店があったんだ。コーヒーを出すようなカウンターもあって、今でもカウンターがあった場所は床の色が違うんだよ！</p>
-      <figure><img src="assets/images/special_photos/special_sec2_5.jpg" alt=""></figure>
-      <p data-i18n="sp.sec2.d.p3">郵便局もここに入っていたし、地下には美容室があったんだ。</p>
-      <p data-i18n="sp.sec2.d.p4">そして、D館4階のガラスは古くて、歪んでいるのが分かるよ。この窓のアルミサッシは日本で最も古いものなんだよ！</p>
-      <p data-i18n="sp.sec2.d.p5">解説パネルがあるので、ぜひ地下から4階まで行って、読んでみてね。</p>
+      <h3 data-i18n="sec2.sangen.h3">・三軒家</h3>
+      <p data-i18n="sec2.sangen.p1">
+        ICUを上から見ると、A駐車場の横からILC館(8番)までまっすぐななめに道があるのが分かるかな？ここには「三軒家」と呼ばれていたところがあったんだよ。
+      </p>
 
-      <h3 data-i18n="sp.sec2.s.h">・三軒家</h3>
-      <p data-i18n="sp.sec2.s.p1">ICUを上から見ると、A駐車場の横からILC館(8番)までまっすぐななめに道があるのが分かるかな？</p>
-      <figure><img src="assets/images/special_photos/special_sec2_9.jpg" alt=""></figure>
-      <p data-i18n="sp.sec2.s.p2">ここには「三軒家」と呼ばれていたところがあったんだよ。</p>
-      <figure><img src="assets/images/special_photos/special_sec2_6.jpg" alt=""></figure>
-      <figure><img src="assets/images/special_photos/special_sec2_7.jpg" alt=""></figure>
-      <p data-i18n="sp.sec2.s.p3">下の拡大写真を見ると、三軒家という文字が見て取れるね。鎌倉時代にはこのあたりに幹線街道があったとされるよ。</p>
-      <figure><img src="assets/images/special_photos/special_sec2_8.jpg" alt=""></figure>
-      <p data-i18n="sp.sec2.s.p4">これは現代の写真だけど、この横の木々も武蔵野の原生林なんだ。</p>
+      <figure>
+        <img class="ph" src="assets/images/special_photos/special_sec2_9.jpg" alt="ICU全景（上空・現在）">
+        <figcaption data-i18n="sec2.sangen.capMap">出典："キャンパス・施設紹介." ICU 国際基督教大学. https://www.icu.ac.jp/about/campus/. Accessed 2025/10/10</figcaption>
+      </figure>
+      <p data-i18n="sec2.sangen.p2">ICUホームページより。上空からの地図。斜めの道筋が見えるね。</p>
 
-      <!-- 最下部：戻る -->
-      <div class="ctaRow">
-        <a href="map.html" class="btn" id="spBackBtn" data-i18n="sp.back">マップへ戻る</a>
-      </div>
+      <figure>
+        <img class="ph" src="assets/images/special_photos/special_sec2_6.jpg" alt="三軒家 周辺の様子（資料写真1）">
+        <figcaption data-i18n="sec2.sangen.cap1">出典：『ICU敷地周辺地図 - ヴォーリズ建築設計 （図面：青焼）』L-243-00-001, ICUアーカイブス 三鷹 東京</figcaption>
+      </figure>
+
+      <figure>
+        <img class="ph" src="assets/images/special_photos/special_sec2_7.jpg" alt="三軒家 周辺の様子（資料写真2）">
+        <figcaption data-i18n="sec2.sangen.cap2">出典：『ICU敷地周辺地図 - ヴォーリズ建築設計 （図面：青焼）』L-243-00-001, ICUアーカイブス 三鷹 東京</figcaption>
+      </figure>
+
+      <p data-i18n="sec2.sangen.p3">下の拡大写真を見ると、「三軒家」という文字が見て取れるね。この文字の下にある、斜めの道が、さっき現在の地図で見た道だよ。鎌倉時代にはこのあたりに幹線街道があったとされるよ。</p>
+
+      <figure>
+        <img class="ph" src="assets/images/special_photos/special_sec2_8.jpg" alt="三軒家 表記の拡大">
+        <figcaption data-i18n="sec2.sangen.cap3">長～い道だね！</figcaption>
+      </figure>
+
+      <p data-i18n="sec2.sangen.p4">これは現代の写真だけど、この横の木々も武蔵野の原生林なんだ。</p>
     </section>
 
-    <!-- 3. 協力者 -->
-    <section class="card">
-      <h2 data-i18n="sp.sec3.h">協力者</h2>
-      <p><b data-i18n="sp.sec3.b">ICUアーカイブズ様</b></p>
-      <p data-i18n="sp.sec3.p1">今回、ほとんどの写真資料や、その解説文を書くにあたっての情報などを提供していただきました。この場を借りて心より感謝申し上げます。</p>
-      <p data-i18n="sp.sec3.p2">
+    <!-- 3. 協力者（ICUアーカイブズ） -->
+    <section id="about-archives" class="card">
+      <h2 data-i18n="sec3.title">3. 協力者</h2>
+      <h3 data-i18n="sec3.h3">ICUアーカイブズ様</h3>
+      <p data-i18n="sec3.p1">
+        今回、ほとんどの写真資料や、その解説文を書くにあたっての情報などを提供していただきました。
+        この場を借りて心より感謝申し上げます。
+      </p>
+      <p data-i18n="sec3.p2">
         ICUアーカイブズ様の活動内容は以下の通りです。<br>
-        「ICUアーカイブズは大学歴史資料室の後継組織として2020年9月に発足しました。ICUアーカイブズは国際基督教大学の歴史に関する資料および大学の行政記録の収集・整理・保存・提供を行っています。（”ICUアーカイブズについて” ICU アーカイブズ　https://www-lib.icu.ac.jp/Archives/index.htm ）」
+        「ICUアーカイブズは大学歴史資料室の後継組織として2020年9月に発足しました。ICUアーカイブズは国際基督教大学の歴史に関する資料および大学の行政記録の収集・整理・保存・提供を行っています。」<br>
+        （「ICUアーカイブズについて」ICUアーカイブズ）
       </p>
-      <p data-i18n="sp.sec3.p3">
-        図書館の一階に展示室、二階に分室があります。ICUの歴史が詰まった大変興味深い場所ですので、ご訪問なさってください。<br>
-        HPリンクはこちらです。<a href="https://www-lib.icu.ac.jp/Archives/index.htm" target="_blank" rel="noopener">https://www-lib.icu.ac.jp/Archives/index.htm</a>
+      <p data-i18n="sec3.p3">
+        図書館の一階に展示室、二階に分室があります。ICUの歴史が詰まった大変興味深い場所ですので、ぜひご興味を持たれた方は訪れてみてください。
+      </p>
+      <p class="note">
+        <span data-i18n="sec3.linkLabel">HPリンクはこちらです：</span>
+        <a href="https://www-lib.icu.ac.jp/Archives/index.htm" target="_blank" rel="noopener">https://www-lib.icu.ac.jp/Archives/index.htm</a>
       </p>
     </section>
+
+    <footer>
+      <a href="map.html" data-i18n="backToMapArrow">← マップへ戻る</a>
+    </footer>
   </div>
 
   <script>
+    // Cache-buster (fallback)
+    if (!window.withV) {
+      window.BUILD_V = window.BUILD_V || '20251005';
+      window.withV = (url) => url + (url.includes('?') ? '&' : '?') + 'v=' + window.BUILD_V;
+    }
+
+    // === i18n ===
     (function(){
       const DICT = {
         ja: {
-          'sp.title':'スペシャルコンテンツ',
-          'sp.sec1.h':'このページの説明',
-          'sp.sec1.p1':'アンケートにご回答いただきありがとうございます。このページでは今回のスタンプラリーでは紹介できなかったICUの面白い歴史を持つスポットの写真と、その解説が書かれています。次に、今回このアプリを作成するにあたりご協力いただいたICUアーカイブズについてやその活動・アクセス情報を載せております。',
-          'sp.sec2.h':'まだ紹介していないスポットについて',
-          'sp.sec2.p0':'ICUの中で暮らせるように、ICUには昔農場があったんだ。下の3つの写真は、全部1952-1953年に撮られたものだよ。',
-          'sp.sec2.p1':'これは今の府中自動車運転免許試験場の近くで、トウモロコシの種をまいているところだね。',
-          'sp.sec2.p2':'これは鶏舎の近く',
-          'sp.sec2.p3':'これは牛舎の近くで撮られていると思われるよ！',
-          'sp.sec2.p4':'ICUではかつて、”ICU牛乳”の名前で牛乳が（学外にも！）市販されてたんだ。1956年には食堂裏手への移設が承認されているから、その前からあったんだね。1970年に製造を中止してしまったよ。ジャージー種乳牛から生産された高品質ミルクとして知られ、表面に浮いた固形脂肪分で、ふたを取ってひっくり返してもこぼれなかったとの話が伝わっているよ。この時に使っていた牛乳瓶を、図書館1階のアーカイブズ展示室で展示しているから、興味がある人はぜひ見ていってね！',
-          'sp.sec2.d.h':'・D館',
-          'sp.sec2.d.p1':'これはディッフェンドルファー記念館、通称D館だね！これもむかーしからある建物で、東棟と西棟があるよ。東棟は1958年に完成しているから、そろそろ70歳かな？',
-          'sp.sec2.d.p2':'ここにはスナックバーと呼ばれる売店があったんだ。コーヒーを出すようなカウンターもあって、今でもカウンターがあった場所は床の色が違うんだよ！',
-          'sp.sec2.d.p3':'郵便局もここに入っていたし、地下には美容室があったんだ。',
-          'sp.sec2.d.p4':'そして、D館4階のガラスは古くて、歪んでいるのが分かるよ。この窓のアルミサッシは日本で最も古いものなんだよ！',
-          'sp.sec2.d.p5':'解説パネルがあるので、ぜひ地下から4階まで行って、読んでみてね。',
-          'sp.sec2.s.h':'・三軒家',
-          'sp.sec2.s.p1':'ICUを上から見ると、A駐車場の横からILC館(8番)までまっすぐななめに道があるのが分かるかな？',
-          'sp.sec2.s.p2':'ここには「三軒家」と呼ばれていたところがあったんだよ。',
-          'sp.sec2.s.p3':'下の拡大写真を見ると、三軒家という文字が見て取れるね。鎌倉時代にはこのあたりに幹線街道があったとされるよ。',
-          'sp.sec2.s.p4':'これは現代の写真だけど、この横の木々も武蔵野の原生林なんだ。',
-          'sp.sec3.h':'協力者',
-          'sp.sec3.b':'ICUアーカイブズ様',
-          'sp.sec3.p1':'今回、ほとんどの写真資料や、その解説文を書くにあたっての情報などを提供していただきました。この場を借りて心より感謝申し上げます。',
-          'sp.sec3.p2':'ICUアーカイブズ様の活動内容は以下の通りです。<br>「ICUアーカイブズは大学歴史資料室の後継組織として2020年9月に発足しました。ICUアーカイブズは国際基督教大学の歴史に関する資料および大学の行政記録の収集・整理・保存・提供を行っています。（”ICUアーカイブズについて” ICU アーカイブズ　https://www-lib.icu.ac.jp/Archives/index.htm ）」',
-          'sp.sec3.p3':'図書館の一階に展示室、二階に分室があります。ICUの歴史が詰まった大変興味深い場所ですので、ご訪問なさってください。<br>HPリンクはこちらです。<a href="https://www-lib.icu.ac.jp/Archives/index.htm" target="_blank" rel="noopener">https://www-lib.icu.ac.jp/Archives/index.htm</a>',
-          'sp.back':'マップへ戻る'
+          title: 'スペシャルコンテンツ | ARスタンプラリー',
+          h1: 'スペシャルコンテンツ',
+          backToMap: 'マップへ戻る',
+          backToMapArrow: '← マップへ戻る',
+          toc: { title: '目次', about: 'ページの説明', moreSpots: 'ARスタンプラリーで紹介できなかったスポットの写真', archives: 'ICUアーカイブズについて' },
+          sec1: {
+            title: '1. このページの説明',
+            p1: 'アンケートにご回答いただきありがとうございます。このページでは今回のスタンプラリーでは紹介できなかったICUの 面白い歴史を持つスポットの写真と、その解説が書かれています。次に、今回このアプリを作成するにあたりご協力いただいた ICUアーカイブズについてやその活動・アクセス情報を載せております。'
+          },
+          sec2: {
+            title: '2. まだ紹介していないスポットについて',
+            farm: {
+              h3: '・ICUの農場（1952–1953年ごろ）',
+              p1: 'ICUの中で暮らせるように、ICUには昔農場があったんだ。下の3つの写真は、全部1952–1953年に撮られたものだよ。',
+              cap1:'出典：『ICU 農場 (1951-1970)』P-03_42_014, ICUアーカイブス 三鷹 東京',
+              p2: '今の府中自動車運転免許試験場の近くで、トウモロコシの種をまいているところだね。',
+              cap2:'出典：『ICU農場 ②』P-03_43_01_024, ICUアーカイブス 三鷹 東京',
+              p3: 'これは鶏舎の近く。',
+              cap3:'出典：『ICU農場 ②』P-03_43_01_016, ICUアーカイブス 三鷹 東京',
+              p4: 'これは牛舎の近くで撮られていると思われるよ！',
+              p5: 'ICUではかつて、”ICU牛乳”の名前で牛乳が（学外にも！）市販されてたんだ。1956年には食堂裏手への移設が承認されているから、 その前からあったんだね。1970年に製造を中止してしまったよ。ジャージー種乳牛から生産された高品質ミルクとして知られ、 表面に浮いた固形脂肪分で、ふたを取ってひっくり返してもこぼれなかったとの話が伝わっているよ。この時に使っていた牛乳瓶を、 図書館1階のアーカイブズ展示室で展示しているから、興味がある人はぜひ見ていってね！'
+            },
+            d:{
+              h3:'・D館（ディッフェンドルファー記念館）',
+              cap1:'出典：『ICU農場 ②』P-03_43_01_016, ICUアーカイブス 三鷹 東京',
+              p1:'ディッフェンドルファー記念館、通称D館。東棟と西棟があるよ。',
+              p2:'これもむかーしからある建物で、東棟と西棟があるよ。東棟は1958年に完成しているから、そろそろ70歳かな？ ここにはスナックバーと呼ばれる売店があったんだ。コーヒーを出すようなカウンターもあって、今でもカウンターがあった場所は床の色が違うんだよ！',
+              p3:'郵便局もここに入っていたし、地下には美容室があったんだ。そして、D館4階のガラスは古くて、歪んでいるのが分かるよ。この窓のアルミサッシは日本で最も古いものなんだよ！ 解説パネルがあるので、ぜひ地下から4階まで行って、読んでみてね。'
+            },
+            sangen:{
+              h3:'・三軒家',
+              p1:'ICUを上から見ると、A駐車場の横からILC館(8番)までまっすぐななめに道があるのが分かるかな？ここには「三軒家」と呼ばれていたところがあったんだよ。',
+              capMap:'出典："キャンパス・施設紹介." ICU 国際基督教大学. https://www.icu.ac.jp/about/campus/. Accessed 2025/10/10',
+              p2:'ICUホームページより。上空からの地図。斜めの道筋が見えるね。',
+              cap1:'出典：『ICU敷地周辺地図 - ヴォーリズ建築設計 （図面：青焼）』L-243-00-001, ICUアーカイブス 三鷹 東京',
+              cap2:'出典：『ICU敷地周辺地図 - ヴォーリズ建築設計 （図面：青焼）』L-243-00-001, ICUアーカイブス 三鷹 東京',
+              p3:'下の拡大写真を見ると、「三軒家」という文字が見て取れるね。この文字の下にある、斜めの道が、さっき現在の地図で見た道だよ。鎌倉時代にはこのあたりに幹線街道があったとされるよ。',
+              cap3:'長～い道だね！',
+              p4:'これは現代の写真だけど、この横の木々も武蔵野の原生林なんだ。'
+            }
+          },
+          sec3:{
+            title:'3. 協力者',
+            h3:'ICUアーカイブズ様',
+            p1:'今回、ほとんどの写真資料や、その解説文を書くにあたっての情報などを提供していただきました。 この場を借りて心より感謝申し上げます。',
+            p2:'ICUアーカイブズ様の活動内容は以下の通りです。<br>「ICUアーカイブズは大学歴史資料室の後継組織として2020年9月に発足しました。ICUアーカイブズは国際基督教大学の歴史に関する資料および大学の行政記録の収集・整理・保存・提供を行っています。」<br>（「ICUアーカイブズについて」ICUアーカイブズ）',
+            p3:'図書館の一階に展示室、二階に分室があります。ICUの歴史が詰まった大変興味深い場所ですので、ぜひご興味を持たれた方は訪れてみてください。',
+            linkLabel:'HPリンクはこちらです：'
+          },
+          toc: { }, // placeholder to avoid errors
         },
         en: {
-          'sp.title':'Special Content',
-          'sp.sec1.h':'About this page',
-          'sp.sec1.p1':'Thank you for answering the survey. This page shows photos and short explanations of interesting ICU spots that we couldn’t include in the stamp rally. It also introduces ICU Archives, who supported this app, and their activities/access information.',
-          'sp.sec2.h':'More spots we didn’t cover',
-          'sp.sec2.p0':'ICU once had a farm so that people could live on campus. The three photos below were all taken in 1952–1953.',
-          'sp.sec2.p1':'This is near today’s Fuchu Driver’s License Test Center, where corn seeds were being sown.',
-          'sp.sec2.p2':'This one is near the chicken coop.',
-          'sp.sec2.p3':'This seems to have been taken near the cowshed!',
-          'sp.sec2.p4':'ICU once marketed milk (even off-campus!) under the name “ICU Milk.” Its relocation behind the cafeteria was approved in 1956, so it already existed before then. Production stopped in 1970. It was known as high-quality milk from Jersey cattle; people say the solid fat on top was so thick that even if you removed the cap and turned the bottle upside down, it wouldn’t spill. The milk bottles used back then are on display in the ICU Archives exhibition room on the first floor of the Library—please have a look!',
-          'sp.sec2.d.h':'• Diffendorfer Memorial Hall (D-kan)',
-          'sp.sec2.d.p1':'This is Diffendorfer Memorial Hall, commonly called D-kan. It’s an old building with East and West wings; the East wing was completed in 1958—almost 70 years old!',
-          'sp.sec2.d.p2':'There used to be a snack bar here, with a coffee counter. You can still see the floor color difference where the counter stood.',
-          'sp.sec2.d.p3':'There was also a post office, and a hair salon in the basement.',
-          'sp.sec2.d.p4':'The window glass on the 4th floor is old and wavy; its aluminum sashes are said to be the oldest in Japan.',
-          'sp.sec2.d.p5':'There are explanatory panels—please go from the basement up to the 4th floor and read them!',
-          'sp.sec2.s.h':'• Sangen-ya (“Three Houses”)',
-          'sp.sec2.s.p1':'From above, you can see a diagonal straight path from the A Parking Lot to the ILC (No. 8).',
-          'sp.sec2.s.p2':'There used to be an area called “Sangen-ya.”',
-          'sp.sec2.s.p3':'In the enlarged photo below you can read the characters for Sangen-ya. It’s said a main road existed around here in the Kamakura period.',
-          'sp.sec2.s.p4':'This is a modern photo, but the trees lining the side are part of the Musashino primeval forest.',
-          'sp.sec3.h':'Acknowledgments',
-          'sp.sec3.b':'ICU Archives',
-          'sp.sec3.p1':'Most photos and background information were provided by ICU Archives. We express our sincere gratitude for their support.',
-          'sp.sec3.p2':'About ICU Archives:<br>“ICU Archives was established in September 2020 as the successor to the University Historical Materials Room. ICU Archives collects, organizes, preserves, and provides access to materials related to the history of ICU and administrative records of the university.”',
-          'sp.sec3.p3':'There is an exhibition room on the first floor of the Library and an annex on the second floor. It’s a fascinating place full of ICU history—please visit!<br>Website: <a href="https://www-lib.icu.ac.jp/Archives/index.htm" target="_blank" rel="noopener">https://www-lib.icu.ac.jp/Archives/index.htm</a>',
-          'sp.back':'Back to Map'
+          title: 'Special Content | AR Stamp Rally',
+          h1: 'Special Content',
+          backToMap: 'Back to Map',
+          backToMapArrow: '← Back to Map',
+          toc: { title: 'Contents', about: 'About this page', moreSpots: 'Photos of spots not covered in the AR Stamp Rally', archives: 'About ICU Archives' },
+          sec1: {
+            title: '1. About this page',
+            p1: 'Thank you for taking the survey. This page presents photos and explanations of ICU spots with interesting histories that were not covered in this stamp rally. It also introduces ICU Archives, who supported the creation of this app, along with their activities and access information.'
+          },
+          sec2: {
+            title: '2. Additional spots not yet introduced',
+            farm: {
+              h3: '• ICU Farm (around 1952–1953)',
+              p1: 'ICU once had a farm so that people could live on campus. The three photos below were all taken in 1952–1953.',
+              cap1:'Source: “ICU Farm (1951–1970)” P-03_42_014, ICU Archives, Mitaka, Tokyo',
+              p2: 'Corn is being sown near today’s Fuchu Driver’s License Examination Center.',
+              cap2:'Source: “ICU Farm ②” P-03_43_01_024, ICU Archives, Mitaka, Tokyo',
+              p3: 'This one is near the chicken coop.',
+              cap3:'Source: “ICU Farm ②” P-03_43_01_016, ICU Archives, Mitaka, Tokyo',
+              p4: 'This appears to have been taken near the cowshed!',
+              p5: 'In the past, “ICU Milk” was even sold off campus. Relocation behind the cafeteria was approved in 1956, so it must have existed even before that. Production ceased in 1970. The high-quality milk from Jersey cows was said to be so rich that the solid fat on top kept the milk from spilling even if the bottle was inverted after removing the cap. The milk bottles used then are exhibited in the Archives gallery on the 1st floor of the Library—please take a look if you are interested!'
+            },
+            d:{
+              h3:'• Building D (Diffendorfer Memorial Hall)',
+              cap1:'Source: “ICU Farm ②” P-03_43_01_016, ICU Archives, Mitaka, Tokyo',
+              p1:'Diffendorfer Memorial Hall, commonly called Building D, consists of East and West wings.',
+              p2:'This building has been around for a long time. The East Wing was completed in 1958—about 70 years ago! It once housed a shop called the snack bar with a coffee counter; even today you can spot the spot on the floor where the counter used to be.',
+              p3:'There used to be a post office here, and a hair salon in the basement. The 4th-floor window glass is old and slightly wavy; its aluminum sash is said to be one of the oldest in Japan. There are explanatory panels—try visiting from the basement up to the 4th floor and read them!'
+            },
+            sangen:{
+              h3:'• Sangen-ya (“Three Houses” area)',
+              p1:'Seen from above, there is a straight diagonal path from Parking Area A toward the ILC building (No. 8). This area used to be called “Sangen-ya.”',
+              capMap:'Source: “Campus & Facilities.” International Christian University. https://www.icu.ac.jp/about/campus/. Accessed 2025/10/10',
+              p2:'From the ICU website: an aerial map where you can see the diagonal route.',
+              cap1:'Source: “Map around the ICU site – Vories Architectural Office (Blueprint: Diazo print)” L-243-00-001, ICU Archives, Mitaka, Tokyo',
+              cap2:'Source: “Map around the ICU site – Vories Architectural Office (Blueprint: Diazo print)” L-243-00-001, ICU Archives, Mitaka, Tokyo',
+              p3:'In the enlarged image below, you can read the words “Sangen-ya.” The diagonal road beneath the label is the same one visible on the current map. It is said that a main road existed around here in the Kamakura period.',
+              cap3:'It’s a long road indeed!',
+              p4:'This is a modern photograph, but the trees along the side are part of the native Musashino forest.'
+            }
+          },
+          sec3:{
+            title:'3. Acknowledgements',
+            h3:'ICU Archives',
+            p1:'We received most of the photographs and information used to write the explanations from ICU Archives. We would like to express our heartfelt gratitude here.',
+            p2:'Their activities are as follows:<br>“ICU Archives was established in September 2020 as the successor to the University Historical Materials Room. ICU Archives collects, organizes, preserves, and provides materials related to the history of International Christian University and the university’s administrative records.”<br>(“About ICU Archives,” ICU Archives)',
+            p3:'There is an exhibition room on the 1st floor of the Library and a branch office on the 2nd floor. It is a fascinating place filled with ICU’s history—please visit if you are interested.',
+            linkLabel:'Website: '
+          }
         }
       };
 
       function getLang(){ try { return localStorage.getItem('app_lang') || 'ja'; } catch { return 'ja'; } }
-      function setLang(v){ try { localStorage.setItem('app_lang', v); } catch{} }
+      function setLang(lang){ try { localStorage.setItem('app_lang', lang); } catch {} }
 
-      function applyI18n(){
-        const lang = getLang();
-        const dict = DICT[lang] || DICT.ja;
-        document.querySelectorAll('[data-i18n]').forEach(el=>{
-          const k = el.getAttribute('data-i18n');
-          if (dict[k] != null) el.innerHTML = dict[k]; // aタグ等が含まれるため
-        });
-        document.documentElement.setAttribute('lang', lang==='en'?'en':'ja');
-        document.title = (lang==='en') ? 'Special Content | AR Stamp Rally' : 'スペシャルコンテンツ | ARスタンプラリー';
+      function t(path, dict){
+        return path.split('.').reduce((o,k)=> (o && o[k] != null ? o[k] : null), dict);
       }
 
-      // 言語メニュー
+      function applyI18n(lang){
+        const d = DICT[lang] || DICT.ja;
+
+        // Simple [data-i18n] bindings
+        document.querySelectorAll('[data-i18n]').forEach(el=>{
+          const key = el.getAttribute('data-i18n');
+          const val = t(key, d);
+          if (val != null) el.innerHTML = val;
+        });
+
+        // Title element needs special care
+        const titleEl = document.querySelector('title[data-i18n="title"]');
+        if (titleEl) titleEl.textContent = d.title || 'Special Content | AR Stamp Rally';
+
+        // html lang
+        document.documentElement.setAttribute('lang', lang==='en'?'en':'ja');
+      }
+
+      // Lang menu interactions
       (function initLangMenu(){
         const btn  = document.getElementById('langBtn');
         const menu = document.getElementById('langMenu');
         const items= menu?.querySelectorAll('.lang-item');
-        const open = (v)=>{ menu.classList.toggle('is-open', v); btn.setAttribute('aria-expanded', v ? 'true':'false'); };
-        btn?.addEventListener('click', (e)=>{ e.stopPropagation(); open(!menu.classList.contains('is-open')); });
+        const open = (v)=>{
+          if (!menu || !btn) return;
+          menu.classList.toggle('is-open', v);
+          btn.setAttribute('aria-expanded', v ? 'true':'false');
+        };
+        btn?.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          open(!menu.classList.contains('is-open'));
+        });
         document.addEventListener('click', ()=> open(false));
         items?.forEach(it=>{
           it.addEventListener('click', ()=>{
             const lang = it.dataset.lang || 'ja';
             setLang(lang);
-            applyI18n();
-            try { window.dispatchEvent(new Event('app_lang_changed')); } catch(e){}
+            applyI18n(lang);
           });
         });
       })();
 
-      document.addEventListener('DOMContentLoaded', applyI18n);
-      window.addEventListener('storage', (e)=>{ if (e.key === 'app_lang') applyI18n(); });
-      window.addEventListener('app_lang_changed', applyI18n);
+      document.addEventListener('DOMContentLoaded', ()=>{
+        applyI18n(getLang());
+      });
     })();
   </script>
 </body>
